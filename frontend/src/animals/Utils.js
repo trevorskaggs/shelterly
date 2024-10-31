@@ -183,7 +183,7 @@ async function buildAnimalCareScheduleContent(pdf, animals) {
     const smallCol = pageWidth * .15;
     const bigCol = pageWidth * .35;
     pdf.drawTableGrid({
-      headers: ['Date Time', 'AR#', 'Actions', 'Comments'],
+      headers: ['Date Time', 'Intials/ID', 'Actions', 'Comments'],
       columnStyles: [{ cellWidth: smallCol }, { cellWidth: smallCol }, { cellWidth: bigCol }, { cellWidth: bigCol }]
     });
   }

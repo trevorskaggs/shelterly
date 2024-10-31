@@ -41,12 +41,18 @@ const buildOwnersContent = (pdf, owners, organization, animalsOverride) => {
       `Drivers License: ${owner.drivers_license || 'N/A'}`
     ];
 
-    if (owner.request) {
-      ownerInfoList.push(`Service Request: ${owner.request.full_address}`);
-    } else if (owner.address) {
+    if (owner.address) {
         ownerInfoList.push(`Address: ${owner.full_address}`);
     } else {
       ownerInfoList.push('Address: N/A');
+    }
+
+    if (owner.requests){
+      console.log(owner.requests);
+      ownerInfoList.push('Service Requests:');
+      owner.requests.forEach((request, i) => {
+        ownerInfoList.push(`SR#${request.id_for_incident} - ${request.full_address}`)
+      })
     }
 
     pdf.drawTextList({
