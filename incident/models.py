@@ -28,9 +28,10 @@ class Organization(models.Model):
 @receiver(post_save, sender=Organization)
 def add_default_admins(sender, instance, created, **kwargs):
     if created:
+        from accounts.models import ShelterlyUserOrg
         for user in User.objects.filter(is_superuser=True):
             user.organizations.add(instance)
-            User.objects.filter(user=user, organization=instance).update(user_perms=True, incident_perms=True, vet_perms=True)
+            ShelterlyUserOrg.objects.filter(user=user, organization=instance).update(user_perms=True, incident_perms=True, vet_perms=True)
 
 
 class Incident(models.Model):

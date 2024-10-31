@@ -7,7 +7,7 @@ from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, V
 from django.http import HttpResponse, JsonResponse
 from actstream import action
 from datetime import datetime
-from .serializers import ServiceRequestSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
+from .serializers import BarebonesServiceRequestSerializer, ServiceRequestSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from .ordering import MyCustomOrdering
 from wsgiref.util import FileWrapper
 from channels.layers import get_channel_layer
@@ -28,6 +28,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     filter_backends = (filters.SearchFilter, MyCustomOrdering)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = SimpleServiceRequestSerializer
+    light_serializer_class = BarebonesServiceRequestSerializer
     detail_serializer_class = ServiceRequestSerializer
     map_serializer_class = MapServiceRequestSerializer
 
@@ -38,6 +39,9 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         if self.request.query_params.get('landingmap', False):
             if hasattr(self, 'map_serializer_class'):
                 return self.map_serializer_class
+        elif self.action == 'list':
+            if self.request.GET.get('light', 'false') == 'true' and hasattr(self, 'light_serializer_class'):
+                return self.light_serializer_class
         return super(ServiceRequestViewSet, self).get_serializer_class()
 
 
@@ -82,9 +86,14 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                   image_data = self.request.FILES[key]
                   ServiceRequestImage.objects.create(image=image_data, name=self.request.data.get('name'), service_request=service_request)
             elif self.request.data.get('edit_image'):
-              ServiceRequestImage.objects.filter(id=self.request.data.get('id')).update(name=self.request.data.get('edit_image'))
+                ServiceRequestImage.objects.filter(id=self.request.data.get('id')).update(name=self.request.data.get('edit_image'))
             elif self.request.data.get('remove_image'):
-              ServiceRequestImage.objects.filter(id=self.request.data.get('remove_image')).delete()
+                ServiceRequestImage.objects.filter(id=self.request.data.get('remove_image')).delete()
+
+            elif self.request.data.get('new_request_id'):
+                sr = ServiceRequest.objects.get(id=self.request.data.get('new_request_id'))
+                Animal.objects.filter(id__in=self.request.data.get('animal_ids')).update(request=sr)
+                action.send(self.request.user, verb='transferred animals to SR#' + str(sr.id_for_incident), target=service_request)
 
             elif self.request.data.get('reunite_animals'):
                 for animal in service_request.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION', 'REUNITED']):

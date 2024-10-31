@@ -2,16 +2,19 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
+import { Typeahead } from 'react-bootstrap-typeahead';
 import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import Flatpickr from 'react-flatpickr';
+import { Formik } from "formik";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCar, faClipboardCheck, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faHammerCrash, faHomeHeart, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faHammerCrash, faHomeHeart, faRightLeft, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
+import { Checkbox } from '../components/Form';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -32,6 +35,10 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const { setShowSystemError } = useContext(SystemErrorContext);
   const { getFullLocationFromPath } = useLocationWithRoutes();
   const datetime = useRef(null);
+
+  const [showTransfer, setShowTransfer] = useState(false);
+  const handleCloseTransfer = () => setShowTransfer(false);
+  const [transferData, setTransferData] = useState({'new_request_id':null, 'animal_ids':[]});
 
   const openCalendar = () => {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
@@ -84,6 +91,8 @@ function ServiceRequestDetails({ id, incident, organization }) {
     action_history: [],
   });
 
+  const [existingSRs, setExistingSRs] = useState({data:{}, options:[], fetching:true});
+
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
 
@@ -114,11 +123,12 @@ function ServiceRequestDetails({ id, incident, organization }) {
   }
 
   const handlePrintAllAnimalsClick = () => {
+    setIsLoading(true);
     const animals = data.animals.map((animal) => ({
       ...animal,
       url: buildAnimalUrl(animal)
     }));
-    return printSrAnimalCareSchedules(animals, id);
+    return printSrAnimalCareSchedules(animals, id, setIsLoading);
   }
 
   const handleGeoJsonDownload = () => {
@@ -165,6 +175,29 @@ function ServiceRequestDetails({ id, incident, organization }) {
       .finally(() => setIsLoading(false));
     };
     fetchServiceRequestData();
+
+    const fetchExistingSRData = async () => {
+      // Fetch all owners data.
+      await axios.get('/hotline/api/servicerequests/?light=true&incident=' + incident + '&organization=' + organization, {
+        cancelToken: source.token,
+      })
+      .then(existingSRResponse => {
+        if (!unmounted) {
+          let options = [];
+          existingSRResponse.data.filter(request => request.id_for_incident !== Number(id)).forEach(request => {
+            options.push({id: request.id, label: 'SR#' + request.id_for_incident + ': ' + request.full_address})
+          })
+          setExistingSRs({data:existingSRResponse.data, options:options, fetching:false});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    }
+    fetchExistingSRData();
+
     // Cleanup.
     return () => {
       unmounted = true;
@@ -193,9 +226,9 @@ function ServiceRequestDetails({ id, incident, organization }) {
       <div className="row mb-2">
         <div className="col-6 d-flex">
           <Card className="mb-2 border rounded" style={{width:"100%"}}>
-            <Card.Body>
-              <div className="d-flex justify-content-between">
-                <h4 className="h5 mb-0 pb-0 pt-2">Information&nbsp;
+            <Card.Body style={{marginTop:"-10px"}}>
+              <div className="d-flex justify-content-between" style={{marginBottom:"-10px"}}>
+                <h4 style={{paddingTop:"12px"}}>Information&nbsp;
                   {data.verbal_permission ?
                   <OverlayTrigger
                     key={"verbal"}
@@ -459,45 +492,64 @@ function ServiceRequestDetails({ id, incident, organization }) {
       </div>
       <div className="row">
         <div className="col-12 d-flex">
-          <Card className="border rounded" style={{width:"100%"}}>
-            <Card.Body style={{marginBottom:"-20px"}}>
-              <Card.Title>
-                <h4 className="mb-0">Animals
-                  <OverlayTrigger
-                    key={"add-animal"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-add-animal`}>
-                        Add an animal to this service request
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/" + organization + "/" + incident + "/animals/new?servicerequest_id=" + data.id}><FontAwesomeIcon icon={faPlusSquare} className="ml-1" inverse /></Link>
-                  </OverlayTrigger>
-                  {data.status.toLowerCase() !== 'closed' ?
-                    <OverlayTrigger
-                      key={"reunite"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-reunite`}>
-                          Reunite all service request animals
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faHomeHeart} onClick={() => setShow(true)} style={{cursor:'pointer'}} className="ml-1 fa-move-up" inverse />
-                    </OverlayTrigger>
-                    : ""}
-                  {data.animals?.length > 0 && (
-                    <ShelterlyPrintifyButton
-                      id="service-request-animal-care-schedules"
-                      spinnerSize={1.5}
-                      tooltipPlacement='bottom'
-                      tooltipText='Print All Animal Care Schedules'
-                      printFunc={handlePrintAllAnimalsClick}
-                    />
-                  )}
+          <Card className="border rounded d-flex" style={{width:"100%"}}>
+            <Card.Body style={{marginTop:"-10px", marginBottom:"-15px"}}>
+              <div className="d-flex justify-content-between" style={{marginBottom:"-10px"}}>
+                <h4 style={{paddingTop:"12px"}}>
+                    Animals
                 </h4>
-              </Card.Title>
+                {isLoading ? (
+                    <Spinner
+                      className="align-self-center mr-3"
+                      {...{
+                        as: 'span',
+                        animation: 'border',
+                        size: undefined,
+                        role: 'status',
+                        'aria-hidden': 'true',
+                        variant: 'light',
+                        style: {
+                          height: '1.5rem',
+                          width: '1.5rem',
+                          marginBottom: '0.75rem'
+                        }
+                      }}
+                    />
+                  ) : (
+                    <ActionsDropdown alignRight={true} variant="dark" title="Actions">
+                      {data.animals.length > 0 ?
+                        <ShelterlyPrintifyButton
+                          id="animal-details-all-animal-care-schedules"
+                          spinnerSize={2.0}
+                          tooltipPlacement='right'
+                          tooltipText='Print All Animal Care Schedules'
+                          printFunc={handlePrintAllAnimalsClick}
+                          disabled={isLoading}
+                          noOverlay={true}
+                        />
+                      : ""}
+                      <LoadingLink
+                        href={"/" + organization + "/" + incident + "/animals/new?servicerequest_id=" + data.id}
+                        isLoading={isLoading}
+                        className="text-white d-block py-1"
+                        style={{marginLeft:"18px"}}
+                      >
+                        <FontAwesomeIcon icon={faPlusSquare} className="mr-1" inverse />
+                        Add an Animal
+                      </LoadingLink>
+                      {data.status.toLowerCase() !== 'closed' ?
+                        <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                          <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
+                          Reunite All Animals
+                        </LoadingLink>
+                      : ""}
+                      <LoadingLink onClick={() => setShowTransfer(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                        <FontAwesomeIcon icon={faRightLeft} className="mr-1" style={{cursor:'pointer'}} inverse />
+                        Transfer Animals
+                      </LoadingLink>
+                    </ActionsDropdown>
+                  )}
+              </div>
               <hr />
               <AnimalCards animals={data.animals} show_owner={false} show_status={true} organization={organization} incident={"/" + incident} />
               {data.animals.length < 1 ? <div className="mb-3">Service Request does not have any animals assigned.</div> : ""}
@@ -627,6 +679,80 @@ function ServiceRequestDetails({ id, incident, organization }) {
           <Button variant="secondary" onClick={handleClose}>Close</Button>
         </Modal.Footer>
       </Modal>
+      <Formik
+      initialValues={transferData}
+      enableReinitialize={true}
+      // validationSchema={Yup.object({
+      // })}
+      onSubmit={(values, { setSubmitting }) => {
+        axios.patch('/hotline/api/servicerequests/' + data.id + '/', values)
+        .then(response => {
+          setData(prevState => ({ ...prevState, animals:response.data.animals.filter(animal => !values.animal_ids.includes(animal.id))}));
+          setTransferData(prevState => ({ ...prevState, animal_ids:transferData.animal_ids.filter(id => (!values.animal_ids.includes(id)))}));
+          setShowTransfer(false);
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      }}
+    >
+      {formikProps => (
+      <Modal show={showTransfer} onHide={handleCloseTransfer}>
+        <Modal.Header closeButton>
+          <Modal.Title>Transfer Animals Between SRs</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {data.animals.map((animal, index) => (
+            <div key={animal.id}>
+              <Checkbox
+                name={`animal_ids`}
+                checked={formikProps.values.animal_ids.includes(animal.id) || false}
+                onChange={() => {
+                  if (formikProps.values.animal_ids.includes(animal.id)) {
+                    let newItems = [...transferData.animal_ids];
+                    newItems = newItems.filter(id => id !== animal.id);
+                    setTransferData(prevState => ({...prevState, animal_ids: newItems}))
+                    formikProps.setFieldValue(`animal_ids`, newItems);
+                  }
+                  else {
+                    let newItems = [...transferData.animal_ids];
+                    newItems.push(animal.id);
+                    setTransferData(prevState => ({...prevState, animal_ids: newItems}));
+                    formikProps.setFieldValue(`animal_ids`, newItems);
+                  }
+                }}
+                style={{
+                  transform: "scale(1.5)",
+                  marginTop: "-4px"
+                }}
+              />
+              A#{animal.id_for_incident} - {animal.species_string} - {animal.name||"Unknown"}</div>
+          ))}
+          <label className="mt-3">To SR:</label>
+          <Typeahead
+            id="new_request_id"
+            onChange={(values) => {
+              if (values.length) {
+                setTransferData(prevState => ({...prevState, 'new_request_id':values[0].id}));
+                // setData(existingSRs.data.filter(request => request.id === values[0].id)[0])
+              }
+              else {
+                setTransferData(prevState => ({...prevState, 'new_request_id':null}));
+              }
+            }}
+            options={existingSRs.options}
+            placeholder={existingSRs.fetching ? "Loading..." : "Search..."}
+            disabled={existingSRs.fetching ? true : false}
+            emptyLabel="No matches found."
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {formikProps.submitForm();}} disabled={!transferData.new_request_id || transferData.animal_ids.length === 0}>Transfer</Button>
+          <Button variant="secondary" onClick={handleCloseTransfer}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      )}
+    </Formik>
     </>
   );
 };

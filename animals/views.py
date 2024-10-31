@@ -206,10 +206,11 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 return url.split("?AWSAccessKeyId")[0]
 
             # Remove extra images that have been removed.
-            remaining_extra_urls = [strip_s3(url) for url in self.request.data.get('extra_images', '').split(',')]
-            for extra_image in AnimalImage.objects.filter(animal=animal, category="extra"):
-                if strip_s3(extra_image.image.url) not in remaining_extra_urls:
-                    extra_image.delete()
+            if self.request.data.get('extra_images'):
+                remaining_extra_urls = [strip_s3(url) for url in self.request.data.get('extra_images', '').split(',')]
+                for extra_image in AnimalImage.objects.filter(animal=animal, category="extra"):
+                    if strip_s3(extra_image.image.url) not in remaining_extra_urls:
+                        extra_image.delete()
 
             #Create new files from uploads
             for key in self.request.FILES.keys():
