@@ -67,19 +67,16 @@ class IncidentViewSet(viewsets.ModelViewSet):
 
 
     def perform_update(self, serializer):
-        if serializer.is_valid():
-
-            # Only create incident if user is an Admin.
-            if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.data.get('organization'))[0].incident_perms:
+        incident = self.get_object()
+        # Only allow updating incident if user is an Admin.
+        if self.request.user.is_superuser or self.request.user.perms.get(organization=incident.organization).incident_perms:
+            if serializer.is_valid():
                 incident = serializer.save()
+            # Open/close incident.
+            if self.request.data.get('change_lock'):
+                incident.end_time = None if incident.end_time else datetime.now()
+                incident.save()
 
-                # Open/close incident.
-                if self.request.data.get('change_lock'):
-                    if incident.end_time:
-                        incident.end_time = None
-                    else:
-                        incident.end_time = datetime.now()
-                    incident.save()
 
     # New method to specifically handle updating the 'hide' property of an incident.
     @action(detail=True, methods=['patch'])
