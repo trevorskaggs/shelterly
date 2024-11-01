@@ -23,7 +23,7 @@ function Patient(props) {
               <h4 className="mb-0">
                 <Row className="ml-0 pr-0">
                   Patient: {props.animal.name||"Unknown"}
-                  <span className="ml-auto" style={{paddingRight:"15px"}}>
+                  {props.animal.medical_record ? <span className="ml-auto" style={{paddingRight:"15px"}}>
                     <OverlayTrigger
                       key={"medical-record"}
                       placement="top"
@@ -35,7 +35,7 @@ function Patient(props) {
                     >
                       <Link href={"/" + props.organization + "/" + props.incident + "/vet/medrecord/" + props.animal.medical_record} style={{textDecoration:"none", color:"white"}}><FontAwesomeIcon icon={faFolderMedical} className="" inverse /></Link>
                     </OverlayTrigger>
-                  </span>
+                  </span> : ""}
                 </Row>
               </h4>
             </Card.Title>

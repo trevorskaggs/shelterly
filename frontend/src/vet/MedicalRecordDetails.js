@@ -1,8 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import moment from 'moment';
+import { Field, Form, Formik, } from 'formik';
+import { DateTimePicker, TextInput } from '../components/Form';
+import * as Yup from 'yup';
 import { Link, useQueryParams } from 'raviger';
-import { Button, Card, Col, Collapse, ListGroup, ListGroupItem, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, Col, Collapse, Form as BootstrapForm, ListGroup, ListGroupItem, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faEdit,
@@ -64,12 +67,14 @@ function MedicalRecordDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent (Red)', when_available:'When Available (Yellow)'};
 
-  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], medical_notes:[], patient:null, vet_requests:[], pending:[], open: '', diagnosis: '', other_diagnosis:'', medical_plan:'', medical_notes:[], treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
+  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], pending:[], open: '', diagnosis: '', other_diagnosis:'', medical_plan:'', medical_notes:[], treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
   const [showExam, setShowExam] = useState(false);
   const [activeVR, setActiveVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
   const [activeOrders, setActiveOrders] = useState(tab);
   const [isLoading, setIsLoading] = useState(true);
+  const [showMedicalNotesForm, setShowMedicalNotesForm] = useState(false);
+  const handleClose = () => setShowMedicalNotesForm(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -143,14 +148,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
                     Create Veterinary Request
                   </LoadingLink>
-                  {/* {data.exams.length ? <LoadingLink
-                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id}
-                    isLoading={isLoading}
-                    className="text-white d-block py-1 px-3"
-                  >
-                    <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
-                    Update Medical Plan
-                  </LoadingLink> : ""} */}
                   {data.exams.length ? <LoadingLink
                     href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/medicalnote/new"}
                     isLoading={isLoading}
@@ -185,14 +182,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faScalpelLineDashed} className="mr-2" style={{cursor:'pointer'}} transform='grow-3' inverse />
                     Order Procedures
                   </LoadingLink> : ""}
-                  {data.exams.length ? <LoadingLink
-                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}
-                    isLoading={isLoading}
-                    className="text-white d-block py-1 px-3"
-                  >
-                    <FontAwesomeIcon icon={faClipboardListCheck} className="mr-2" inverse />
-                    Update Diagnosis
-                  </LoadingLink> : ""}
                 </ActionsDropdown>
             </div>
             <hr/>
@@ -220,7 +209,17 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 </div>
               </ListGroup.Item>
               <ListGroup.Item style={{marginBottom:"-6px"}}>
-                  <span><b>Medical Notes:</b> {data.animal_object.medical_notes || "N/A"}</span>
+                  <span><b>Medical Notes<OverlayTrigger
+                    key={"edit-animal-medical-notes"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-edit-animal-medical-notes`}>
+                        Edit animal medical notes
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faEdit} onClick={() => {setShowMedicalNotesForm(true)}} size="sm" className="ml-1" style={{ cursor: 'pointer' }} inverse />
+                  </OverlayTrigger>:</b> {data.animal_object.medical_notes || "N/A"}</span>
               </ListGroup.Item>
             </ListGroup>
           </Card.Body>
@@ -229,14 +228,22 @@ function MedicalRecordDetails({ id, incident, organization }) {
       {data.exams.length > 0 ?
       <div className="col-6 d-flex pl-0">
         <Card className="border rounded d-flex" style={{width:"100%"}}>
-          <Card.Body>
-            <Card.Title>
-              <h4 className="mb-0">
-                <Row className="ml-0 pr-0">
+          <Card.Body style={{marginTop:"-10px"}}>
+            <div className="d-flex justify-content-between" style={{marginBottom:"-3px"}}>
+              <h4 className="h4 mb-0 pb-0 pt-2">
                   Medical Plan
-                </Row>
               </h4>
-            </Card.Title>
+              <ActionsDropdown alignRight={true} className="pt-1" variant="dark" title="Actions">
+                {data.exams.length ? <LoadingLink
+                  href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/medicalplan/edit"}
+                  isLoading={isLoading}
+                  className="text-white d-block py-1 px-3"
+                >
+                  <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                  Edit Medical Plan
+                </LoadingLink> : ""}
+              </ActionsDropdown>
+            </div>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
@@ -425,27 +432,13 @@ function MedicalRecordDetails({ id, incident, organization }) {
                     </div>
                   </ListGroup.Item>
                 </ListGroup>
-                {/* {"pending" !== activeOrders ?
-                  <input
-                    id="hide_completed"
-                    name="hide_completed"
-                    type="checkbox"
-                    className="ml-3"
-                    checked={hideCompleted}
-                    onChange={() => {
-                      setHideCompleted(!hideCompleted)
-                    }}
-                    style={{marginTop:"-10px"}}
-                  />: ""}
-                  {"pending" !== activeOrders ?
-                  <span style={{fontSize:"16px"}}>&nbsp;&nbsp;Hide Completed</span> : ""} */}
                 </Row>
               </h4>
             </Card.Title>
             <hr className="mb-3" />
             <Scrollbar no_shadow="true" style={{height:"564px", minHeight:"564px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             {activeOrders === 'pending' && data.pending.sort((a, b) => new Date(a.suggested_admin_time ? a.suggested_admin_time : a.open) - new Date(b.suggested_admin_time ? b.suggested_admin_time : b.open)).map(pending => (
-              <span>
+              <span key={pending.id}>
               {pending.type === 'treatment' ? <TreatmentCard key={pending.id} incident={incident} organization={organization} treatment_request={pending} />
               :pending.type === 'diagnostic' ? <DiagnosticCard key={pending.id} incident={incident} organization={organization} diagnostic={pending} />
               :pending.type === 'procedure' ? <ProcedureCard key={pending.id} incident={incident} organization={organization} procedure={pending} />
@@ -475,14 +468,22 @@ function MedicalRecordDetails({ id, incident, organization }) {
     {data.exams.length > 0 ?
     <div className="d-flex pl-0 mb-3">
       <Card className="border rounded d-flex" style={{width:"100%"}}>
-        <Card.Body>
-          <Card.Title>
-            <h4 className="mb-0">
-              <Row className="ml-0 pr-0">
-                Diagnosis/Problem List
-              </Row>
+        <Card.Body style={{marginTop:"-10px"}}>
+          <div className="d-flex justify-content-between" style={{marginBottom:"-3px"}}>
+            <h4 className="h4 mb-0 pb-0 pt-2">
+              Diagnosis/Problem List
             </h4>
-          </Card.Title>
+            <ActionsDropdown alignRight={true} className="pt-1" variant="dark" title="Actions">
+                <LoadingLink
+                  href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}
+                  isLoading={isLoading}
+                  className="text-white d-block py-1 px-3"
+                >
+                  <FontAwesomeIcon icon={faClipboardListCheck} className="mr-1" inverse />
+                  Update Diagnoses
+                </LoadingLink>
+              </ActionsDropdown>
+          </div>
           <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
             <ListGroup.Item>
@@ -513,7 +514,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
           <hr/>
           <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
             {data.medical_notes.map(note => (
-              <ListGroup.Item>
+              <ListGroup.Item key={note.id}>
                 <div className="row">
                   <span><Link href={"/" + organization + "/" + incident + "/vet/medicalnote/edit/" + note.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{moment(note.open).format('MM/DD')}</Link> - {note.note}</span>
                 </div>
@@ -523,6 +524,47 @@ function MedicalRecordDetails({ id, incident, organization }) {
         </Card.Body>
       </Card>
     </div> : ""}
+    <Formik
+      initialValues={data.animal_object}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        medical_notes: Yup.string().max(2500, 'Must be 2500 characters or less.'),
+      })}
+      onSubmit={(values, { setSubmitting }) => {
+        axios.patch('/animals/api/animal/' + data.animal_object.id + '/', values)
+        .then(response => {
+          setData(prevState => ({ ...prevState, animal_object:response.data}));
+          setShowMedicalNotesForm(false);
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      }}
+    >
+      {formikProps => (
+    <Modal show={showMedicalNotesForm} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Edit Animal Medical Notes</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <BootstrapForm.Row className="">
+          <TextInput
+            as="textarea"
+            // label="Notes"
+            name="medical_notes"
+            id="medical_notes"
+            xs="12"
+            rows={7}
+          />
+        </BootstrapForm.Row>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Save</Button>
+        <Button variant="secondary" onClick={handleClose}>Close</Button>
+      </Modal.Footer>
+    </Modal>
+    )}
+    </Formik>
     {/* <History action_history={data.action_history} /> */}
     </>
   );

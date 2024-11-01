@@ -36,7 +36,7 @@ function Deploy({ incident, organization }) {
   // Determine if this is a preplanning workflow.
   let preplan = window.location.pathname.includes("preplan")
 
-  const [data, setData] = useState({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+  const [data, setData] = useState({service_requests: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
   const [newData, setNewData] = useState(false);
   const [mapState, setMapState] = useState({});
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
@@ -307,6 +307,7 @@ function Deploy({ incident, organization }) {
     };
 
     const fetchServiceRequests = async () => {
+      setData({...data, isFetching: true});
       // Fetch ServiceRequest data.
       await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
@@ -450,7 +451,7 @@ function Deploy({ incident, organization }) {
             }
           >
             <span className="d-inline-block">
-              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)}>
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={data.isFetching}>
                 <FontAwesomeIcon icon={faRotate} />
               </Button>
             </span>
@@ -944,7 +945,18 @@ function Deploy({ incident, organization }) {
                     </OverlayTrigger>
                     }
                     <span className="ml-2">|
-                    &nbsp;<Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>SR#{service_request.id_for_incident}</Link> - {service_request.full_address}</span>
+                    &nbsp;<Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>SR#{service_request.id_for_incident}</Link>
+                    {service_request.followup_date ? <span> (
+                      {/* <OverlayTrigger
+                      key={"followup-date"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-followup-date`}>
+                          Followup date
+                        </Tooltip>
+                      }
+                    ><FontAwesomeIcon icon={faCalendarDay} className="fa-move-up" size="sm" /></OverlayTrigger>:  */}
+                    <Moment format="MM/DD/YY">{service_request.followup_date}</Moment>)</span> : ""} - {service_request.full_address}</span>
                     <OverlayTrigger
                       key={"radius-toggle"}
                       placement="top"
@@ -956,7 +968,7 @@ function Deploy({ incident, organization }) {
                     >
                       <FontAwesomeIcon icon={faBullseye} color={mapState[service_request.id].radius === "enabled" ? "red" : ""} className="ml-1 mr-1" style={{cursor:'pointer'}} onClick={() => handleRadius(service_request.id)} />
                     </OverlayTrigger>
-                    {service_request.followup_date ?
+                    {/* {service_request.followup_date ?
                     <OverlayTrigger
                       key={"followup-date"}
                       placement="top"
@@ -967,7 +979,7 @@ function Deploy({ incident, organization }) {
                       }
                     >
                       <FontAwesomeIcon icon={faCalendarDay} className="mr-1" />
-                    </OverlayTrigger> : ""}
+                    </OverlayTrigger> : ""} */}
                     {service_request.owner_objects.length === 0 ?
                       <OverlayTrigger
                         key={"stray"}

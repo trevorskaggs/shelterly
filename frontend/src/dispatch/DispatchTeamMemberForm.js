@@ -4,12 +4,17 @@ import { navigate } from "raviger";
 import { Formik } from 'formik';
 import {
   Form as BootstrapForm,
+  Button,
   ButtonGroup,
   Card,
+  Modal,
+  OverlayTrigger,
+  Tooltip
 } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowAltCircleLeft,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import { TextInput } from '.././components/Form.js';
@@ -21,6 +26,9 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
 
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
+
+  const [showModal, setShowModal] = useState(false);
+  const handleClose = () => setShowModal(false);
 
   // Track whether or not to add another evac team member after saving.
   const [addAnother, setAddAnother] = useState(false);
@@ -34,6 +42,16 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
     agency_id: '',
     incident: state ? state.incident.id : 'undefined',
   })
+
+  const handleConfirm = () => {
+    axios.delete(`/evac/api/evacteammember/${id}/`)
+      .then(() => {
+        navigate('/' + organization + '/' + incident + '/dispatch/teammanagement');
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+  };
 
   useEffect(() => {
     let unmounted = false;
@@ -65,6 +83,7 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
   }, [id]);
 
   return (
+    <>
     <Formik
       initialValues={data}
       enableReinitialize={true}
@@ -81,36 +100,49 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
         agency_id: Yup.string(),
       })}
       onSubmit={(values, { setSubmitting, resetForm }) => {
-          if (id) {
-            axios.put('/evac/api/evacteammember/' + id + '/', values)
-            .then(function () {
+        if (id) {
+          axios.put('/evac/api/evacteammember/' + id + '/', values)
+          .then(function () {
+            navigate('/' + organization + '/' + incident + '/dispatch/teammanagement');
+          })
+          .catch(error => {
+            setSubmitting(false);
+            setShowSystemError(true);
+          });
+        }
+        else {
+          axios.post('/evac/api/evacteammember/', values)
+          .then(function () {
+            if (addAnother) {
+              resetForm();
+            }
+            else {
               navigate('/' + organization + '/' + incident + '/dispatch/teammanagement');
-            })
-            .catch(error => {
-              setSubmitting(false);
-              setShowSystemError(true);
-            });
-          }
-          else {
-            axios.post('/evac/api/evacteammember/', values)
-            .then(function () {
-              if (addAnother) {
-                resetForm();
-              }
-              else {
-                navigate('/' + organization + '/' + incident + '/dispatch/teammanagement');
-              }
-            })
-            .catch(error => {
-              setSubmitting(false);
-              setShowSystemError(true);
-            });
-          }
+            }
+          })
+          .catch(error => {
+            setSubmitting(false);
+            setShowSystemError(true);
+          });
+        }
       }}
     >
       {form => (
         <Card border="secondary" className="mt-5">
-          <Card.Header as="h5" className="pl-3"><span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{ id ? "Edit" : "New"} Team Member</Card.Header>
+          <Card.Header as="h5" className="pl-3">
+            <span style={{ cursor: 'pointer' }} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{ id ? "Edit" : "New"} Team Member
+            <OverlayTrigger
+              key={"delete-team-member"}
+              placement="left"
+              overlay={
+                <Tooltip id={`tooltip-delete-team-member`}>
+                  Permanently delete team member
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faTimes} className="float-right" size="lg" onClick={() => {setShowModal(true);}} style={{cursor:'pointer'}} inverse />
+            </OverlayTrigger>
+          </Card.Header>
           <Card.Body>
             <BootstrapForm>
               <BootstrapForm.Row>
@@ -154,6 +186,23 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
         </Card>
       )}
     </Formik>
+    <Modal show={showModal} onHide={handleClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Team Member Deletion</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        This action will permanently delete this team member. Are you sure you want to proceed?
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleConfirm}>
+          Yes
+        </Button>
+        <Button variant="secondary" onClick={handleClose}>
+          No
+        </Button>
+      </Modal.Footer>
+    </Modal>
+    </>
   );
 };
 

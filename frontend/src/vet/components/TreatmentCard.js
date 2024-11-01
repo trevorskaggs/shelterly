@@ -49,7 +49,7 @@ function TreatmentCard(props) {
             <Row className="ml-0 mr-0  pl-0 pr-0 w-100">
               {props.animal_object ?
               <div className="border-right ml-0 mr-0" style={{height:props.animal_object ? "120px" : "100px", width:"120px"}}>
-              {props.treatment_request.treatment_object['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object ? props.treatment_request.treatment_object.category : '') ?
+              {['Eye Medication','Ear Medication'].includes(props.treatment_request.treatment_object ? props.treatment_request.treatment_object.category : '') ?
                 <FontAwesomeIcon icon={faEyeDropper} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"14px"}} transform={'grow-1'} inverse />
                 : props.treatment_request.treatment_object && props.treatment_request.treatment_object.category === 'Patient Care' ?
                 <FontAwesomeIcon icon={faHeart} size="6x" className="treatment-icon" style={{marginTop:"14px", marginLeft:"14px"}} transform={'grow-1'} inverse />
