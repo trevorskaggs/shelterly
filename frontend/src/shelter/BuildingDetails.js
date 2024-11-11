@@ -135,7 +135,7 @@ function BuildingDetails({ id, incident, organization }) {
                     </div>
                   </div>
                   <Card.Text className="mb-0 pl-1">
-                    {room.animal_count} Animal{room.animal_count === 1 ? "" : "s"}
+                    {room.animal_count||0} Animal{room.animal_count === 1 ? "" : "s"}
                   </Card.Text>
                 </Card>
               </Link>

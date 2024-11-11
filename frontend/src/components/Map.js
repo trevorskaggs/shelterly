@@ -254,23 +254,23 @@ export const finishedMarkerIcon = new L.DivIcon({
 });
 
 // Counts the number of size/species matches for a service request by status.
-export const countMatches = (service_request) => {
+export const countMatches = (animals) => {
   var matches = {};
   var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
-  service_request.animals.forEach((animal) => {
+  animals.forEach((animal) => {
     if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
       if (!matches[[animal.species_string]]) {
-        matches[[animal.species_string]] = 1;
+        matches[[animal.species_string]] = animal.animal_count;
       }
       else {
-        matches[[animal.species_string]] += 1;
+        matches[[animal.species_string]] += animal.animal_count;
       }
       if (!status_matches[animal.status][[animal.species_string]]) {
-        status_matches[animal.status][[animal.species_string]] = 1;
+        status_matches[animal.status][[animal.species_string]] = animal.animal_count;
       }
       else {
-        status_matches[animal.status][[animal.species_string]] += 1;
+        status_matches[animal.status][[animal.species_string]] += animal.animal_count;
       }
     }
   });
@@ -283,10 +283,10 @@ export const countDictMatches = (animals) => {
 
   Object.keys(animals).forEach((animal) => {
     if (!matches[[animals[animal].species]]) {
-      matches[[animals[animal].species]] = 1;
+      matches[[animals[animal].species]] = animals[animal].animal_count;
     }
     else {
-      matches[[animals[animal].species]] += 1;
+      matches[[animals[animal].species]] += animals[animal].animal_count;
     }
   });
   return matches

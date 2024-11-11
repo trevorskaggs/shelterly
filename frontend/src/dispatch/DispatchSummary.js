@@ -558,7 +558,8 @@ function DispatchSummary({ id, incident, organization }) {
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{animal.id_for_incident}</Link> - {animal.name||"Unknown"}&nbsp;-&nbsp;{animal.species_string}</span>
+                <span style={{textTransform:"capitalize"}}><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>
+                  A#{animal.id_for_incident}</Link> - {animal.animal_count > 1 ? <span>{animal.animal_count} {animal.species_string}{animal.animal_count > 1 && !["sheep", "cattle"].includes(animal.species_string) ? "s" : ""}</span> : <span>{animal.name||"Unknown"}&nbsp;-&nbsp;{animal.species_string}</span>}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}

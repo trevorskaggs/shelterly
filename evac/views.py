@@ -183,6 +183,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 for animal in full_animal_set:
                     animals_dict[animal["id"]] = {
                         'id_for_incident':animal["id_for_incident"],
+                        'animal_count':animal["animal_count"],
                         'status':animal["status"],
                         'name':animal["name"],
                         'species':animal["species_string"],
@@ -226,6 +227,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 for animal in full_animal_set:
                     animals_dict[animal["id"]] = {
                         "id_for_incident": animal["id_for_incident"],
+                        'animal_count':animal["animal_count"],
                         "name": animal["name"],
                         "species": animal["species_string"],
                         "status": animal["status"],
@@ -249,6 +251,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 for animal_dict in service_request['animals']:
                     animals_dict[animal_dict["id"]] = {
                         "id_for_incident": animal_dict.get("id_for_incident"),
+                        'animal_count':animal_dict["animal_count"],
                         "name": animal_dict.get("name"),
                         "species": animal_dict.get("species"),
                         "status": animal_dict.get("status"),
@@ -301,7 +304,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                             visit_note = VisitNote.objects.create(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
                             assigned_request.visit_note = visit_note
                         else:
-                            VisitNote.objects.filter(assigned_request=assigned_request).update(date_completed=service_request['date_completed'], notes=service_request['notes'], forced_entry=service_request['forced_entry'])
+                            VisitNote.objects.filter(assigned_request=assigned_request).update(date_completed=service_request['date_completed'], notes=service_request.get('notes', ''), forced_entry=service_request.get('forced_entry', False))
 
                     # Create OwnerContact object if provided.
                     owner = Person.objects.get(pk=service_request['owner_contact_id']) if service_request.get('owner_contact_id') else None

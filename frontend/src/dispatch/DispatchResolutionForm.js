@@ -60,8 +60,8 @@ function AnimalStatus(props) {
           }}
         />
       </Col>
-      <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px", textTransform:"capitalize" }}>
-        A#{props.animal.id_for_incident} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
+      <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px"}}>
+        A#{props.animal.id_for_incident} - {props.animal.animal_count > 1 ? <span>{props.animal.animal_count} <span style={{textTransform:"capitalize"}}>{props.animal.species}</span>{props.animal.animal_count > 1 && !["sheep", "cattle"].includes(props.animal.species) ? "s" : ""}</span> : <span>{props.animal.name||"Unknown"}&nbsp;-&nbsp;{props.animal.species_string}</span>}
         {props.animal.color_notes ?
         <OverlayTrigger
           key={"animal-color-notes"}
@@ -174,7 +174,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
               date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
-              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, id_for_incident:assigned_request.animals[animal_id].id_for_incident, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
+              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, id_for_incident:assigned_request.animals[animal_id].id_for_incident, animal_count:assigned_request.animals[animal_id].animal_count, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
               owner: assigned_request.service_request_object.owners.length > 0,
               owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
               owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : null,

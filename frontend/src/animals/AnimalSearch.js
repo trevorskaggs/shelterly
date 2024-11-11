@@ -600,7 +600,7 @@ function AnimalSearch({ incident, organization }) {
               >
                 <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              A#{animal.id_for_incident} - {animal.name ? titleCase(animal.name) : "Unknown"}&nbsp;| {titleCase(animal.status)}
+              A#{animal.id_for_incident} - {animal.animal_count > 1 ? <span>{animal.animal_count} Animal{animal.animal_count > 1 ? "s" : ""}</span> : <span>{animal.name ? titleCase(animal.name) : "Unknown"}</span>}&nbsp;| {titleCase(animal.status)}
 
               <ShelterlyPrintifyButton
                 id="animal-search-animal-schedules"

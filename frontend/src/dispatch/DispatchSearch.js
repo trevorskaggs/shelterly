@@ -13,7 +13,7 @@ import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import { useMark, useSubmitting, useDateRange } from '../hooks';
-import Map, { prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
 import Header from '../components/Header';
@@ -87,30 +87,6 @@ function DispatchAssignmentSearch({ incident, organization }) {
     if (pageNum !== page) {
       tempSearchTerm.current.focus();
     }
-  }
-
-  // Counts the number of species matches for a service request.
-  const countMatches = (animal_dict) => {
-    let species_matches = {};
-    let status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
-
-    Object.keys(animal_dict).forEach((animal) => {
-      if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal_dict[animal]['status']) > -1) {
-        if (!species_matches[[animal_dict[animal]['species']]]) {
-          species_matches[[animal_dict[animal]['species']]] = 1;
-        }
-        else {
-          species_matches[[animal_dict[animal]['species']]] += 1;
-        }
-        if (!status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]]) {
-          status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] = 1;
-        }
-        else {
-          status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] += 1;
-        }
-      }
-    });
-    return [species_matches, status_matches]
   }
 
   // Hook for filtering evacuation assignments

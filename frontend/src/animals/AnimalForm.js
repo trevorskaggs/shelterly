@@ -114,7 +114,7 @@ const AnimalForm = (props) => {
     caution: false,
     last_seen: null,
     microchip: '',
-    number_of_animals: 1,
+    animal_count: 1,
     room: null,
     shelter: props.state.shelter || null,
     front_image: null,
@@ -249,8 +249,6 @@ const AnimalForm = (props) => {
         })
         .then(response => {
           if (!unmounted) {
-            // Initialize number_of_animals because it's not returned by the serializer.
-            response.data['number_of_animals'] = 1;
             response.data['presenting_complaints'] = [];
             response.data['priority'] = 'green';
             setData(response.data);
@@ -349,7 +347,7 @@ const AnimalForm = (props) => {
             .max(10, 'Must be 10 characters or less'),
           sex: Yup.string()
             .oneOf(['M', 'F']),
-          number_of_animals: Yup.number().required('Required').positive('Value must be positive').integer('Value must be a whole number'),
+          animal_count: Yup.number().required('Required').positive('Value must be positive').integer('Value must be a whole number'),
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
@@ -904,13 +902,13 @@ const AnimalForm = (props) => {
                     xs="6"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row hidden={id} style={{marginBottom:is_intake ? "" : "-15px"}}>
+                <BootstrapForm.Row>
                   <TextInput
-                    id="number_of_animals"
-                    name="number_of_animals"
+                    id="animal_count"
+                    name="animal_count"
                     type="text"
                     xs="2"
-                    label="No. of Copies"
+                    label="No. of Animals"
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}

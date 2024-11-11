@@ -201,10 +201,6 @@ function Vet({ incident, organization }) {
       name: 'Procedures',
       selector: row => row.procedures,
     },
-    {
-      name: 'Total',
-      selector: row => row.total,
-    },
   ];
 
   return (
@@ -336,7 +332,7 @@ function Vet({ incident, organization }) {
                       <FontAwesomeIcon icon={faBandAid} className="ml-1"/>
                     </OverlayTrigger>
                     : ""} */}
-                    A#{animalData[animal_id].id_for_incident} - {animalData[animal_id].name || 'Unknown'} | <span style={{textTransform:'capitalize'}}>{animalData[animal_id].species_string}</span> |&nbsp;
+                    A#{animalData[animal_id].id_for_incident} - {animalData[animal_id].animal_count === 1 ? <span>{animalData[animal_id].name || 'Unknown'} | <span style={{textTransform:'capitalize'}}>{animalData[animal_id].species_string}</span></span> : <span>{animalData[animal_id].animal_count} <span style={{textTransform:"capitalize"}}>{animalData[animal_id].species_string}</span>{animalData[animal_id].animal_count > 1 && !["sheep", "cattle"].includes(animalData[animal_id].species_string) ? "s" : ""}</span>} |&nbsp;
                     {animalData[animal_id].shelter_object ? animalData[animal_id].shelter_object['name'] : 'Field'} |&nbsp;
                     {animalData[animal_id].vet_request ? <span>{animalData[animal_id].vet_request} Vet Request{animalData[animal_id].vet_request > 1 ? "s" : ""}</span> : ""}
                     {animalData[animal_id].treatment ? <span>{animalData[animal_id].vet_request ? ", " : ""}{animalData[animal_id].treatment} Treatment{animalData[animal_id].treatment > 1 ? "s" : ""}</span> : ""}

@@ -4,19 +4,20 @@ import { Link, navigate } from 'raviger';
 import { AuthContext } from "../accounts/AccountsReducer";
 import Moment from 'react-moment';
 import { Carousel } from 'react-responsive-carousel';
+import RangeSlider from 'react-bootstrap-range-slider';
 import { Button, Card, Col, Form as BootstrapForm, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus, faFilePdf
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faFolderMedical, faHomeHeart, faPhoneRotary, faRightLeft } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faFolderMedical, faHomeHeart, faPhoneRotary, faRightLeft, faSplit } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import * as Yup from 'yup';
 import { Formik } from "formik";
 import { AnimalDeleteModal } from "../components/Modals";
 import Header from '../components/Header';
 import History from '../components/History';
-import { DropDown } from '../components/Form.js';
+import { DropDown, TextInput } from '../components/Form.js';
 import { printAnimalCareSchedule } from './Utils';
 import AnimalCoverImage from '../components/AnimalCoverImage';
 import { SystemErrorContext } from '../components/SystemError';
@@ -69,6 +70,8 @@ function AnimalDetails({ id, incident, organization }) {
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [showSplit, setShowSplit] = useState(false);
+  const handleCloseSplit = () => setShowSplit(false);
   const [showTransfer, setShowTransfer] = useState(false);
   const handleCloseTransfer = () => setShowTransfer(false);
   const [ownerToDelete, setOwnerToDelete] = useState({id:0, name:''});
@@ -381,6 +384,12 @@ function AnimalDetails({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
                     Update Animal
                   </LoadingLink>
+                  {data.animal_count > 1 ?
+                    <LoadingLink disabled={true} onClick={() => setShowSplit(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                      <FontAwesomeIcon icon={faSplit} className="mr-1" style={{cursor:'pointer'}} inverse />
+                      Split Animal Group
+                    </LoadingLink>
+                  : ""}
                   {data.status !== 'REUNITED' ?
                     <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
@@ -393,6 +402,7 @@ function AnimalDetails({ id, incident, organization }) {
                       Transfer Animal Between Shelters
                     </LoadingLink>
                   : ""}
+                  {data.animal_count === 1 ?
                   <LoadingLink
                     href={"/" + organization + "/" + incident + "/animals/" + id + "/vetrequest/new"}
                     isLoading={isLoading}
@@ -401,7 +411,7 @@ function AnimalDetails({ id, incident, organization }) {
                   >
                     <FontAwesomeIcon icon={faUserDoctorMessage} className="mr-1" inverse />
                     Create Veterinary Request
-                  </LoadingLink>
+                  </LoadingLink> : ""}
                   <LoadingLink onClick={() => {setShowAnimalConfirm(true);}} isLoading={isLoading} className="text-white d-block py-1 px-3">
                     <FontAwesomeIcon icon={faTimes} style={{cursor:'pointer'}} className='mr-1' size="lg" inverse />
                     Cancel Animal
@@ -410,20 +420,20 @@ function AnimalDetails({ id, incident, organization }) {
               )}
             </div>
             <hr className="pt-0 mt-1" />
-            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
               <ListGroup.Item>
                 <div className="row">
-                  <span className="col-6"><b>Name:</b> {data.name||"Unknown"}</span>
-                  <span className="col-6"><b>Status:</b> {data.status}</span>
+                  {data.animal_count > 1 ? <span className="col-6"><b>No. of Animals:</b> {data.animal_count}</span> : <span className="col-6"><b>Name:</b> {data.name||"Unknown"}</span>}
+                  <span className="col-6" style={{textTransform:"capitalize"}}><b>Status:</b> {data.status}</span>
                 </div>
               </ListGroup.Item>
-              <ListGroup.Item>
+              <ListGroup.Item style={{textTransform:"capitalize"}}>
                 <div className="row">
                   <span className="col-6"><b>Species:</b> {data.species_string}</span>
                   <span className="col-6"><b>Sex:</b> {data.sex||"Unknown"}</span>
                 </div>
               </ListGroup.Item>
-              <ListGroup.Item>
+              <ListGroup.Item style={{textTransform:"capitalize"}}>
                 <div className="row">
                   <span className="col-6"><b>Age:</b> {data.age||"Unknown"}</span>
                   <span className="col-6"><b>Size:</b> {data.size||"Unknown"}</span>
@@ -703,6 +713,47 @@ function AnimalDetails({ id, incident, organization }) {
         <Modal.Footer>
           <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Save</Button>
           <Button variant="secondary" onClick={handleCloseTransfer}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      )}
+    </Formik>
+    <Formik
+      initialValues={{'animal_count':data.animal_count, 'group_2':0}}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        animal_count: Yup.number(),
+        group_2: Yup.number(),
+      })}
+      onSubmit={(values, { setSubmitting }) => {
+        axios.patch('/animals/api/animal/' + data.id + '/?incident=' + incident, values)
+        .then(response => {
+          setData(prevState => ({ ...prevState, animal_count:values.animal_count}));
+          setShowSplit(false);
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      }}
+    >
+      {formikProps => (
+      <Modal show={showSplit} onHide={handleCloseSplit}>
+        <Modal.Header closeButton>
+          <Modal.Title>Split Animal Group</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <span><b>Current Group: </b>{formikProps.values.animal_count} <span style={{textTransform:"capitalize"}}>{data.species_string}</span>{(formikProps.values.animal_count) !== 1 && !["sheep", "cattle"].includes(data.species_string) ? "s" : ""}</span>
+          <RangeSlider
+            value={formikProps.values.group_2}
+            onChange={(changeEvent) => {formikProps.setFieldValue("group_2", changeEvent.target.value);formikProps.setFieldValue("animal_count", data.animal_count - changeEvent.target.value);}}
+            min={0}
+            max={data.animal_count - 1}
+            className="mb-3 mt-3"
+          />
+          <span className="row mt-3 pl-3"><b>New Group:&nbsp;</b>{formikProps.values.group_2}&nbsp;<span style={{textTransform:"capitalize"}}>{data.species_string}</span>{(Number(formikProps.values.group_2) !== 1) && !["sheep", "cattle"].includes(data.species_string) ? "s" : ""}</span>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {formikProps.submitForm();}} disabled={Number(formikProps.values.group_2) === 0}>Save</Button>
+          <Button variant="secondary" onClick={handleCloseSplit}>Close</Button>
         </Modal.Footer>
       </Modal>
       )}

@@ -26,7 +26,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'id_for_incident', 'species', 'species_string', 'category', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes']
+        fields = ['id', 'id_for_incident', 'animal_count', 'species', 'species_string', 'category', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes', 'animal_count']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
@@ -34,6 +34,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     request_id_for_incident = serializers.SerializerMethodField()
     request_address = serializers.SerializerMethodField()
     request_lat_lon = serializers.SerializerMethodField()
+    active_dispatch = serializers.SerializerMethodField()
     weight = serializers.SerializerMethodField()
     owners = SimplePersonSerializer(many=True, required=False, read_only=True)
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
@@ -43,8 +44,8 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'id_for_incident', 'name', 'species', 'species_string', 'confined', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
-        'microchip', 'front_image', 'intake_date', 'owners', 'owner_names', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight', 'reporter', 'reporter_object']
+        fields = ['id', 'id_for_incident', 'animal_count', 'name', 'species', 'species_string', 'confined', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
+        'microchip', 'front_image', 'intake_date', 'owners', 'owner_names', 'active_dispatch', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight', 'reporter', 'reporter_object']
 
     def get_found_location(self, obj):
         return build_full_address(obj)
@@ -62,6 +63,9 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     # Custom field for request address.
     def get_request_address(self, obj):
         return build_full_address(obj.request)
+
+    def get_active_dispatch(self, obj):
+        return obj.request and obj.request.status == 'assigned'
 
     # Custom field for the current animal weight.
     def get_weight(self, obj):
@@ -108,10 +112,10 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'id_for_incident', 'species', 'species_string', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
+        fields = ['id', 'id_for_incident', 'animal_count', 'species', 'species_string', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_id_for_incident', 'request_address',
         'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
-        'latitude', 'longitude', 'medical_record', 'microchip', 'vet_requests']
+        'latitude', 'longitude', 'medical_record', 'microchip', 'active_dispatch', 'vet_requests']
 
     # Truncates latitude and longitude.
     def to_internal_value(self, data):
