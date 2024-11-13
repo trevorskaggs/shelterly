@@ -9,7 +9,7 @@ export function loadUser({state, dispatch, removeCookie, path}) {
   dispatch({ type: 'USER_LOADING' });
 
   // Check backend for authentication and return user information if valid.
-  axios.get("/accounts/api/user/auth/?organization=" + state.organization.id + "&incident=" + state.incident.id)
+  axios.get("/accounts/api/user/auth/?organization=" + state.organization.id)
   .then(function(results){
     // Set the user state.
     dispatch({type: 'USER_LOADED', user: results.data });
