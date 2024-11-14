@@ -126,8 +126,11 @@ class ModestShelterSerializer(SimpleShelterSerializer):
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer
     buildings = BuildingSerializer(source='building_set', many=True, required=False, read_only=True)
-    intake_summaries = SimpleIntakeSummarySerializer(source='intakesummary_set', many=True, required=False, read_only=True)
+    intake_summaries = serializers.SerializerMethodField()#SimpleIntakeSummarySerializer(obj.intakesummary_set.distinct(), many=True, required=False, read_only=True)
     # action_history = serializers.SerializerMethodField()
+
+    def get_intake_summaries(self, obj):
+        return SimpleIntakeSummarySerializer(obj.intakesummary_set.all().distinct(), many=True, required=False, read_only=True).data
 
     # def get_action_history(self, obj):
     #     return [build_action_string(action) for action in obj.target_actions.all()]

@@ -13,7 +13,7 @@ import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import { useMark, useSubmitting, useDateRange } from '../hooks';
-import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countMatches, countDictMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
 import Header from '../components/Header';
@@ -124,7 +124,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
           for (const dispatch_assignment of response.data) {
             let sr_bounds = [];
             for (const assigned_request of dispatch_assignment.assigned_requests) {
-              const [species_matches, status_matches] = countMatches(assigned_request.animals);
+              const [species_matches, status_matches] = countDictMatches(assigned_request.animals, true);
               map_dict[assigned_request.service_request_object.id] = {species_matches:species_matches, status_matches:status_matches};
               sr_bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }

@@ -600,7 +600,7 @@ function AnimalSearch({ incident, organization }) {
               >
                 <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
-              A#{animal.id_for_incident} - {animal.animal_count > 1 ? <span>{animal.animal_count} Animal{animal.animal_count > 1 ? "s" : ""}</span> : <span>{animal.name ? titleCase(animal.name) : "Unknown"}</span>}&nbsp;| {titleCase(animal.status)}
+              A#{animal.id_for_incident} - {animal.animal_count > 1 ? <span>{animal.animal_count} {titleCase(animal.species_string)}{(animal.animal_count) !== 1 && !["sheep", "cattle"].includes(animal.species_string) ? "s" : ""}</span> : <span>{animal.name ? titleCase(animal.name) : "Unknown"}</span>}
 
               <ShelterlyPrintifyButton
                 id="animal-search-animal-schedules"
@@ -775,7 +775,8 @@ function AnimalSearch({ incident, organization }) {
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
                     <ListGroup.Item>{titleCase(animal.species_string)}{animal.size ? <span>,&nbsp;{titleCase(animal.size)}</span> : ""}{animal.sex ? <span>,&nbsp;{titleCase(animal.sex)}</span> : ""}{animal.age ? <span>,&nbsp;{titleCase(animal.age)}</span> : ""}{animal.pcolor ? <span style={{textTransform:"capitalize"}}>,&nbsp;{animal.pcolor}{animal.scolor ? <span>/{animal.scolor}</span> : ""}</span> : ""}</ListGroup.Item>
-                    <ListGroup.Item><b>Microchip: </b> {animal.microchip || "N/A"}</ListGroup.Item>
+                    <ListGroup.Item><b>Status: </b> {animal.status}</ListGroup.Item>
+                    {animal.microchip ? <ListGroup.Item><b>Microchip: </b> {animal.microchip || "N/A"}</ListGroup.Item> : ""}
                     {animal.owners.map(owner => (
                       <ListGroup.Item key={owner.id}>
                         <b>Owner:</b> <Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
@@ -807,7 +808,6 @@ function AnimalSearch({ incident, organization }) {
                         : ""}
                       </ListGroup.Item>
                     ))}
-                    {animal.owners < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                     {animal.reporter ? <ListGroup.Item><b>Reporter: </b><Link href={"/" + organization + "/" + incident + "/people/reporter/" + animal.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.reporter_object.first_name} {animal.reporter_object.last_name}</Link></ListGroup.Item> : ""}
                   </ListGroup>
                 </Scrollbar>

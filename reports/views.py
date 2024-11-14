@@ -1,5 +1,5 @@
-from django.db.models import Count, CharField, DateTimeField, Exists, OuterRef, Subquery, Prefetch, F, Q, IntegerField, Value
-from django.db.models.functions import Cast, TruncDay
+from django.db.models import Count, CharField, DateTimeField, Exists, OuterRef, Subquery, Prefetch, F, Q, Sum, IntegerField, Value
+from django.db.models.functions import Cast, Coalesce, TruncDay
 from rest_framework import viewsets
 from operator import itemgetter
 from rest_framework.response import Response
@@ -57,26 +57,26 @@ class ReportViewSet(viewsets.ViewSet):
 
           intake_data = {}
           intake_data['date'] = end_date.strftime('%m/%d/%Y')
-          intake_total = 0
           for animal_category in animal_categories:
-            intake_data[animal_category.replace('/', '')] = intake_animals.filter(species__category__name=animal_category).count()
-          intake_data['total'] = intake_animals.count()
+            intake_data[animal_category.replace('/', '')] = intake_animals.filter(species__category__name=animal_category).aggregate(Sum("animal_count"))['animal_count__sum'] or 0
+          intake_data['total'] = intake_animals.aggregate(Sum("animal_count"))['animal_count__sum'] or 0
           shelter_intake_report.append(intake_data)
 
           end_date -= delta
         shelters = Shelter.objects.select_related('animal__incident').prefetch_related('animal_set', 'animal_set__species').filter(animal__incident__slug=self.request.GET.get('incident')).annotate(
-          avians=Count("animal", filter=Q(animal__species__category__name="avian", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
-          cats=Count("animal", filter=Q(animal__species__category__name="cat", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
-          dogs=Count("animal", filter=Q(animal__species__category__name="dog", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
-          equines=Count("animal", filter=Q(animal__species__category__name="equine", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
-          reptiles=Count("animal", filter=Q(animal__species__category__name="reptile/amphibian", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
-          ruminants=Count("animal", filter=Q(animal__species__category__name="ruminant", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
-          small_mammals=Count("animal", filter=Q(animal__species__category__name="small mammal", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
-          others=Count("animal", filter=Q(animal__species__category__name="other", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
-          total=Count("animal", filter=Q(animal__status='SHELTERED', animal__incident__slug=incident_slug))).values('name', 'avians', 'cats', 'dogs', 'equines', 'reptiles', 'ruminants', 'small_mammals', 'others', 'total').order_by('name')
+          avians=Sum("animal__animal_count", filter=Q(animal__species__category__name="avian", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          cats=Sum("animal__animal_count", filter=Q(animal__species__category__name="cat", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          dogs=Sum("animal__animal_count", filter=Q(animal__species__category__name="dog", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          camelids=Sum("animal__animal_count", filter=Q(animal__species__category__name="camelid", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          equines=Sum("animal__animal_count", filter=Q(animal__species__category__name="equine", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          # reptiles=Sum("animal__animal_count", filter=Q(animal__species__category__name="reptile/amphibian", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          ruminants=Sum("animal__animal_count", filter=Q(animal__species__category__name="ruminant", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          small_mammals=Sum("animal__animal_count", filter=Q(animal__species__category__name="small mammal", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          others=Sum("animal__animal_count", filter=Q(animal__species__category__name="other", animal__status='SHELTERED', animal__incident__slug=incident_slug)),
+          total=Sum("animal__animal_count", filter=Q(animal__status='SHELTERED', animal__incident__slug=incident_slug))).values('name', 'avians', 'cats', 'dogs', 'camelids', 'equines', 'ruminants', 'small_mammals', 'others', 'total').order_by('name')
         # Turn queryset into list so we can append a total row to it.
         animals_status = []
-        for row in list(animals.values('species__category__name').annotate(reported=Count("id", filter=Q(status='REPORTED'), distinct=True), reported_evac=Count("id", filter=Q(status='REPORTED (EVAC REQUESTED)'), distinct=True), reported_sip=Count("id", filter=Q(status='REPORTED (SIP REQUESTED)'), distinct=True), utl=Count("id", filter=Q(status='UNABLE TO LOCATE'), distinct=True), nfa=Count("id", filter=Q(status='NO FURTHER ACTION'), distinct=True), sheltered=Count("id", filter=Q(status='SHELTERED'), distinct=True), sip=Count("id", filter=Q(status='SHELTERED IN PLACE'), distinct=True), reunited=Count("id", filter=Q(status='REUNITED'), distinct=True), deceased=Count("id", filter=Q(status='DECEASED'), distinct=True)).order_by('species__category__name')):
+        for row in list(animals.values('species__category__name').annotate(reported=Coalesce(Sum("animal_count", filter=Q(status='REPORTED'), distinct=True), 0), reported_evac=Coalesce(Sum("animal_count", filter=Q(status='REPORTED (EVAC REQUESTED)'), distinct=True), 0), reported_sip=Coalesce(Sum("animal_count", filter=Q(status='REPORTED (SIP REQUESTED)'), distinct=True), 0), utl=Coalesce(Sum("animal_count", filter=Q(status='UNABLE TO LOCATE'), distinct=True), 0), nfa=Coalesce(Sum("animal_count", filter=Q(status='NO FURTHER ACTION'), distinct=True), 0), sheltered=Coalesce(Sum("animal_count", filter=Q(status='SHELTERED'), distinct=True), 0), sip=Coalesce(Sum("animal_count", filter=Q(status='SHELTERED IN PLACE'), distinct=True), 0), reunited=Coalesce(Sum("animal_count", filter=Q(status='REUNITED'), distinct=True), 0), deceased=Coalesce(Sum("animal_count", filter=Q(status='DECEASED'), distinct=True), 0)).order_by('species__category__name')):
             row['last'] = False
             animals_status.append(row)
         # Add total row
@@ -84,13 +84,13 @@ class ReportViewSet(viewsets.ViewSet):
 
         # Turn queryset into list so we can append a total row to it.
         animals_ownership = []
-        for row in list(animals.values('species__category__name').annotate(owned=Count("id", filter=Q(owners__isnull=False), distinct=True), stray=Count("id", filter=Q(owners__isnull=True), distinct=True)).order_by('species__category__name')):
+        for row in list(animals.values('species__category__name').annotate(owned=Coalesce(Sum("animal_count", filter=Q(owners__isnull=False), distinct=True), 0), stray=Coalesce(Sum("animal_count", filter=Q(owners__isnull=True), distinct=True), 0)).order_by('species__category__name')):
             row['last'] = False
             animals_ownership.append(row)
         animals_ownership.append({'species__category__name': 'total', 'owned':sum(v['owned'] for v in animals_ownership), 'stray':sum(v['stray'] for v in animals_ownership), 'last':True})
 
         animals_deceased = []
-        for animal in list(animals.filter(status='DECEASED').values('id', 'name', 'species__category__name', 'status', 'address', 'city', 'state', 'zip_code')):
+        for animal in list(animals.filter(status='DECEASED').values('id', 'id_for_incident', 'animal_count', 'name', 'species__category__name', 'status', 'address', 'city', 'state', 'zip_code')):
             for action in Action.objects.filter(target_object_id=str(animal['id']), verb="changed animal status to DECEASED"):
                 animal['date'] = action.timestamp
                 animals_deceased.append(animal)

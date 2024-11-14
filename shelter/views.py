@@ -152,6 +152,9 @@ class IntakeSummaryViewSet(viewsets.ModelViewSet):
     serializer_class = IntakeSummarySerializer
     permission_classes = [permissions.IsAuthenticated, ]
 
+    def get_queryset(self):
+        return self.queryset.distinct()
+
     def perform_create(self, serializer):
         if serializer.is_valid():
             summary = serializer.save()

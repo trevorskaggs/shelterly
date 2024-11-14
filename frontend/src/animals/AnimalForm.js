@@ -509,11 +509,17 @@ const AnimalForm = (props) => {
                 });
               }
 
+              let count = values.animal_count;
+              props.state.steps.animals.forEach(animal => {
+                count = Number(count) + Number(animal.get("animal_count"));
+              });
+
               // Create Intake Summary
               let intakeSummaryResponse = [{data:{id:null}}];
               values['shelter'] = shelter_id;
               values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
               values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
+              values['animal_count'] = count;
               intakeSummaryResponse = await Promise.all([
                 axios.post('/shelter/api/intakesummary/', values)
               ])
@@ -522,7 +528,7 @@ const AnimalForm = (props) => {
                 setShowSystemError(true);
                 setRedirectCheck(true);
               });
-              
+
               // Create previous animals
               let promises = [];
               props.state.steps.animals.forEach(animal => {

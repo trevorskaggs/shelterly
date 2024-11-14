@@ -196,7 +196,7 @@ function ShelterDetails({ id, incident, organization }) {
           <div>
             <Card className="border rounded d-flex mb-2">
               <Card.Body>
-              {intakesummary.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : intakesummary.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}<Link href={"/" + organization + "/" + incident + "/shelter/intakesummary/" + intakesummary.id} className="text-link" style={{textDecoration:"none", color:"white"}}>Intake Summary #{intakesummary.id}</Link> for {intakesummary.animals.length} animal{intakesummary.animals.length === 1 ? '' : 's'} on <Moment format="MMMM Do YYYY">{intakesummary.date}</Moment> at <Moment format="HH:mm">{intakesummary.date}</Moment>.
+              {intakesummary.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : intakesummary.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}<Link href={"/" + organization + "/" + incident + "/shelter/intakesummary/" + intakesummary.id} className="text-link" style={{textDecoration:"none", color:"white"}}>Intake Summary #{intakesummary.id}</Link> for {intakesummary.animal_count} animal{intakesummary.animal_count === 1 ? '' : 's'} on <Moment format="MMMM Do YYYY">{intakesummary.date}</Moment> at <Moment format="HH:mm">{intakesummary.date}</Moment>.
               </Card.Body>
             </Card>
           </div>

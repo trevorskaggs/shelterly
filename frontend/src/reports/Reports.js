@@ -13,7 +13,7 @@ function Reports({ incident, organization }) {
   // Initial state.
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[], 'duplicate_sr_report': []});
+  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report': []});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report", key:"daily_report"});
 
   const [storeDate, setStoreDate] = useState('');
@@ -88,7 +88,7 @@ function Reports({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animals_deceased_report':[], 'duplicate_sr_report': []});
+          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report': []});
           setShowSystemError(true);
         }
       });
@@ -165,6 +165,11 @@ function Reports({ incident, organization }) {
       compact: true,
     },
     {
+      name: 'Camelids',
+      selector: row => row.camelids,
+      compact: true,
+    },
+    {
       name: 'Cats',
       selector: row => row.cats,
       compact: true,
@@ -179,11 +184,11 @@ function Reports({ incident, organization }) {
       selector: row => row.equines,
       compact: true,
     },
-    {
-      name: 'Reptiles/Amphibians',
-      selector: row => row.reptiles,
-      compact: true,
-    },
+    // {
+    //   name: 'Reptiles/Amphibians',
+    //   selector: row => row.reptiles,
+    //   compact: true,
+    // },
     {
       name: 'Ruminants',
       selector: row => row.ruminants,
@@ -220,6 +225,11 @@ function Reports({ incident, organization }) {
       compact: true,
     },
     {
+      name: 'Camelids',
+      selector: row => row.camelid,
+      compact: true,
+    },
+    {
       name: 'Cats',
       selector: row => row.cat,
       compact: true,
@@ -234,11 +244,11 @@ function Reports({ incident, organization }) {
       selector: row => row.equine,
       compact: true,
     },
-    {
-      name: 'Reptiles/Amphibians',
-      selector: row => row.reptileamphibian,
-      compact: true,
-    },
+    // {
+    //   name: 'Reptiles/Amphibians',
+    //   selector: row => row.reptileamphibian,
+    //   compact: true,
+    // },
     {
       name: 'Ruminants',
       selector: row => row.ruminant,
@@ -430,11 +440,18 @@ function Reports({ incident, organization }) {
     },
     {
       name: 'ID',
-      selector: row => row.id,
+      selector: row => row.id_for_incident,
+      compact: true,
+    },
+    {
+      name: 'Count',
+      selector: row => row.animal_count,
+      compact: true,
     },
     {
       name: 'Name',
       selector: row => row.name || 'Unknown',
+      compact: true,
     },
     {
       name: 'Address',
@@ -448,6 +465,7 @@ function Reports({ incident, organization }) {
     {
       name: 'STATUS',
       selector: row => row.status,
+      compact: true,
     },
   ];
 
@@ -472,7 +490,7 @@ function Reports({ incident, organization }) {
     {value:'worked', label:"Service Requests Worked Report", key:"sr_worked_report"},
     {value:'shelter', label:"Shelter Report", key:"shelter_report"},
     {value:'shelter_intake', label:"Shelter Intake Report", key:"shelter_intake"},
-    {value:'animal_deceased', label:"Deceased Animal Report", key:"animals_deceased_report"},
+    {value:'animal_deceased', label:"Deceased Animal Report", key:"animal_deceased_report"},
     {value:'animal_status', label:"Total Animals By Status Report", key:"animal_status_report"},
     {value:'animal_owner', label:"Total Animals By Ownership Report", key:"animal_owner_report"},
     {value:'duplicate_sr', label: "Duplicate SR Report", key:"duplicate_sr_report"}

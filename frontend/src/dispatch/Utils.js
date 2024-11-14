@@ -227,13 +227,22 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         }
         // draw the animals header in each row
         pdf.setDocumentFontSize({ size: 11 });
-        drawAnimalHeader({
-          firstLabel: `***A#${
-            animal.id_for_incident
-          } - ${animal.species_string[0].toUpperCase()}${animal.species_string.slice(1)}\n${
-            animal.name || "Unknown"
-          }***`,
-        });
+        if (animal.animal_count > 1) {
+          drawAnimalHeader({
+            firstLabel: `***A#${
+              animal.id_for_incident
+            }\n${animal.animal_count} ${animal.species_string[0].toUpperCase()}${animal.species_string.slice(1)}${((animal.animal_count === 1) && ['sheep', 'cattle'].includes(animal.species_string)) ? "" : "s"}***`,
+          });
+        }
+        else {
+          drawAnimalHeader({
+            firstLabel: `***A#${
+              animal.id_for_incident
+            } - ${animal.species_string[0].toUpperCase()}${animal.species_string.slice(1)}\n${
+              animal.name || "Unknown"
+            }***`,
+          });
+        }
 
         const animalRow = [{
           label: `\n\n${animal.status}`,
