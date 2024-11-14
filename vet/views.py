@@ -32,7 +32,6 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_update(self, serializer):
-        import ipdb; ipdb.set_trace()
         if serializer.is_valid():
             med_record = serializer.save()
 
