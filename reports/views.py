@@ -54,7 +54,6 @@ class ReportViewSet(viewsets.ViewSet):
             'sr_per_team': total_assigned / teams if teams > 0 else 0
           }
           sr_worked_report.append(sr_data)
-
           intake_data = {}
           intake_data['date'] = end_date.strftime('%m/%d/%Y')
           intake_total = 0
@@ -89,12 +88,14 @@ class ReportViewSet(viewsets.ViewSet):
             animals_ownership.append(row)
         animals_ownership.append({'species__category__name': 'total', 'owned':sum(v['owned'] for v in animals_ownership), 'stray':sum(v['stray'] for v in animals_ownership), 'last':True})
 
+        #Decease Animals Report
         animals_deceased = []
         for animal in list(animals.filter(status='DECEASED').values('id', 'name', 'species__category__name', 'status', 'address', 'city', 'state', 'zip_code')):
             for action in Action.objects.filter(target_object_id=str(animal['id']), verb="changed animal status to DECEASED"):
                 animal['date'] = action.timestamp
                 animals_deceased.append(animal)
 
+        ## Duplicate SR Report
         duplicate_sr_report = []
         active_incident_srs = ServiceRequest.objects.filter(incident__slug=incident_slug).exclude(status='canceled')
         for dupe_sr in active_incident_srs.values('address', 'city', 'state', 'zip_code').order_by('address', 'city', 'state', 'zip_code').annotate(Count('pk')).filter(pk__count__gt=1):
@@ -108,6 +109,25 @@ class ReportViewSet(viewsets.ViewSet):
               'sr_ids': dupe_sr_ids
             })
 
-        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True), 'duplicate_sr_report': duplicate_sr_report}
+        ## Small Animal Care Report
+        animal_care_report = []
+        incident_animals = Animal.objects.filter(incident__slug=incident_slug).exclude(status='canceled')
+        species = incident_animals.values_list('species__category__name', flat=True)
+        evacuated_animals = incident_animals.filter(request__isnull=False, intake_date__isnull=False)
+        sip_animals = incident_animals.filter(request__isnull=False, status='SHELTERED IN PLACE')
+        sheltered_animals = incident_animals.filter(intake_date__isnull=False)
+        report_fields = {
+            'Evacuated': evacuated_animals,
+            'SIP': sip_animals,
+            'Sheltered': sheltered_animals
+        }
+        for key in report_fields.keys():
+            report_out = [key]
+            animals = report_fields[key]
+            for ac in animal_categories:
+                report_out.append(animals.filter(species__category__name=ac).count())
+            animal_care_report.append(report_out)
+
+        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True), 'duplicate_sr_report': duplicate_sr_report, 'animal_care_report': animal_care_report}
         return Response(data)
     return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report': []})
