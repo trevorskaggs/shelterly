@@ -4,7 +4,7 @@ from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, V
 from dateutil import parser
 
 from animals.models import Animal
-from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalNote, MedicalRecord, PresentingComplaint, Procedure, ProcedureResult, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
+from vet.models import Diagnosis, Diagnostic, DiagnosticResult, Exam, ExamAnswer, ExamQuestion, MedicalNote, MedicalRecord, MedicalRecordImage, PresentingComplaint, Procedure, ProcedureResult, Treatment, TreatmentPlan, TreatmentRequest, VetRequest
 from vet.serializers import DiagnosisSerializer, DiagnosticSerializer, DiagnosticResultSerializer, ExamQuestionSerializer, ExamSerializer, MedicalNoteSerializer, MedicalRecordSerializer, PresentingComplaintSerializer, ProcedureSerializer, ProcedureResultSerializer, TreatmentSerializer, TreatmentPlanSerializer, TreatmentRequestSerializer, VetRequestSerializer
 
 class MedicalRecordViewSet(viewsets.ModelViewSet):
@@ -32,8 +32,21 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_update(self, serializer):
+        import ipdb; ipdb.set_trace()
         if serializer.is_valid():
             med_record = serializer.save()
+
+            if self.request.FILES.keys():
+              # Create new files from uploads
+              for key in self.request.FILES.keys():
+                  image_data = self.request.FILES[key]
+                  MedicalRecordImage.objects.create(image=image_data, name=self.request.data.get('name'), medical_record=med_record)
+            elif self.request.data.get('edit_image'):
+                MedicalRecordImage.objects.filter(id=self.request.data.get('id')).update(name=self.request.data.get('edit_image'))
+            elif self.request.data.get('remove_image'):
+                MedicalRecordImage.objects.filter(id=self.request.data.get('remove_image')).delete()
+
+
             # Create DiagnosticResults if we receive diagnostic data.
             for id in self.request.data.get('diagnostics', []):
                 diagnostic = Diagnostic.objects.get(id=id)
