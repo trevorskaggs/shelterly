@@ -82,9 +82,7 @@ function AnimalStatus(props) {
             </Tooltip>
           }
         >
-          <Button className="ml-1" onClick={() => subscribe()} style={{marginTop:"-8px", background:"#a72b46"}}>
-            <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse />
-          </Button>
+          <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse />
         </OverlayTrigger>
         : ""}
         {props.animal.pcolor || props.animal.scolor ? <span className="ml-1">({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>/</span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
