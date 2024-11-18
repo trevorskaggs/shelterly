@@ -300,10 +300,11 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         action.send(self.request.user, verb=f'changed animal status to {new_status}', target=animal)
                     new_shelter = animal_dict.get('shelter', None)
                     new_room = animal_dict.get('room', None)
+                    intake_date = animal.intake_date
                     if animal.shelter != new_shelter:
                         action.send(self.request.user, verb='sheltered animal', target=animal)
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
-                    intake_date = animal.intake_date if animal.intake_date else datetime.now()
+                        intake_date = animal.intake_date if animal.intake_date else datetime.now()
                     # Update shelter, room, and intake_date info.
                     Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date)
                     # Update animal found location with SR location if blank.
