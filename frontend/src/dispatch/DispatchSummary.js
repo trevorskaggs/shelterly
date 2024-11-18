@@ -279,10 +279,10 @@ function DispatchSummary({ id, incident, organization }) {
     <hr/>
     <Row className="mb-3">
       <Col>
-        <Card className="mt-1 border rounded" style={{minHeight:"313px", maxHeight:"313px"}}>
-          <Card.Body>
-            <div className="d-flex justify-content-between">
-              <h4 className="h5 mb-0 pb-0 pt-2">
+        <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          <Card.Body style={{marginTop:"-10px"}}>
+            <div className="d-flex justify-content-between" style={{marginBottom:"-10px"}}>
+              <h4 style={{paddingTop:"12px"}}>
                 {data.team_object ? data.team_object.name : "Preplanned"}
                 <OverlayTrigger
                   key={"edit-team-name"}

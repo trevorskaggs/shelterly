@@ -384,14 +384,14 @@ function AnimalDetails({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
                     Update Animal
                   </LoadingLink>
-                  {data.animal_count > 1 ?
+                  {data.animal_count > 1 && !data.medical_record && !data.active_dispatch ?
                     <LoadingLink disabled={true} onClick={() => setShowSplit(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faSplit} className="mr-1" style={{cursor:'pointer'}} inverse />
                       Split Animal Group
                     </LoadingLink>
                   : ""}
                   {data.status !== 'REUNITED' ?
-                    <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                    <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1" style={{marginLeft:"13px"}}>
                       <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
                       Reunite Animal
                     </LoadingLink>

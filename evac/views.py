@@ -3,6 +3,7 @@ from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.http import HttpResponse, JsonResponse
 import json
 import io
+from copy import deepcopy
 from wsgiref.util import FileWrapper
 from datetime import datetime, timedelta
 from rest_framework import filters, permissions, serializers, viewsets
@@ -249,24 +250,51 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 # sr_status = 'open' if service_request.get('unable_to_complete', '') else 'assigned'
                 for animal_dict in service_request['animals']:
-                    animals_dict[animal_dict["id"]] = {
-                        "id_for_incident": animal_dict.get("id_for_incident"),
-                        'animal_count':animal_dict["animal_count"],
-                        "name": animal_dict.get("name"),
-                        "species": animal_dict.get("species"),
-                        "status": animal_dict.get("status"),
-                        "color_notes": animal_dict.get("color_notes"),
-                        "pcolor": animal_dict.get("pcolor"),
-                        "scolor": animal_dict.get("scolor"),
-                        "shelter": animal_dict.get("shelter"),
-                        "room": animal_dict.get("room"),
-                        'animal_notes':animal_dict.get("animal_notes"),
-                        'aggressive':animal_dict.get("aggressive"),
-                        'aco_required':animal_dict.get("aco_required"),
-                        'injured':animal_dict.get("injured"),
-                    }
+                    id = animal_dict["id"]
+                    if id:
+                      Animal.objects.filter(id=id).update(animal_count=animal_dict.get("animal_count"))
+                      animals_dict[id] = {
+                          "id_for_incident": animal_dict.get("id_for_incident"),
+                          'animal_count':animal_dict.get("animal_count"),
+                          "name": animal_dict.get("name"),
+                          "species": animal_dict.get("species"),
+                          "status": animal_dict.get("status"),
+                          "color_notes": animal_dict.get("color_notes"),
+                          "pcolor": animal_dict.get("pcolor"),
+                          "scolor": animal_dict.get("scolor"),
+                          "shelter": animal_dict.get("shelter"),
+                          "room": animal_dict.get("room"),
+                          'animal_notes':animal_dict.get("animal_notes"),
+                          'aggressive':animal_dict.get("aggressive"),
+                          'aco_required':animal_dict.get("aco_required"),
+                          'injured':animal_dict.get("injured"),
+                      }
+                    else:
+                        with transaction.atomic():
+                            new_animal = deepcopy(Animal.objects.get(id=animal_dict["original_id"]))
+                            new_animal.id = None
+                            new_animal.medical_record = None
+                            new_animal.animal_count = animal_dict["animal_count"]
+                            new_animal.save()
+                            id = new_animal.id
+                            animals_dict[id] = {
+                                "id_for_incident":new_animal.id_for_incident,
+                                'animal_count':animal_dict["animal_count"],
+                                "name":animal_dict.get("name"),
+                                "species":animal_dict.get("species"),
+                                "status":animal_dict.get("status"),
+                                "color_notes":animal_dict.get("color_notes"),
+                                "pcolor":animal_dict.get("pcolor"),
+                                "scolor":animal_dict.get("scolor"),
+                                "shelter":animal_dict.get("shelter"),
+                                "room":animal_dict.get("room"),
+                                'animal_notes':animal_dict.get("animal_notes"),
+                                'aggressive':animal_dict.get("aggressive"),
+                                'aco_required':animal_dict.get("aco_required"),
+                                'injured':animal_dict.get("injured"),
+                            }
                     # Record status change if applicable.
-                    animal = Animal.objects.get(pk=animal_dict['id'])
+                    animal = Animal.objects.get(pk=id)
                     new_status = animal_dict.get('status')
                     if animal.status != new_status:
                         action.send(self.request.user, verb=f'changed animal status to {new_status}', target=animal)
@@ -277,10 +305,10 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
                     intake_date = animal.intake_date if animal.intake_date else datetime.now()
                     # Update shelter, room, and intake_date info.
-                    Animal.objects.filter(id=animal_dict['id']).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date)
+                    Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date)
                     # Update animal found location with SR location if blank.
                     if not animal.address:
-                        Animal.objects.filter(id=animal_dict['id']).update(address=service_requests[0].address, city=service_requests[0].city, state=service_requests[0].state, zip_code=service_requests[0].zip_code, latitude=service_requests[0].latitude, longitude=service_requests[0].longitude)
+                        Animal.objects.filter(id=id).update(address=service_requests[0].address, city=service_requests[0].city, state=service_requests[0].state, zip_code=service_requests[0].zip_code, latitude=service_requests[0].latitude, longitude=service_requests[0].longitude)
 
                 # Update the relevant SR fields.
                 assigned_request = AssignedRequest.objects.get(service_request=service_request['id'], dispatch_assignment=evac_assignment.id)

@@ -261,16 +261,16 @@ export const countMatches = (animals) => {
   animals.forEach((animal) => {
     if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
       if (!matches[[animal.species_string]]) {
-        matches[[animal.species_string]] = animal.animal_count;
+        matches[[animal.species_string]] = Number(animal.animal_count);
       }
       else {
-        matches[[animal.species_string]] += animal.animal_count;
+        matches[[animal.species_string]] += Number(animal.animal_count);
       }
       if (!status_matches[animal.status][[animal.species_string]]) {
-        status_matches[animal.status][[animal.species_string]] = animal.animal_count;
+        status_matches[animal.status][[animal.species_string]] = Number(animal.animal_count);
       }
       else {
-        status_matches[animal.status][[animal.species_string]] += animal.animal_count;
+        status_matches[animal.status][[animal.species_string]] += Number(animal.animal_count);
       }
     }
   });
@@ -285,17 +285,17 @@ export const countDictMatches = (animals, status=false) => {
   Object.keys(animals).forEach((animal) => {
     if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE', 'SHELTERED'].indexOf(animals[animal].status) > -1) {
       if (!matches[[animals[animal].species]]) {
-        matches[[animals[animal].species]] = animals[animal].animal_count || 1;
+        matches[[animals[animal].species]] = Number(animals[animal].animal_count) || 1;
       }
       else {
-        matches[[animals[animal].species]] += animals[animal].animal_count || 1;
+        matches[[animals[animal].species]] += Number(animals[animal].animal_count) || 1;
       }
       if (status) {
         if (!status_matches[animals[animal].status][[animals[animal].species]]) {
-          status_matches[animals[animal].status][[animals[animal].species]] = animals[animal].animal_count || 1;
+          status_matches[animals[animal].status][[animals[animal].species]] = Number(animals[animal].animal_count) || 1;
         }
         else {
-          status_matches[animals[animal].status][[animals[animal].species]] += animals[animal].animal_count || 1;
+          status_matches[animals[animal].status][[animals[animal].species]] += Number(animals[animal].animal_count) || 1;
         }
       }
     }
