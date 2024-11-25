@@ -179,8 +179,10 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
 
 
     def perform_destroy(self, instance):
-        if self.request.user.is_superuser or self.request.user.perms.filter(organization=self.request.GET.get('organization')[0])[0].user_perms:
-            instance.organizations.remove(Organization.objects.get(id=self.request.GET.get('organization')[0]))
+        org_id = self.request.GET.get('organization')
+        perms = self.request.user.perms.get(organization=org_id)
+        if self.request.user.is_superuser or perms.user_perms:
+            instance.organizations.remove(Organization.objects.get(id=org_id))
             # instance.delete()
 
 
