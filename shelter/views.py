@@ -84,7 +84,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
 class BuildingViewSet(viewsets.ModelViewSet):
     # add permissions
     queryset = Building.objects.all()
-    serializer_class = SimpleBuildingSerializer
+    # serializer_class = SimpleBuildingSerializer
     permission_classes = [permissions.IsAuthenticated, ]
 
     def get_serializer_class(self):

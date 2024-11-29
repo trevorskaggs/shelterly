@@ -73,7 +73,7 @@ class RoomSerializer(SimpleRoomSerializer):
 
 class SimpleBuildingSerializer(serializers.ModelSerializer):
     shelter_name = serializers.StringRelatedField(source='shelter')
-    # rooms = SimpleRoomSerializer(source='room_set', many=True, required=False, read_only=True)
+    rooms = SimpleRoomSerializer(source='room_set', many=True, required=False, read_only=True)
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
@@ -108,7 +108,7 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
 
 class ModestShelterSerializer(SimpleShelterSerializer):
     
-    # buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
+    buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
     # animal_count = serializers.IntegerField(required=False)
     animal_count = serializers.SerializerMethodField()
 
