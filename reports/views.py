@@ -25,7 +25,7 @@ class ReportViewSet(viewsets.ViewSet):
         shelter_intake_report = []
         delta = datetime.timedelta(days=1)
 
-        animals = Animal.objects.select_related('incident').select_related('species').select_related('species__category').prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=incident_slug).distinct()
+        animals = Animal.objects.select_related('incident').select_related('species').select_related('species__category').prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=incident_slug)
         animal_categories = [sc.replace('/', '').replace(' ', '_') for sc in SpeciesCategory.objects.all().values_list('name', flat=True)]
 
         while end_date >= start_date:
@@ -76,7 +76,7 @@ class ReportViewSet(viewsets.ViewSet):
           total=Sum("animal__animal_count", filter=Q(animal__status='SHELTERED', animal__incident__slug=incident_slug))).values('name', 'avians', 'cats', 'dogs', 'camelids', 'equines', 'ruminants', 'small_mammals', 'others', 'total').order_by('name')
         # Turn queryset into list so we can append a total row to it.
         animals_status = []
-        for row in list(animals.values('species__category__name').annotate(reported=Coalesce(Sum("animal_count", filter=Q(status='REPORTED'), distinct=True), 0), reported_evac=Coalesce(Sum("animal_count", filter=Q(status='REPORTED (EVAC REQUESTED)'), distinct=True), 0), reported_sip=Coalesce(Sum("animal_count", filter=Q(status='REPORTED (SIP REQUESTED)'), distinct=True), 0), utl=Coalesce(Sum("animal_count", filter=Q(status='UNABLE TO LOCATE'), distinct=True), 0), nfa=Coalesce(Sum("animal_count", filter=Q(status='NO FURTHER ACTION'), distinct=True), 0), sheltered=Coalesce(Sum("animal_count", filter=Q(status='SHELTERED'), distinct=True), 0), sip=Coalesce(Sum("animal_count", filter=Q(status='SHELTERED IN PLACE'), distinct=True), 0), reunited=Coalesce(Sum("animal_count", filter=Q(status='REUNITED'), distinct=True), 0), deceased=Coalesce(Sum("animal_count", filter=Q(status='DECEASED'), distinct=True), 0)).order_by('species__category__name')):
+        for row in list(animals.values('species__category__name').annotate(reported=Coalesce(Sum("animal_count", filter=Q(status='REPORTED')), 0), reported_evac=Coalesce(Sum("animal_count", filter=Q(status='REPORTED (EVAC REQUESTED)')), 0), reported_sip=Coalesce(Sum("animal_count", filter=Q(status='REPORTED (SIP REQUESTED)')), 0), utl=Coalesce(Sum("animal_count", filter=Q(status='UNABLE TO LOCATE')), 0), nfa=Coalesce(Sum("animal_count", filter=Q(status='NO FURTHER ACTION')), 0), sheltered=Coalesce(Sum("animal_count", filter=Q(status='SHELTERED')), 0), sip=Coalesce(Sum("animal_count", filter=Q(status='SHELTERED IN PLACE')), 0), reunited=Coalesce(Sum("animal_count", filter=Q(status='REUNITED')), 0), deceased=Coalesce(Sum("animal_count", filter=Q(status='DECEASED')), 0)).order_by('species__category__name')):
             row['last'] = False
             animals_status.append(row)
         # Add total row
@@ -84,7 +84,7 @@ class ReportViewSet(viewsets.ViewSet):
 
         # Turn queryset into list so we can append a total row to it.
         animals_ownership = []
-        for row in list(animals.values('species__category__name').annotate(owned=Coalesce(Sum("animal_count", filter=Q(owners__isnull=False), distinct=True), 0), stray=Coalesce(Sum("animal_count", filter=Q(owners__isnull=True), distinct=True), 0)).order_by('species__category__name')):
+        for row in list(animals.values('species__category__name').annotate(owned=Coalesce(Sum("animal_count", filter=Q(owners__isnull=False)), 0), stray=Coalesce(Sum("animal_count", filter=Q(owners__isnull=True)), 0)).order_by('species__category__name')):
             row['last'] = False
             animals_ownership.append(row)
         animals_ownership.append({'species__category__name': 'total', 'owned':sum(v['owned'] for v in animals_ownership), 'stray':sum(v['stray'] for v in animals_ownership), 'last':True})

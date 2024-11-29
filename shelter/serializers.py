@@ -73,9 +73,7 @@ class RoomSerializer(SimpleRoomSerializer):
 
 class SimpleBuildingSerializer(serializers.ModelSerializer):
     shelter_name = serializers.StringRelatedField(source='shelter')
-    rooms = SimpleRoomSerializer(source='room_set', many=True, required=False, read_only=True)
-    action_history = serializers.SerializerMethodField()
-
+    # rooms = SimpleRoomSerializer(source='room_set', many=True, required=False, read_only=True)
 
     def get_action_history(self, obj):
         return [build_action_string(action) for action in obj.target_actions.all()]
@@ -88,6 +86,7 @@ class SimpleBuildingSerializer(serializers.ModelSerializer):
 class BuildingSerializer(SimpleBuildingSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     rooms = RoomSerializer(source='room_set', many=True, required=False, read_only=True)
+    action_history = serializers.SerializerMethodField()
 
 
 class SimpleShelterSerializer(serializers.ModelSerializer):
@@ -109,25 +108,31 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
 
 class ModestShelterSerializer(SimpleShelterSerializer):
     
-    buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
-    animal_count = serializers.IntegerField(required=False)
-    room_count = serializers.IntegerField(required=False)
-    unroomed_animals = serializers.SerializerMethodField()
+    # buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
+    # animal_count = serializers.IntegerField(required=False)
+    animal_count = serializers.SerializerMethodField()
 
-    # Custom field for unroomed animals.
-    def get_unroomed_animals(self, obj):
-        from animals.serializers import ModestAnimalSerializer
-        if hasattr(obj, 'unroomed_animals'):
-            return ModestAnimalSerializer(obj.unroomed_animals, many=True).data
-        else:
-            return ModestAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True, required=False, read_only=True).data
+    def get_animal_count(self, obj):
+        count = 0
+        for animal in obj.animal_set.all():
+            count = count + animal.animal_count
+        return count
 
 
 class ShelterSerializer(ModestShelterSerializer):
     #Single obj serializer
     buildings = BuildingSerializer(source='building_set', many=True, required=False, read_only=True)
     intake_summaries = serializers.SerializerMethodField()#SimpleIntakeSummarySerializer(obj.intakesummary_set.distinct(), many=True, required=False, read_only=True)
+    unroomed_animals = serializers.SerializerMethodField()
     # action_history = serializers.SerializerMethodField()
+
+    # Custom field for unroomed animals.
+    def get_unroomed_animals(self, obj):
+        from animals.serializers import SimpleAnimalSerializer
+        if hasattr(obj, 'unroomed_animals'):
+            return SimpleAnimalSerializer(obj.unroomed_animals, many=True).data
+        else:
+            return SimpleAnimalSerializer(obj.animal_set.filter(room=None).exclude(status='CANCELED'), many=True, required=False, read_only=True).data
 
     def get_intake_summaries(self, obj):
         return SimpleIntakeSummarySerializer(obj.intakesummary_set.all().distinct(), many=True, required=False, read_only=True).data

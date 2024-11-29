@@ -28,7 +28,7 @@ function AnimalRoomAssignmentCard(props) {
           <div style={{width:"157px"}}>
             #{props.animal.id_for_incident}&nbsp;
             {props.animal.animal_count > 1 ? "" : <span style={{ textTransform:"capitalize" }}>{props.animal.species_string}&nbsp;</span>}
-            {props.animal.owner_names.length === 0 ?
+            {/* {props.animal.owner_names.length === 0 ?
             <OverlayTrigger
               key={"stray"}
               placement="top"
@@ -53,7 +53,7 @@ function AnimalRoomAssignmentCard(props) {
               }
             >
               <FontAwesomeIcon icon={faUserAlt} size="sm" />
-            </OverlayTrigger>}
+            </OverlayTrigger>} */}
           </div>
         </div>
       </div>

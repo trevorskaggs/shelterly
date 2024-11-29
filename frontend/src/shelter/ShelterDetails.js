@@ -35,7 +35,6 @@ function ShelterDetails({ id, incident, organization }) {
     unroomed_animals: [],
     intake_summaries: [],
     animal_count: 0,
-    room_count: 0,
   });
 
   useEffect(() => {
@@ -58,7 +57,7 @@ function ShelterDetails({ id, incident, organization }) {
           response.data.unroomed_animals.forEach(unroomed_animal => {
             count = count + unroomed_animal.animal_count;
           });
-          response.data['unroomed_count'] = count
+          response.data['unroomed_count'] = count;
           setData(response.data);
         }
       })

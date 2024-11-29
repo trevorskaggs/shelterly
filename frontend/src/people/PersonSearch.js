@@ -12,6 +12,7 @@ import {
 } from '@fortawesome/free-regular-svg-icons';
 import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
+import { titleCase } from '../components/Utils';
 import Scrollbar from '../components/Scrollbars';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { ITEMS_PER_PAGE } from '../constants';
@@ -286,7 +287,7 @@ function PersonSearch({ incident, organization }) {
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   {owner.animals.filter(animal => animal.species_string === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
-                      <b>#{animal.id}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                      <b><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>#{animal.id}</Link>:</b>&nbsp;&nbsp;{Number(animal.animal_count) === 1 ? <span>{animal.name || "Unknown"}</span> : <span>{animal.animal_count} {titleCase(animal.species_string)}{["cattle", "sheep"].includes(animal.species_string) ? "" : "s"}</span>}
                       {animal.color_notes ?
                       <OverlayTrigger
                         key={"animal-color-notes"}

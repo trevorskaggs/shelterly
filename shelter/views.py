@@ -6,7 +6,7 @@ from actstream.models import Action
 from django_filters import rest_framework as filters
 from django.db.models import Count, Prefetch, Q, Sum
 from rest_framework import permissions
-from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer, IntakeSummarySerializer
+from .serializers import ShelterSerializer, ModestShelterSerializer, BuildingSerializer, SimpleBuildingSerializer, RoomSerializer, IntakeSummarySerializer
 from animals.models import Animal
 from incident.models import Incident, Organization
 from vet.models import MedicalRecord, VetRequest
@@ -41,14 +41,13 @@ class ShelterViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('training'):
             queryset = queryset.filter(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')
         queryset = (queryset
-            .annotate(room_count=Count("building__room"))
-            .annotate(
-                animal_count=Sum(
-                    "animal__animal_count",
-                    filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')),
-                    distinct=True
-                )
-            )
+            # .annotate(
+            #     animal_count=Sum(
+            #         "animal__animal_count",
+            #         filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')),
+            #         distinct=True
+            #     )
+            # )
             .prefetch_related(
                         Prefetch(
                             "intakesummary_set",
@@ -87,6 +86,11 @@ class BuildingViewSet(viewsets.ModelViewSet):
     queryset = Building.objects.all()
     serializer_class = SimpleBuildingSerializer
     permission_classes = [permissions.IsAuthenticated, ]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return SimpleBuildingSerializer
+        return BuildingSerializer
 
     def perform_create(self, serializer):
         if serializer.is_valid():

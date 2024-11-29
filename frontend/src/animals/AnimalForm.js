@@ -117,6 +117,7 @@ const AnimalForm = (props) => {
     animal_count: 1,
     room: null,
     shelter: props.state.shelter || null,
+    medical_record: null,
     front_image: null,
     front_image_data_url: '',
     side_image: null,
@@ -178,7 +179,6 @@ const AnimalForm = (props) => {
 
   // Initial Animal data.
   const [data, setData] = useState(current_data);
-  const [shelters, setShelters] = useState({options: [], shelters: [], room_options: {}, isFetching: false});
   const [species, setSpecies] = useState({options: []});
 
   const wrapperSetFrontImage = useCallback(val => {
@@ -265,39 +265,6 @@ const AnimalForm = (props) => {
       };
       fetchAnimalData();
     }
-
-    const fetchShelters = () => {
-      setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
-      // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + props.incident + '&organization=' + props.organization +'&training=' + (state && state.incident.training), {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          let room_options = {};
-          response.data.forEach(shelter => {
-            // Build shelter option list.
-            options.push({value: shelter.id, label: shelter.name});
-            room_options[shelter.id] = [];
-            shelter.buildings.forEach(building => {
-              building.rooms.forEach(room => {
-                // Build room option list identified by shelter ID.
-                room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
-              });
-            });
-          });
-          setShelters({options: options, shelters:response.data, room_options:room_options, isFetching:false});
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShelters({options: [], shelters: [], room_options: {}, isFetching: false});
-          setShowSystemError(true);
-        }
-      });
-    };
-    fetchShelters();
 
     const fetchPresentingComplaints = async () => {
       // Fetch assignee data.
@@ -915,6 +882,7 @@ const AnimalForm = (props) => {
                     type="text"
                     xs="2"
                     label="No. of Animals"
+                    disabled={data.medical_record ? true : false}
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}

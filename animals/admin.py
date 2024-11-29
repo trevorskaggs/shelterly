@@ -5,7 +5,7 @@ from django.utils.html import escape, mark_safe
 from animals.models import Animal, AnimalImage, Species, SpeciesCategory
 
 class AnimalAdmin(admin.ModelAdmin):
-  list_display = ('id', 'id_for_incident', 'name', 'animal_count', 'status', 'species', 'size')
+  list_display = ('id', 'id_for_incident', 'animal_count', 'species', 'status', 'name')
 
 class SpeciesAdmin(admin.ModelAdmin):
   list_display = ('id', 'name', 'category')

@@ -26,7 +26,7 @@ class SimpleAnimalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'id_for_incident', 'animal_count', 'species', 'species_string', 'category', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes', 'animal_count']
+        fields = ['id', 'id_for_incident', 'animal_count', 'species', 'species_string', 'category', 'aggressive', 'confined', 'injured', 'status', 'aco_required', 'name', 'sex', 'fixed', 'size', 'age', 'pcolor', 'scolor', 'last_seen', 'color_notes', 'behavior_notes', 'medical_notes']
 
 class ModestAnimalSerializer(SimpleAnimalSerializer):
     front_image = serializers.SerializerMethodField()
