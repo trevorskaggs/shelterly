@@ -53,6 +53,7 @@ import DiagnosticCard from './components/DiagnosticCard';
 import ProcedureCard from './components/ProcedureCard';
 import ActionsDropdown from '../components/ActionsDropdown';
 import LoadingLink from '../components/LoadingLink';
+import PhotoDocuments from '../components/PhotoDocuments';
 
 function MedicalRecordDetails({ id, incident, organization }) {
 
@@ -67,7 +68,7 @@ function MedicalRecordDetails({ id, incident, organization }) {
 
   const priorityText = {urgent:'Urgent (Red)', when_available:'When Available (Yellow)'};
 
-  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], pending:[], open: '', diagnosis: '', other_diagnosis:'', medical_plan:'', medical_notes:[], treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
+  const [data, setData] = useState({id:'', exams:[], diagnostic_objects:[], procedure_objects:[], patient:null, vet_requests:[], pending:[], open: '', images: [], diagnosis: '', other_diagnosis:'', medical_plan:'', medical_notes:[], treatment_requests:[], animal_object: {id:'', name:'', species:'', category:'', sex:'', age:'', fixed:'', pcolor:'', scolor:'', medical_notes:'', shelter_object:{}, room_name:''}});
   const [showExam, setShowExam] = useState(false);
   const [activeVR, setActiveVR] = useState(null);
   const [activeExam, setActiveExam] = useState(null);
@@ -499,7 +500,9 @@ function MedicalRecordDetails({ id, incident, organization }) {
           </ListGroup>
         </Card.Body>
       </Card>
-    </div> : ""}
+    </div>
+     : ""}
+    <PhotoDocuments setData={setData} data={data} id={id} object="medical record" url={'/vet/api/medrecord/' + data.id + '/?incident=' + incident} />
     {data.exams.length > 0 && data.medical_notes.length > 0 ?
     <div className="d-flex pl-0 mb-3">
       <Card className="border rounded d-flex" style={{width:"100%"}}>

@@ -5,6 +5,7 @@ from django.db.models import Q
 from datetime import datetime
 
 from animals.models import Animal
+from vet.managers import MedicalRecordQueryset
 
 User = get_user_model()
 
@@ -73,6 +74,14 @@ class MedicalRecord(models.Model):
     diagnosis_notes = models.CharField(max_length=300, blank=True, null=True)
     medical_status = models.CharField(max_length=20, default='Healthy')
     medical_plan = models.TextField(blank=True, null=True)
+
+    objects = MedicalRecordQueryset.as_manager()
+
+class MedicalRecordImage(models.Model):
+
+    image = models.ImageField(upload_to='images/')
+    name = models.CharField(max_length=25, blank=True)
+    medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
 
 
 class MedicalNote(models.Model):

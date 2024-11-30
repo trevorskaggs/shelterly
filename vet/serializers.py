@@ -209,12 +209,25 @@ class MedicalRecordSerializer(serializers.ModelSerializer):
     vet_requests = SimpleVetRequestSerializer(source='vetrequest_set', required=False, read_only=True, many=True)
     medical_notes = MedicalNoteSerializer(source='medicalnote_set', required=False, read_only=True, many=True)
     diagnosis_text = serializers.SerializerMethodField()
+    images = serializers.SerializerMethodField()
 
     def get_diagnosis_text(self, obj):
         diagnosis = obj.diagnosis.all().values_list('name', flat=True)
         if obj.diagnosis_other:
             list(diagnosis).insert(0, obj.diagnosis_other)
         return ', '.join(diagnosis)
+
+    def get_images(self, obj):
+        try:
+            return [{'id':mr_image.id, 'url':mr_image.image.url, 'name':mr_image.name} for mr_image in obj.images]
+        except IndexError:
+            return []
+        except AttributeError:
+            # Should only hit this when returning a single object after create.
+            try:
+                return [{'id':mr_image.id, 'url':mr_image.image.url, 'name':mr_image.name} for mr_image in obj.medicalrecordimage_set.all()]
+            except AttributeError:
+                return []
 
     class Meta:
         model = MedicalRecord
