@@ -102,8 +102,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 treatment_requests = treatment_requests.concat([tr]);
               }
           });
-          pending_data = pending_data.concat(response.data.diagnostic_objects.map(diagnostic => ({...diagnostic, type:'diagnostic'})));
-          pending_data = pending_data.concat(response.data.procedure_objects.map(procedure => ({...procedure, type:'procedure'})));
+          pending_data = pending_data.concat(response.data.diagnostic_objects.filter(item => item.status !== 'Completed').map(diagnostic => ({...diagnostic, type:'diagnostic'})));
+          pending_data = pending_data.concat(response.data.procedure_objects.filter(item => item.status !== 'Completed').map(procedure => ({...procedure, type:'procedure'})));
           response.data['pending'] = pending_data;
           response.data['treatment_requests'] = treatment_requests;
 
