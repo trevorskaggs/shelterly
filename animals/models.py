@@ -42,7 +42,6 @@ class Animal(Location, OrderedModel):
     room = models.ForeignKey(Room, on_delete=models.SET_NULL, blank=True, null=True)
     shelter = models.ForeignKey(Shelter, on_delete=models.SET_NULL, blank=True, null=True)
     medical_record = models.OneToOneField('vet.MedicalRecord', on_delete=models.DO_NOTHING, related_name='patient', null=True, blank=True)
-
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
 
     #choice fields
@@ -69,6 +68,7 @@ class Animal(Location, OrderedModel):
     last_seen = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     intake_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     microchip = models.CharField(max_length=50, blank=True)
+    animal_count = models.IntegerField(default=1)
 
     order_with_respect_to = 'room'
     objects = AnimalQueryset.as_manager()

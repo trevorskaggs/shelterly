@@ -69,7 +69,7 @@ const PersonForm = (props) => {
       .then(response => {
         // If SR already exists, redirect to the SR details.
         if (servicerequest_id) {
-          navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
+          navigate('/' + props.organization + incident + '/hotline/servicerequest/' + response.data.requests.filter(request => request.id === servicerequest_id)[0].id_for_incident);
         }
         // If adding from an animal, redirect to the Animal details.
         else if (animal_id) {
@@ -299,7 +299,7 @@ const PersonForm = (props) => {
             .then(response => {
               // If SR already exists, redirect to the SR details.
               if (servicerequest_id) {
-                navigate('/' + props.organization + incident + '/hotline/servicerequest/' + servicerequest_id);
+                navigate('/' + props.organization + incident + '/hotline/servicerequest/' + response.data.requests.filter(request => Number(request.id) === Number(servicerequest_id))[0].id_for_incident);
               }
               // If adding from an animal, redirect to the Animal details.
               else if (animal_id) {

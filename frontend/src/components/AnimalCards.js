@@ -23,10 +23,11 @@ function AnimalCards(props) {
               width="153px"
             />
             <Card.ImgOverlay className="text-border" style={{height:"20px"}}>#{animal.id_for_incident}</Card.ImgOverlay>
-            <Card.Text className="mb-0 border-top animal-hover-div" style={{textTransform:"capitalize", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
-              <span title={animal.name} className="ml-1">{animal.name||"Unknown"}</span>
-              <span className="ml-1" style={{display:"block"}}>
-                {animal.species_string}&nbsp;
+            <Card.Text className="mb-0 border-top animal-hover-div" style={{whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis"}}>
+              {animal.animal_count > 1 ? <span title={animal.animal_count} className="ml-1" style={{textTransform:"capitalize"}}>{animal.animal_count} {animal.species_string}
+              {animal.animal_count > 1 && !["sheep", "cattle"].includes(animal.species_string) ? "s" : ""}</span> : <span title={animal.name} className="ml-1" style={{textTransform:"capitalize"}}>{animal.name||"Unknown"}</span>}
+              <span className="ml-1" style={{display:"block", textTransform:"capitalize"}}>
+                {Number(animal.animal_count) === 1 ? <span>{animal.species_string}&nbsp;</span> : ""}
                 {props.show_owner ? <span>
                 {animal.owner_names.length === 0 ?
                 <OverlayTrigger
@@ -38,7 +39,7 @@ function AnimalCards(props) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faUserAltSlash} size="sm" />
+                  <FontAwesomeIcon icon={faUserAltSlash} className="mr-1" size="sm" />
                 </OverlayTrigger> :
                 <OverlayTrigger
                   key={"owners"}
@@ -52,7 +53,7 @@ function AnimalCards(props) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faUserAlt} size="sm" />
+                  <FontAwesomeIcon icon={faUserAlt} className="mr-1" size="sm" />
                 </OverlayTrigger>}
                 </span> : ""}
                 {animal.medical_record ?
@@ -65,7 +66,7 @@ function AnimalCards(props) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faClipboardMedical} className="ml-1" size="sm" />
+                  <FontAwesomeIcon icon={faClipboardMedical} className="" />
                 </OverlayTrigger> : ""}
                 {props.show_status ?
                 <span>

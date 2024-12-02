@@ -48,7 +48,6 @@ const buildOwnersContent = (pdf, owners, organization, animalsOverride) => {
     }
 
     if (owner.requests){
-      console.log(owner.requests);
       ownerInfoList.push('Service Requests:');
       owner.requests.forEach((request, i) => {
         ownerInfoList.push(`SR#${request.id_for_incident} - ${request.full_address}`)

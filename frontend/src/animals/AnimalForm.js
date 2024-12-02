@@ -114,9 +114,10 @@ const AnimalForm = (props) => {
     caution: false,
     last_seen: null,
     microchip: '',
-    number_of_animals: 1,
+    animal_count: 1,
     room: null,
     shelter: props.state.shelter || null,
+    medical_record: null,
     front_image: null,
     front_image_data_url: '',
     side_image: null,
@@ -178,7 +179,6 @@ const AnimalForm = (props) => {
 
   // Initial Animal data.
   const [data, setData] = useState(current_data);
-  const [shelters, setShelters] = useState({options: [], shelters: [], room_options: {}, isFetching: false});
   const [species, setSpecies] = useState({options: []});
 
   const wrapperSetFrontImage = useCallback(val => {
@@ -249,8 +249,6 @@ const AnimalForm = (props) => {
         })
         .then(response => {
           if (!unmounted) {
-            // Initialize number_of_animals because it's not returned by the serializer.
-            response.data['number_of_animals'] = 1;
             response.data['presenting_complaints'] = [];
             response.data['priority'] = 'green';
             setData(response.data);
@@ -267,39 +265,6 @@ const AnimalForm = (props) => {
       };
       fetchAnimalData();
     }
-
-    const fetchShelters = () => {
-      setShelters({options: [], shelters: [], room_options: {}, isFetching: true});
-      // Fetch Shelter data.
-      axios.get('/shelter/api/shelter/?incident=' + props.incident + '&organization=' + props.organization +'&training=' + (state && state.incident.training), {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          let options = [];
-          let room_options = {};
-          response.data.forEach(shelter => {
-            // Build shelter option list.
-            options.push({value: shelter.id, label: shelter.name});
-            room_options[shelter.id] = [];
-            shelter.buildings.forEach(building => {
-              building.rooms.forEach(room => {
-                // Build room option list identified by shelter ID.
-                room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
-              });
-            });
-          });
-          setShelters({options: options, shelters:response.data, room_options:room_options, isFetching:false});
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShelters({options: [], shelters: [], room_options: {}, isFetching: false});
-          setShowSystemError(true);
-        }
-      });
-    };
-    fetchShelters();
 
     const fetchPresentingComplaints = async () => {
       // Fetch assignee data.
@@ -349,7 +314,7 @@ const AnimalForm = (props) => {
             .max(10, 'Must be 10 characters or less'),
           sex: Yup.string()
             .oneOf(['M', 'F']),
-          number_of_animals: Yup.number().required('Required').positive('Value must be positive').integer('Value must be a whole number'),
+          animal_count: Yup.number().required('Required').positive('Value must be positive').integer('Value must be a whole number'),
           pcolor: Yup.string(),
           scolor: Yup.string(),
           color_notes: Yup.string()
@@ -511,11 +476,17 @@ const AnimalForm = (props) => {
                 });
               }
 
+              let count = values.animal_count;
+              props.state.steps.animals.forEach(animal => {
+                count = Number(count) + Number(animal.get("animal_count"));
+              });
+
               // Create Intake Summary
               let intakeSummaryResponse = [{data:{id:null}}];
               values['shelter'] = shelter_id;
               values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
               values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
+              values['animal_count'] = count;
               intakeSummaryResponse = await Promise.all([
                 axios.post('/shelter/api/intakesummary/', values)
               ])
@@ -524,7 +495,7 @@ const AnimalForm = (props) => {
                 setShowSystemError(true);
                 setRedirectCheck(true);
               });
-              
+
               // Create previous animals
               let promises = [];
               props.state.steps.animals.forEach(animal => {
@@ -904,13 +875,14 @@ const AnimalForm = (props) => {
                     xs="6"
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row hidden={id} style={{marginBottom:is_intake ? "" : "-15px"}}>
+                <BootstrapForm.Row>
                   <TextInput
-                    id="number_of_animals"
-                    name="number_of_animals"
+                    id="animal_count"
+                    name="animal_count"
                     type="text"
                     xs="2"
-                    label="No. of Copies"
+                    label="No. of Animals"
+                    disabled={data.medical_record ? true : false}
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}

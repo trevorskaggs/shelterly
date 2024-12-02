@@ -12,7 +12,7 @@ import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
 import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
-import { AddressLookup } from '../components/Map';
+import { AddressLookup, countMatches } from '../components/Map';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
 
@@ -55,21 +55,6 @@ function Hotline({ incident, organization }) {
       .finally(() => setIsSubscribed(!isSubscribed));
   }
 
-  // Counts the number of species matches for a service request.
-  const countMatches = (service_request) => {
-    let species_matches = {};
-
-    service_request.animals.forEach((animal) => {
-      if (!species_matches[[animal.species_string]]) {
-        species_matches[[animal.species_string]] = 1;
-      }
-      else {
-        species_matches[[animal.species_string]] += 1;
-      }
-    });
-    return species_matches
-  }
-
   // Hook for initializing data.
   useEffect(() => {
     let unmounted = false;
@@ -90,7 +75,7 @@ function Hotline({ incident, organization }) {
           const map_dict = {};
           const bounds = [];
           for (const service_request of response.data) {
-            const matches = countMatches(service_request);
+            const matches = countMatches(service_request.animals)[0];
             map_dict[service_request.id] = {matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
             bounds.push([service_request.latitude, service_request.longitude]);
           }

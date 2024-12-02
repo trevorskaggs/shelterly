@@ -254,41 +254,55 @@ export const finishedMarkerIcon = new L.DivIcon({
 });
 
 // Counts the number of size/species matches for a service request by status.
-export const countMatches = (service_request) => {
+export const countMatches = (animals) => {
   var matches = {};
   var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
 
-  service_request.animals.forEach((animal) => {
+  animals.forEach((animal) => {
     if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal.status) > -1) {
       if (!matches[[animal.species_string]]) {
-        matches[[animal.species_string]] = 1;
+        matches[[animal.species_string]] = Number(animal.animal_count);
       }
       else {
-        matches[[animal.species_string]] += 1;
+        matches[[animal.species_string]] += Number(animal.animal_count);
       }
       if (!status_matches[animal.status][[animal.species_string]]) {
-        status_matches[animal.status][[animal.species_string]] = 1;
+        status_matches[animal.status][[animal.species_string]] = Number(animal.animal_count);
       }
       else {
-        status_matches[animal.status][[animal.species_string]] += 1;
+        status_matches[animal.status][[animal.species_string]] += Number(animal.animal_count);
       }
     }
   });
   return [matches, status_matches]
 }
 
-// Counts the number of species matches for a assigned request.
-export const countDictMatches = (animals) => {
+// Counts the number of species matches for an assigned request.
+export const countDictMatches = (animals, status=false) => {
   var matches = {};
+  var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}, 'SHELTERED':{}};
 
   Object.keys(animals).forEach((animal) => {
-    if (!matches[[animals[animal].species]]) {
-      matches[[animals[animal].species]] = 1;
-    }
-    else {
-      matches[[animals[animal].species]] += 1;
+    if (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE', 'SHELTERED'].indexOf(animals[animal].status) > -1) {
+      if (!matches[[animals[animal].species]]) {
+        matches[[animals[animal].species]] = Number(animals[animal].animal_count) || 1;
+      }
+      else {
+        matches[[animals[animal].species]] += Number(animals[animal].animal_count) || 1;
+      }
+      if (status) {
+        if (!status_matches[animals[animal].status][[animals[animal].species]]) {
+          status_matches[animals[animal].status][[animals[animal].species]] = Number(animals[animal].animal_count) || 1;
+        }
+        else {
+          status_matches[animals[animal].status][[animals[animal].species]] += Number(animals[animal].animal_count) || 1;
+        }
+      }
     }
   });
+  if (status) {
+    return [matches, status_matches]
+  }
   return matches
 }
 
