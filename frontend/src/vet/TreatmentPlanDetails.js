@@ -9,6 +9,7 @@ import {
   faUserMd,
   faCheckSquare,
   faTimes,
+  faArrowAltCircleLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faSquareExclamation,
@@ -26,7 +27,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
 
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [data, setData] = useState({id: '', medical_record:null, animal_object:{name:'', id:''}, days:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
+  const [data, setData] = useState({id: '', medical_record: null, animal_object:{name:'', id:''}, days:'', frequency: '', quantity: '', unit: '', route: '', treatment_requests:[]});
   const [isLoading, setIsLoading] = useState(true);
 
   const [showModal, setShowModal] = useState(false);
@@ -69,6 +70,7 @@ function TreatmentPlanDetails({ id, incident, organization }) {
   return (
     <>
     <Header>
+      <span style={{cursor:'pointer'}} onClick={() => navigate("/" + organization + "/" + incident + "/vet/medrecord/" + data.medical_record + '?tab=treatments')} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
       Treatment Details
     </Header>
     <hr/>
