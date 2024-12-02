@@ -102,8 +102,8 @@ function MedicalRecordDetails({ id, incident, organization }) {
                 treatment_requests = treatment_requests.concat([tr]);
               }
           });
-          pending_data = pending_data.concat(response.data.diagnostic_objects.map(diagnostic => ({...diagnostic, type:'diagnostic'})));
-          pending_data = pending_data.concat(response.data.procedure_objects.map(procedure => ({...procedure, type:'procedure'})));
+          pending_data = pending_data.concat(response.data.diagnostic_objects.filter(item => item.status !== 'Completed').map(diagnostic => ({...diagnostic, type:'diagnostic'})));
+          pending_data = pending_data.concat(response.data.procedure_objects.filter(item => item.status !== 'Completed').map(procedure => ({...procedure, type:'procedure'})));
           response.data['pending'] = pending_data;
           response.data['treatment_requests'] = treatment_requests;
 
@@ -404,6 +404,44 @@ function MedicalRecordDetails({ id, incident, organization }) {
       </div>
     </div>
     {data.exams.length > 0 ?
+    <div className="row mt-3">
+      <div className="col-12 d-flex">
+        <Card className="border rounded d-flex" style={{width:"100%"}}>
+          <Card.Body style={{marginTop:"-10px"}}>
+            <div className="d-flex justify-content-between" style={{marginBottom:"-3px"}}>
+              <h4 className="h4 mb-0 pb-0 pt-2">
+                Diagnosis/Problem List
+              </h4>
+              <ActionsDropdown alignRight={true} className="pt-1" variant="dark" title="Actions">
+                  <LoadingLink
+                    href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}
+                    isLoading={isLoading}
+                    className="text-white d-block py-1 px-3"
+                  >
+                    <FontAwesomeIcon icon={faClipboardListCheck} className="mr-1" inverse />
+                    Update Diagnoses
+                  </LoadingLink>
+                </ActionsDropdown>
+            </div>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <ListGroup.Item>
+                <div className="row">
+                  <span><b>Diagnoses:</b> {data.diagnosis_text||"N/A"}</span>
+                </div>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <div className="row">
+                  <span><b>Notes:</b> {data.diagnosis_notes||"N/A"}</span>
+                </div>
+              </ListGroup.Item>
+            </ListGroup>
+          </Card.Body>
+        </Card>
+      </div>
+    </div>
+     : ""}
+    {data.exams.length > 0 ?
     <div className="row mt-3 mb-2">
       <div className="col-12 d-flex">
         <Card className="mb-2 border rounded" style={{width:"100%", height:"685px"}}>
@@ -466,42 +504,6 @@ function MedicalRecordDetails({ id, incident, organization }) {
         </Card>
       </div>
     </div> : ""}
-    {data.exams.length > 0 ?
-    <div className="d-flex pl-0 mb-3">
-      <Card className="border rounded d-flex" style={{width:"100%"}}>
-        <Card.Body style={{marginTop:"-10px"}}>
-          <div className="d-flex justify-content-between" style={{marginBottom:"-3px"}}>
-            <h4 className="h4 mb-0 pb-0 pt-2">
-              Diagnosis/Problem List
-            </h4>
-            <ActionsDropdown alignRight={true} className="pt-1" variant="dark" title="Actions">
-                <LoadingLink
-                  href={"/" + organization + "/" + incident + "/vet/medrecord/" + data.id + "/diagnosis/new"}
-                  isLoading={isLoading}
-                  className="text-white d-block py-1 px-3"
-                >
-                  <FontAwesomeIcon icon={faClipboardListCheck} className="mr-1" inverse />
-                  Update Diagnoses
-                </LoadingLink>
-              </ActionsDropdown>
-          </div>
-          <hr/>
-          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
-            <ListGroup.Item>
-              <div className="row">
-                <span><b>Diagnoses:</b> {data.diagnosis_text||"N/A"}</span>
-              </div>
-            </ListGroup.Item>
-            <ListGroup.Item>
-              <div className="row">
-                <span><b>Notes:</b> {data.diagnosis_notes||"N/A"}</span>
-              </div>
-            </ListGroup.Item>
-          </ListGroup>
-        </Card.Body>
-      </Card>
-    </div>
-     : ""}
     <PhotoDocuments setData={setData} data={data} id={id} object="medical record" url={'/vet/api/medrecord/' + data.id + '/?incident=' + incident} />
     {data.exams.length > 0 && data.medical_notes.length > 0 ?
     <div className="d-flex pl-0 mb-3">
