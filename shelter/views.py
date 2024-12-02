@@ -4,9 +4,9 @@ from rest_framework import viewsets
 from actstream import action
 from actstream.models import Action
 from django_filters import rest_framework as filters
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Count, Prefetch, Q, Sum
 from rest_framework import permissions
-from .serializers import ShelterSerializer, ModestShelterSerializer, SimpleBuildingSerializer, RoomSerializer, IntakeSummarySerializer
+from .serializers import ShelterSerializer, ModestShelterSerializer, BuildingSerializer, SimpleBuildingSerializer, RoomSerializer, IntakeSummarySerializer
 from animals.models import Animal
 from incident.models import Incident, Organization
 from vet.models import MedicalRecord, VetRequest
@@ -41,14 +41,13 @@ class ShelterViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('training'):
             queryset = queryset.filter(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')
         queryset = (queryset
-            .annotate(room_count=Count("building__room"))
-            .annotate(
-                animal_count=Count(
-                    "animal",
-                    filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')),
-                    distinct=True
-                )
-            )
+            # .annotate(
+            #     animal_count=Sum(
+            #         "animal__animal_count",
+            #         filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')),
+            #         distinct=True
+            #     )
+            # )
             .prefetch_related(
                         Prefetch(
                             "intakesummary_set",
@@ -60,16 +59,16 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     "building_set",
                     Building.objects.with_history()
                     .annotate(
-                        animal_count=Count(
-                            "room__animal", filter=~Q(room__animal__status="CANCELED")&Q(room__animal__incident__slug=self.request.GET.get('incident'))
+                        animal_count=Sum(
+                            "room__animal__animal_count", filter=~Q(room__animal__status="CANCELED")&Q(room__animal__incident__slug=self.request.GET.get('incident'))
                         )
                     ).order_by('name')
                     .prefetch_related(
                         Prefetch(
                             "room_set",
                             Room.objects.with_history().annotate(
-                                animal_count=Count(
-                                    "animal", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident'))
+                                animal_count=Sum(
+                                    "animal__animal_count", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident'))
                                 )
                             ).prefetch_related(Prefetch('animal_set',Animal.objects.with_images().prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=self.request.GET.get('incident')), to_attr='animals')).order_by('name')
                         )
@@ -85,8 +84,13 @@ class ShelterViewSet(viewsets.ModelViewSet):
 class BuildingViewSet(viewsets.ModelViewSet):
     # add permissions
     queryset = Building.objects.all()
-    serializer_class = SimpleBuildingSerializer
+    # serializer_class = SimpleBuildingSerializer
     permission_classes = [permissions.IsAuthenticated, ]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return SimpleBuildingSerializer
+        return BuildingSerializer
 
     def perform_create(self, serializer):
         if serializer.is_valid():
@@ -104,7 +108,7 @@ class BuildingViewSet(viewsets.ModelViewSet):
                 "room_set",
                 Room.objects
                 .annotate(
-                    animal_count=Count("animal", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')))
+                    animal_count=Sum("animal__animal_count", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')))
                 ).order_by('name')
             )
         )
@@ -141,6 +145,9 @@ class RoomViewSet(viewsets.ModelViewSet):
                     to_attr="animals",
                 )
             )
+            .annotate(
+                animal_count=Sum("animal__animal_count", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')))
+            )
         )
 
 class IntakeSummaryViewSet(viewsets.ModelViewSet):
@@ -148,6 +155,9 @@ class IntakeSummaryViewSet(viewsets.ModelViewSet):
     queryset = IntakeSummary.objects.all()
     serializer_class = IntakeSummarySerializer
     permission_classes = [permissions.IsAuthenticated, ]
+
+    def get_queryset(self):
+        return self.queryset.distinct()
 
     def perform_create(self, serializer):
         if serializer.is_valid():

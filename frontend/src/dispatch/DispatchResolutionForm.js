@@ -5,15 +5,18 @@ import { Field, Form, Formik } from 'formik';
 import { Switch } from 'formik-material-ui';
 import {
   Form as BootstrapForm,
+  Button,
   ButtonGroup,
   Card,
   Col,
   ListGroup,
+  Modal,
   OverlayTrigger,
   Row,
   Tooltip,
 } from 'react-bootstrap';
 import * as Yup from 'yup';
+import RangeSlider from 'react-bootstrap-range-slider';
 import {
   useOrderedNodes
 } from "react-register-nodes";
@@ -30,8 +33,15 @@ import ButtonSpinner from '../components/ButtonSpinner';
 import { priorityChoices } from '../constants';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
+import { titleCase } from '../components/Utils';
+import ActionsDropdown from '../components/ActionsDropdown';
+import LoadingLink from "../components/LoadingLink";
+import { faSplit } from '@fortawesome/pro-solid-svg-icons';
 
 function AnimalStatus(props) {
+
+  const [showSplit, setShowSplit] = useState(false);
+  const handleCloseSplit = () => setShowSplit(false);
 
   const roomRef = useRef(null);
   const shelterRef = useRef(null);
@@ -39,7 +49,7 @@ function AnimalStatus(props) {
   return (
     <>
     <Row>
-      <Col xs={4} className="pl-0" style={{marginLeft:"-5px"}}>
+      <Col xs={4} className="pl-0 mr-2" style={{marginLeft:"-5px", paddingRight:"3px"}}>
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.status`}
           name={`sr_updates.${props.index}.animals.${props.inception}.status`}
@@ -60,8 +70,8 @@ function AnimalStatus(props) {
           }}
         />
       </Col>
-      <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px", textTransform:"capitalize" }}>
-        A#{props.animal.id_for_incident} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
+      <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px"}}>
+        {props.animal.id_for_incident ? <span>A#{props.animal.id_for_incident} - </span> : ""}{props.animal.animal_count > 1 ? <span>{props.animal.animal_count} <span style={{textTransform:"capitalize"}}>{props.animal.species}</span>{props.animal.animal_count > 1 && !["sheep", "cattle"].includes(props.animal.species) ? "s" : ""}</span> : <span>{props.animal.name||"Unknown"}&nbsp;-&nbsp;{titleCase(props.animal.species)}</span>}
         {props.animal.color_notes ?
         <OverlayTrigger
           key={"animal-color-notes"}
@@ -72,15 +82,22 @@ function AnimalStatus(props) {
             </Tooltip>
           }
         >
-          <FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse />
+          <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse />
         </OverlayTrigger>
         : ""}
         {props.animal.pcolor || props.animal.scolor ? <span className="ml-1">({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>/</span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
       </span>
+      {props.animal.animal_count > 1 ?
+        <ActionsDropdown alignRight={true} variant="dark" title="Actions" className="pt-0 ml-3">
+          <LoadingLink onClick={() => {setShowSplit(true);}} isLoading={false} className="text-white d-block py-1 px-3">
+            <FontAwesomeIcon icon={faSplit} style={{cursor:'pointer'}} className='mr-1' size="lg" inverse />
+            Split Animal Group
+          </LoadingLink>
+        </ActionsDropdown> : ""}
     </Row>
     {props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'SHELTERED' ?
     <Row>
-      <Col xs={4} className="pl-0" style={{marginLeft:"-5px"}}>
+      <Col xs={4} className="pl-0 mr-2" style={{marginLeft:"-5px", paddingRight:"3px"}}>
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
           name={`sr_updates.${props.index}.animals.${props.inception}.shelter`}
@@ -98,7 +115,7 @@ function AnimalStatus(props) {
           }}
         />
       </Col>
-      <Col xs={6} className="pl-0">
+      <Col xs={6} className="pl-0" style={{paddingRight:"3px"}}>
         <DropDown
           id={`sr_updates.${props.index}.animals.${props.inception}.room`}
           name={`sr_updates.${props.index}.animals.${props.inception}.room`}
@@ -116,6 +133,62 @@ function AnimalStatus(props) {
       </Col>
     </Row>
     : ""}
+    <Formik
+      initialValues={{'animal_count':props.animal.animal_count, 'group_2':0}}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        animal_count: Yup.number(),
+        group_2: Yup.number(),
+      })}
+      onSubmit={(values, { setSubmitting }) => {
+        let test = [...props.sr_updates]
+        test[props.index].animals[props.inception].animal_count = values.animal_count;
+        test[props.index].animals.push({
+          id:null,
+          id_for_incident:null,
+          original_id:props.animal.id,
+          animal_count:values.group_2,
+          name:'',
+          species:props.animal.species,
+          status:props.animal.status,
+          color_notes:props.animal.color_notes,
+          pcolor:props.animal.pcolor,
+          scolor:props.animal.scolor,
+          animal_notes:props.animal.animal_notes,
+          aggressive:props.animal.aggressive,
+          aco_required:props.animal.aco_required,
+          injured:props.animal.injured,
+          request:props.service_request_object_id,
+          shelter:props.animal.shelter || '',
+          room:props.animal.room || ''
+        })
+        props.setData(prevState => ({ ...prevState, "sr_updates":test}));
+        setShowSplit(false);
+      }}
+    >
+      {formikProps => (
+      <Modal show={showSplit} onHide={handleCloseSplit}>
+        <Modal.Header closeButton>
+          <Modal.Title>Split Animal Group</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <span><b>Current Group: </b>{formikProps.values.animal_count} <span style={{textTransform:"capitalize"}}>{props.animal.species}</span>{(formikProps.values.animal_count) !== 1 && !["sheep", "cattle"].includes(props.animal.species) ? "s" : ""}</span>
+          <RangeSlider
+            value={formikProps.values.group_2}
+            onChange={(changeEvent) => {formikProps.setFieldValue("group_2", changeEvent.target.value);formikProps.setFieldValue("animal_count", props.animal.animal_count - changeEvent.target.value);}}
+            min={0}
+            max={props.animal.animal_count - 1}
+            className="mb-3 mt-3"
+          />
+          <span className="row mt-3 pl-3"><b>New Group:&nbsp;</b>{formikProps.values.group_2}&nbsp;<span style={{textTransform:"capitalize"}}>{props.animal.species}</span>{(Number(formikProps.values.group_2) !== 1) && !["sheep", "cattle"].includes(props.animal.species) ? "s" : ""}</span>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {formikProps.submitForm();}} disabled={Number(formikProps.values.group_2) === 0}>Save</Button>
+          <Button variant="secondary" onClick={handleCloseSplit}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      )}
+    </Formik>
     </>
   )
 }
@@ -174,7 +247,23 @@ function DispatchResolutionForm({ id, incident, organization }) {
               date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
-              animals: Object.keys(assigned_request.animals).map(animal_id => {return {id:animal_id, id_for_incident:assigned_request.animals[animal_id].id_for_incident, name:assigned_request.animals[animal_id].name, species:assigned_request.animals[animal_id].species, status:assigned_request.animals[animal_id].status, color_notes:assigned_request.animals[animal_id].color_notes, pcolor:assigned_request.animals[animal_id].pcolor, scolor:assigned_request.animals[animal_id].scolor, request:assigned_request.service_request_object.id, shelter:assigned_request.animals[animal_id].shelter || '', room:assigned_request.animals[animal_id].room || ''}}),
+              animals: Object.keys(assigned_request.animals).map(animal_id =>{return {
+                id:animal_id,
+                id_for_incident:assigned_request.animals[animal_id].id_for_incident,
+                animal_count:assigned_request.animals[animal_id].animal_count,
+                name:assigned_request.animals[animal_id].name,
+                species:assigned_request.animals[animal_id].species,
+                status:assigned_request.animals[animal_id].status,
+                color_notes:assigned_request.animals[animal_id].color_notes,
+                pcolor:assigned_request.animals[animal_id].pcolor,
+                scolor:assigned_request.animals[animal_id].scolor,
+                animal_notes:assigned_request.animals[animal_id].animal_notes,
+                aggressive:assigned_request.animals[animal_id].aggressive,
+                aco_required:assigned_request.animals[animal_id].aco_required,
+                injured:assigned_request.animals[animal_id].injured,
+                request:assigned_request.service_request_object.id,
+                shelter:assigned_request.animals[animal_id].shelter || '',
+                room:assigned_request.animals[animal_id].room || ''}}),
               owner: assigned_request.service_request_object.owners.length > 0,
               owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
               owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : null,
@@ -271,7 +360,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
             followup_date: Yup.date().nullable(),
             animals: Yup.array().of(
               Yup.object().shape({
-                id: Yup.number().required(),
+                id: Yup.number().nullable(),
                 status: Yup.string()
                   .test('required-check', 'Animal cannot remain REPORTED.',
                     function(value) {
@@ -304,7 +393,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
           values['closed'] = saveClose;
-          axios.put('/evac/api/evacassignment/' + data.id + '/', values)
+          axios.put('/evac/api/evacassignment/' + data.id + '/?incident=' + incident, values)
             .then(response => {
               if (response.data.service_requests.length === 0) {
                 navigate('/' + organization + '/' + incident + '/dispatch');
@@ -393,9 +482,9 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
-                    {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED' && Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
+                    {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED').map((animal, inception) => (
                       <ListGroup.Item key={animal.id}>
-                        <AnimalStatus formikProps={props} index={index} inception={inception} animal={animal} shelters={shelters} />
+                        <AnimalStatus formikProps={props} sr_updates={data.sr_updates} setData={setData} index={index} inception={inception} animal={animal} service_request_object_id={assigned_request.service_request_object.id} shelters={shelters} />
                       </ListGroup.Item>
                     ))}
                   </ListGroup>

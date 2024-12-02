@@ -76,8 +76,8 @@ class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
 
 class AssignedRequestDispatchSerializer(SimpleAssignedRequestDispatchSerializer):
 
-    # visit_note = VisitNoteSerializer(required=False, read_only=True)
-    # owner_contact = OwnerContactSerializer(required=False, read_only=True)
+    visit_note = VisitNoteSerializer(required=False, read_only=True)
+    owner_contact = OwnerContactSerializer(required=False, read_only=True)
     service_request_object = DispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
     visit_notes = serializers.SerializerMethodField()
 

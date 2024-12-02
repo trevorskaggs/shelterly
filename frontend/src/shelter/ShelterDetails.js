@@ -35,7 +35,6 @@ function ShelterDetails({ id, incident, organization }) {
     unroomed_animals: [],
     intake_summaries: [],
     animal_count: 0,
-    room_count: 0,
   });
 
   useEffect(() => {
@@ -54,6 +53,11 @@ function ShelterDetails({ id, incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
+          let count = 0;
+          response.data.unroomed_animals.forEach(unroomed_animal => {
+            count = count + unroomed_animal.animal_count;
+          });
+          response.data['unroomed_count'] = count;
           setData(response.data);
         }
       })
@@ -126,7 +130,7 @@ function ShelterDetails({ id, incident, organization }) {
                 <ListGroup.Item className="rounded" action><Link href={"/" + organization + "/" + incident + "/intake/workflow/reporter?shelter_id=" + id} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Walk-In (Non-Owner)</b></Link></ListGroup.Item>
                 <ListGroup.Item className="rounded" action><Link href={"/" + organization + "/" + incident + "/shelter/" + id + "/intake"} style={{color:"#FFF"}}><FontAwesomeIcon icon={faDoorOpen} inverse/> <b>Intake from Dispatch Assignment</b></Link></ListGroup.Item>
                 <ListGroup.Item>
-                  <b>Roomless:</b> {data.unroomed_animals.length} Animal{data.unroomed_animals.length === 1 ? "" : "s"}
+                  <b>Roomless:</b> {data.unroomed_count} Animal{data.unroomed_count === 1 ? "" : "s"}
                   <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
                     <Link href={"/" + organization + "/" + incident + "/shelter/" + id + "/assign"}><FontAwesomeIcon icon={faArrowDownToSquare} size="lg" className="ml-1 fa-move-up" inverse /></Link>
                   </OverlayTrigger>
@@ -170,7 +174,7 @@ function ShelterDetails({ id, incident, organization }) {
                           {building.rooms.length} room{building.rooms.length !== 1 ? "s" : ""}
                         </div>
                         <div>
-                          {building.animal_count} animal{building.animal_count !== 1 ? "s" : ""}
+                          {building.animal_count||0} animal{building.animal_count !== 1 ? "s" : ""}
                         </div>
                       </Col>
                     </Row>
@@ -191,7 +195,7 @@ function ShelterDetails({ id, incident, organization }) {
           <div>
             <Card className="border rounded d-flex mb-2">
               <Card.Body>
-              {intakesummary.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : intakesummary.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}<Link href={"/" + organization + "/" + incident + "/shelter/intakesummary/" + intakesummary.id} className="text-link" style={{textDecoration:"none", color:"white"}}>Intake Summary #{intakesummary.id}</Link> for {intakesummary.animals.length} animal{intakesummary.animals.length === 1 ? '' : 's'} on <Moment format="MMMM Do YYYY">{intakesummary.date}</Moment> at <Moment format="HH:mm">{intakesummary.date}</Moment>.
+              {intakesummary.intake_type === 'owner_walkin' ? 'Owner Walk-In ' : intakesummary.intake_type === 'reporter_walkin' ? 'Reporter Walk-In ' : 'Dispatch '}<Link href={"/" + organization + "/" + incident + "/shelter/intakesummary/" + intakesummary.id} className="text-link" style={{textDecoration:"none", color:"white"}}>Intake Summary #{intakesummary.id}</Link> for {intakesummary.animal_count} animal{intakesummary.animal_count === 1 ? '' : 's'} on <Moment format="MMMM Do YYYY">{intakesummary.date}</Moment> at <Moment format="HH:mm">{intakesummary.date}</Moment>.
               </Card.Body>
             </Card>
           </div>

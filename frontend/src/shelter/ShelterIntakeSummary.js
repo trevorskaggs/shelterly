@@ -29,6 +29,7 @@ function ShelterIntakeSummary({ id, incident, organization }) {
     date: '',
     animals: [],
     animal_objects: [],
+    animal_count: 0,
     person: null,
     person_object: {first_name:'', last_name:''}
   });
@@ -134,7 +135,7 @@ function ShelterIntakeSummary({ id, incident, organization }) {
     <>
       <Header>
         <span style={{cursor:'pointer'}} onClick={() => navigate("/" + organization + "/" + incident + "/shelter/" + data.shelter)} className="mr-2"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="sm" inverse /></span>
-        {data.shelter_name}-&nbsp;
+        {data.shelter_name} -&nbsp;
         Intake Summary
       </Header>
       <hr />
@@ -206,7 +207,7 @@ function ShelterIntakeSummary({ id, incident, organization }) {
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
           <Card.Body style={{marginBottom:"-17px"}}>
             <Card.Title>
-              <h4 className="mb-0">Animals ({data.animals.length})
+              <h4 className="mb-0">Animals ({data.animal_count})
                 {data.animals?.length > 0 && (
                   <ShelterlyPrintifyButton
                     id="dispatch-assignment-animal-care-schedules"

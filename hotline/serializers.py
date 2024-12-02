@@ -88,42 +88,72 @@ class MapServiceRequestSerializer(BarebonesServiceRequestSerializer):
     # Custom field for determining if an SR contains REPORTED animals.
     def get_reported_animals(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        count = 0
         try:
-            return len([animal for animal in obj.animals if animal.status == 'REPORTED'])
+            for animal in obj.animals:
+                if animal.status == 'REPORTED':
+                    count += animal.animal_count
+            return count
         except AttributeError:
-            return obj.animal_set.filter(status='REPORTED').count()
+            for animal in obj.animal_set.filter(status='REPORTED'):
+                count += animal.animal_count
+            return count
 
     # Custom field for determining if an SR contains REPORTED (EVAC REQUESTED) animals.
     def get_reported_evac(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        count = 0
         try:
-            return len([animal for animal in obj.animals if animal.status == 'REPORTED (EVAC REQUESTED)'])
+            for animal in obj.animals:
+                if animal.status == 'REPORTED (EVAC REQUESTED)':
+                    count += animal.animal_count
+            return count
         except AttributeError:
-            return obj.animal_set.filter(status='REPORTED (EVAC REQUESTED)').count()
+            for animal in obj.animal_set.filter(status='REPORTED (EVAC REQUESTED)'):
+                count += animal.animal_count
+            return count
 
     # Custom field for determining that count of REPORTED (SIP REQUESTED) animals.
     def get_reported_sheltered_in_place(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        count = 0
         try:
-            return len([animal for animal in obj.animals if animal.status == 'REPORTED (SIP REQUESTED)'])
+            for animal in obj.animals:
+                if animal.status == 'REPORTED (SIP REQUESTED)':
+                    count += animal.animal_count
+            return count
         except AttributeError:
-            return obj.animal_set.filter(status='REPORTED (SIP REQUESTED)').count()
+            for animal in obj.animal_set.filter(status='REPORTED (SIP REQUESTED)'):
+                count += animal.animal_count
+            return count
 
     # Custom field for determining that count of SHELTERED IN PLACE animals.
     def get_sheltered_in_place(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        count = 0
         try:
-            return len([animal for animal in obj.animals if animal.status == 'SHELTERED IN PLACE'])
+            for animal in obj.animals:
+                if animal.status == 'SHELTERED IN PLACE':
+                    count += animal.animal_count
+            return count
         except AttributeError:
-            return obj.animal_set.filter(status='SHELTERED IN PLACE').count()
+            for animal in obj.animal_set.filter(status='SHELTERED IN PLACE'):
+                count += animal.animal_count
+            return count
 
     # Custom field for determining that count of UNABLE TO LOCATE animals.
     def get_unable_to_locate(self, obj):
         # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        count = 0
         try:
-            return len([animal for animal in obj.animals if animal.status == 'UNABLE TO LOCATE'])
+            for animal in obj.animals:
+                if animal.status == 'UNABLE TO LOCATE':
+                    count += animal.animal_count
+            return count
         except AttributeError:
-            return obj.animal_set.filter(status='UNABLE TO LOCATE').count()
+            for animal in obj.animal_set.filter(status='UNABLE TO LOCATE'):
+                count += animal.animal_count
+            return count
 
     class Meta:
         model = ServiceRequest

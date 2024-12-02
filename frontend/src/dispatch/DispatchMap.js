@@ -325,7 +325,7 @@ function Deploy({ incident, organization }) {
           for (const service_request of response.data) {
             // Only add initial settings if we don't already have them.
             if (!current_ids.includes(String(service_request.id))) {
-              const total_matches = countMatches(service_request);
+              const total_matches = countMatches(service_request.animals);
               const matches = total_matches[0];
               const status_matches = total_matches[1];
               const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';

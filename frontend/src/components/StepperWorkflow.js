@@ -209,14 +209,14 @@ function StepperWorkflow({ incident, organization }) {
       // If we're not on the last animal, update the current animal based on the index.
       if (state.animalIndex !== state.steps.animals.length) {
         const animalList = [...state.steps.animals];
-        let animal_count = animalList[state.animalIndex].get('number_of_animals');
+        let animal_count = animalList[state.animalIndex].get('animal_count');
 
         animalList[state.animalIndex] = data;
         setState((prevState) => ({
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           animalIndex: index,
-          animalCount: prevState.animalCount - Number(animal_count) + Number(data.get('number_of_animals')),
+          animalCount: prevState.animalCount - Number(animal_count) + Number(data.get('animal_count')),
           steps: { ...prevState.steps, [currentStep]:animalList }
         }))
       }
@@ -226,7 +226,7 @@ function StepperWorkflow({ incident, organization }) {
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           animalIndex: index,
-          animalCount: prevState.animalCount + Number(data.get('number_of_animals')),
+          animalCount: prevState.animalCount + Number(data.get('animal_count')),
           steps: { ...prevState.steps, [currentStep]:[...prevState.steps.animals, data] }
         }))
       }

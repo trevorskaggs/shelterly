@@ -65,46 +65,37 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     animals = [animal]
                     action.send(self.request.user, verb='created animal', target=animal)
 
-                    # Create multiple copies of animal if specified.
-                    for i in range(int(self.request.data.get('number_of_animals', 1)) -1):
-                        new_animal = deepcopy(animal)
-                        new_animal.id = None
-                        new_animal.id_for_incident = count + i + 2
-                        new_animal.save()
-                        animals.append(new_animal)
+                    # Add Owner to new animals if included.
+                    if self.request.data.get('new_owner', 'undefined') != 'undefined':
+                        animal.owners.add(self.request.data['new_owner'])
 
-                    for animal in animals:
-                        # Add Owner to new animals if included.
-                        if self.request.data.get('new_owner', 'undefined') != 'undefined':
-                            animal.owners.add(self.request.data['new_owner'])
+                    # Add ServiceRequest Owner to new animals being added to an SR.
+                    if serializer.validated_data.get('request'):
+                        animal.owners.add(*animal.request.owners.all())
 
-                        # Add ServiceRequest Owner to new animals being added to an SR.
-                        if serializer.validated_data.get('request'):
-                            animal.owners.add(*animal.request.owners.all())
+                    # Create VR data if Triage is yellow or red.
+                    if self.request.data.get('priority', 'green') in ['when_available', 'urgent']:
+                        med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
+                        animal.medical_record=med_record
+                        animal.save()
+                        vet_request = VetRequest.objects.create(priority=self.request.data.get('priority'), requested_by=self.request.user, caution=self.request.data.get('caution', 'false') == 'true', complaints_other=self.request.data.get('complaints_other'), concern=self.request.data.get('concern'), medical_record=med_record)
+                        vet_request.presenting_complaints.add(*self.request.data.get('presenting_complaints').split(','))
 
-                        # Create VR data if Triage is yellow or red.
-                        if self.request.data.get('priority', 'green') in ['when_available', 'urgent']:
-                            med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
-                            animal.medical_record=med_record
-                            animal.save()
-                            vet_request = VetRequest.objects.create(priority=self.request.data.get('priority'), requested_by=self.request.user, caution=self.request.data.get('caution', 'false') == 'true', complaints_other=self.request.data.get('complaints_other'), concern=self.request.data.get('concern'), medical_record=med_record)
-                            vet_request.presenting_complaints.add(*self.request.data.get('presenting_complaints').split(','))
+                    if animal.shelter:
+                        action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
+                        action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
 
-                        if animal.shelter:
-                            action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
-                            action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
+                    if animal.room:
+                        action.send(self.request.user, verb='roomed animal in', target=animal, action_object=animal.room)
+                        action.send(self.request.user, verb='roomed animal', target=animal.room, action_object=animal)
+                        action.send(self.request.user, verb='roomed animal', target=animal.room.building, action_object=animal)
 
-                        if animal.room:
-                            action.send(self.request.user, verb='roomed animal in', target=animal, action_object=animal.room)
-                            action.send(self.request.user, verb='roomed animal', target=animal.room, action_object=animal)
-                            action.send(self.request.user, verb='roomed animal', target=animal.room.building, action_object=animal)
-
-                        images_data = self.request.FILES
-                        for key, image_data in images_data.items():
-                            # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
-                            category = key.translate({ord(num): None for num in '0123456789'})
-                            # Create image object.
-                            AnimalImage.objects.create(image=image_data, animal=animal, category=category)
+                    images_data = self.request.FILES
+                    for key, image_data in images_data.items():
+                        # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
+                        category = key.translate({ord(num): None for num in '0123456789'})
+                        # Create image object.
+                        AnimalImage.objects.create(image=image_data, animal=animal, category=category)
 
                     # Check to see if there is an intake summary
                     if self.request.data.get('intake_summary', False):
@@ -196,6 +187,16 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             # Remove Owner from animal.
             if self.request.data.get('remove_owner'):
                 animal.owners.remove(self.request.data.get('remove_owner'))
+            # Split group
+            elif self.request.data.get('group_2'):
+                total_animals = Animal.objects.select_for_update().filter(incident__slug=self.request.data.get('incident')).values_list('id', flat=True)
+                with transaction.atomic():
+                    count = len(total_animals)
+                    new_animal = deepcopy(animal)
+                    new_animal.id = None
+                    new_animal.animal_count = self.request.data.get('group_2')
+                    new_animal.id_for_incident = count
+                    new_animal.save()
 
             # Check if any original front/side images need to be removed.
             for key in ("front_image", "side_image"):

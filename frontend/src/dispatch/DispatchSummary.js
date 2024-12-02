@@ -279,10 +279,10 @@ function DispatchSummary({ id, incident, organization }) {
     <hr/>
     <Row className="mb-3">
       <Col>
-        <Card className="mt-1 border rounded" style={{minHeight:"313px", maxHeight:"313px"}}>
-          <Card.Body>
-            <div className="d-flex justify-content-between">
-              <h4 className="h5 mb-0 pb-0 pt-2">
+        <Card className="mb-2 border rounded" style={{width:"100%"}}>
+          <Card.Body style={{marginTop:"-10px"}}>
+            <div className="d-flex justify-content-between" style={{marginBottom:"-10px"}}>
+              <h4 style={{paddingTop:"12px"}}>
                 {data.team_object ? data.team_object.name : "Preplanned"}
                 <OverlayTrigger
                   key={"edit-team-name"}
@@ -558,7 +558,8 @@ function DispatchSummary({ id, incident, organization }) {
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
-                <span style={{textTransform:"capitalize"}}><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{animal.id_for_incident}</Link> - {animal.name||"Unknown"}&nbsp;-&nbsp;{animal.species_string}</span>
+                <span style={{textTransform:"capitalize"}}><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>
+                  A#{animal.id_for_incident}</Link> - {animal.animal_count > 1 ? <span>{animal.animal_count} {animal.species_string}{animal.animal_count > 1 && !["sheep", "cattle"].includes(animal.species_string) ? "s" : ""}</span> : <span>{animal.name||"Unknown"}&nbsp;-&nbsp;{animal.species_string}</span>}</span>
                 {animal.color_notes ?
                   <OverlayTrigger
                     key={"animal-color-notes"}

@@ -108,7 +108,7 @@ function AnimalStatus(props) {
         />
       </Col>
       <span style={{ marginTop:"-3px", marginBottom: "-4px", fontSize: "26px", textTransform:"capitalize" }}>
-        A#{props.animal.id_for_incident} - {props.animal.name || "Unknown"}&nbsp;-&nbsp;{props.animal.species}
+        A#{props.animal.id_for_incident} - {props.animal.animal_count > 1 ? <span>{props.animal.animal_count} <span style={{textTransform:"capitalize"}}>{props.animal.species}</span>{props.animal.animal_count > 1 && !["sheep", "cattle"].includes(props.animal.species) ? "s" : ""}</span> : <span>{props.animal.name||"Unknown"}&nbsp;-&nbsp;{props.animal.species_string}</span>}
         {props.animal.color_notes ?
         <OverlayTrigger
           key={"animal-color-notes"}
@@ -330,7 +330,7 @@ function ShelterIntake({ id, incident, organization }) {
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [options, setOptions] = useState({shelter_options:[], room_options:{}, da_options:[], fetching:true});
-  const [data, setData] = useState({shelter_name:'', dispatch_assignments:[], sr_updates:[], shelter: id, da: null, animals:[], isFetching: false});
+  const [data, setData] = useState({shelter_name:'', dispatch_assignments:[], sr_updates:[], shelter: id, da: null, animals:[], animal_count:1, isFetching: false});
   const [selected, setSelected] = useState(null);
 
   // Hook for initializing data.
@@ -416,6 +416,7 @@ function ShelterIntake({ id, incident, organization }) {
             animals: Yup.array().of(
               Yup.object().shape({
                 id: Yup.number().required(),
+                animal_count: Yup.number().required(),
                 status: Yup.string(),
                 shelter: Yup.number().nullable(),
                 room: Yup.number().nullable(),
@@ -428,6 +429,11 @@ function ShelterIntake({ id, incident, organization }) {
         axios.patch('/evac/api/evacassignment/' + selected + '/?shelter=' + id, values)
         .then(DAresponse => {
           values['intake_type'] = 'dispatch';
+          let count = 0;
+          values.sr_updates.forEach(sr_update => {
+            sr_update.animals.filter(animal => values.animals.includes(animal.id)).forEach(animal => {count = count + animal.animal_count})
+          })
+          values['animal_count'] = count;
           axios.post('/shelter/api/intakesummary/', values)
           .then(response => {
             navigate('/' + organization + "/" + incident + "/shelter/intakesummary/" + response.data.id);

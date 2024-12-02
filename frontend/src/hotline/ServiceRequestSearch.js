@@ -23,6 +23,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { DateRangePicker } from '../components/Form';
 import { printAllServiceRequests } from './Utils';
+import { titleCase } from '../components/Utils';
 import { DownloadButton } from '../components/DownloadButton';
 
 function ServiceRequestSearch({ incident, organization }) {
@@ -658,7 +659,7 @@ function ServiceRequestSearch({ incident, organization }) {
                       </ListGroup.Item>
                     ))}
                     {service_request.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                    <ListGroup.Item><b>Reporter: </b>{service_request.reporter ? <Link href={"/" + organization + "/" + incident + "/people/reporter/" + service_request.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</Link> : "No Reporter"}</ListGroup.Item>
+                    {service_request.reporter ? <ListGroup.Item><b>Reporter: </b><Link href={"/" + organization + "/" + incident + "/people/reporter/" + service_request.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{service_request.reporter_object.first_name} {service_request.reporter_object.last_name}</Link></ListGroup.Item> : ""}
                   </ListGroup>
                 </Scrollbar>
               </Card.Body>
@@ -679,7 +680,7 @@ function ServiceRequestSearch({ incident, organization }) {
                     <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                       {service_request.animals.filter(animal => animal.species_string === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
-                          <b>A#{animal.id_for_incident}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
+                          <b><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{animal.id_for_incident}</Link>:</b>&nbsp;&nbsp;{Number(animal.animal_count) === 1 ? <span>{animal.name || "Unknown"}</span> : <span>{animal.animal_count} {titleCase(animal.species_string)}{["cattle", "sheep"].includes(animal.species_string) ? "" : "s"}</span>}
                           {animal.color_notes ?
                           <OverlayTrigger
                             key={"animal-color-notes"}

@@ -7,7 +7,7 @@ import { CircleMarker, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
 import randomColor from "randomcolor";
-import Map, { prettyText } from "../components/Map";
+import Map, { countMatches, countDictMatches, prettyText } from "../components/Map";
 import { Checkbox } from "../components/Form"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -36,36 +36,6 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
     let tempSRs = {...showSRs};
     tempSRs[dispatch_id] = !showSRs[dispatch_id];
     setShowSRs(tempSRs);
-  }
-
-  // Counts the number of size/species matches for a service request by status.
-  const countMatches = (service_request) => {
-    var matches = {};
-
-    service_request.animals.forEach((animal) => {
-      if (!matches[[animal.species_string]]) {
-        matches[[animal.species_string]] = 1;
-      }
-      else {
-        matches[[animal.species_string]] += 1;
-      }
-    });
-    return matches
-  }
-
-  // Counts the number of size/species matches for a assigned request by status.
-  const countDictMatches = (animals) => {
-    var matches = {};
-
-    Object.keys(animals).forEach((animal) => {
-      if (!matches[[animals[animal].species]]) {
-        matches[[animals[animal].species]] = 1;
-      }
-      else {
-        matches[[animals[animal].species]] += 1;
-      }
-    });
-    return matches
   }
 
   // Show or hide list of DAs based on current map zoom
@@ -151,7 +121,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                 map_dict[dispatch_assignment.id] = {checked:(active_dispatch !== null) && (active_dispatch.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
 
               });
-              const current_matches = countMatches(currentResponse.data);
+              const current_matches = countMatches(currentResponse.data.animals)[0];
               currentResponse.data['matches'] = current_matches;
               setCurrentRequest(currentResponse.data);
               setActiveDispatch(active_dispatch);
