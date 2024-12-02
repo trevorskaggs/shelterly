@@ -115,7 +115,7 @@ const TreatmetRequestForm = (props) => {
       initialValues={data}
       enableReinitialize={true}
       validationSchema={Yup.object({
-        assignee: Yup.number().nullable(),
+        assignee: Yup.number().required('Required'),
         suggested_admin_time: Yup.string().required('Required'),
         actual_admin_time: Yup.string().nullable(),
         notes: Yup.string().nullable(),
