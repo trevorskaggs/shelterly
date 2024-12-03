@@ -705,6 +705,22 @@ function Deploy({ incident, organization }) {
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
+              .sort((a, b) => {
+                // Sort by followup_date
+                if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom
+                if (a.followup_date && !b.followup_date) return -1; // `b` is null, move it to the bottom
+                if (a.followup_date && b.followup_date) {
+                  const dateA = new Date(a.followup_date);
+                  const dateB = new Date(b.followup_date);
+                  if (dateA - dateB !== 0) return dateA - dateB;
+                }
+
+                // Compare priority (ascending order)
+                if ((a.priority || 0) - (b.priority || 0) !== 0) return (a.priority || 0) - (b.priority || 0);
+
+                // Compare pk (ascending order)
+                return (a.id || 0) - (b.id || 0);
+              })
               .map(service_request => (
                 <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
                 <div className="mt-1 mb-1" style={{}}>
