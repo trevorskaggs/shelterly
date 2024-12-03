@@ -206,13 +206,13 @@ const IncidentForm = ({ id, organization }) => {
               <>
                 <Button variant="outline-danger" size="sm" className="my-0 border-0 text-white" onClick={handleShow}>
                   <FontAwesomeIcon icon={faEyeSlash} size="1x" inverse />{' '}
-                  Hide Incident
+                  Remove Incident
                 </Button><Modal show={showModal} onHide={handleClose}>
                     <Modal.Header closeButton>
-                      <Modal.Title>Confirm Incident Hide</Modal.Title>
+                      <Modal.Title>Confirm Incident Removal</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                      This action will hide the incident and is only reversible by an administrator. Are you sure you want to proceed?
+                      This action will remove the incident and is only reversible by an administrator. Are you sure you want to proceed?
                     </Modal.Body>
                     <Modal.Footer>
                       <Button variant="secondary" onClick={handleClose}>
