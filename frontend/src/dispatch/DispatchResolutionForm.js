@@ -357,7 +357,18 @@ function DispatchResolutionForm({ id, incident, organization }) {
             owner: Yup.boolean(),
             priority: Yup.number(),
             unable_to_complete: Yup.boolean(),
-            followup_date: Yup.date().nullable(),
+            followup_date: Yup.date().nullable().when(['unable_to_complete'], {
+              is: false,
+              then: Yup.date().test('required-check', 'Follow-up date is required',
+                function(value){
+                  if (saveClose) {
+                   // Field is required when saveClose is true
+                   return value != null; // Valid if the value is not null
+                  }
+                  return true
+                }
+              )
+            }),
             animals: Yup.array().of(
               Yup.object().shape({
                 id: Yup.number().nullable(),
@@ -458,6 +469,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                             setData(prevState => ({...prevState, sr_updates: newItems}))
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, true);
                             props.setFieldValue(`sr_updates.${index}.date_completed`, null);
+                            props.setFieldValue(`sr_updates.${index}.followup_date`, null);
                           }
                         }}
                         style={{
