@@ -541,6 +541,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       more_options={{minDate:new Date()}}
                       xs="4"
                       data-enable-time={false}
+                      clearable={false}
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}

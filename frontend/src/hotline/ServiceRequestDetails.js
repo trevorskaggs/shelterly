@@ -394,7 +394,6 @@ function ServiceRequestDetails({ id, incident, organization }) {
                   {data.followup_date ?
                   <span>
                     <Moment format="ll">{data.followup_date}</Moment>
-                    <FontAwesomeIcon icon={faTimes} className="ml-1" style={{cursor:'pointer'}} onClick={clearDate} />
                   </span>
                   : "Set date"}
                   <Flatpickr
