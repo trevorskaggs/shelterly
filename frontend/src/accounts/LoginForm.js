@@ -25,6 +25,9 @@ const Login = () => {
     next = '/',
   } = queryParams;
 
+  const org_slug = next.split('/')[1];
+  const incident_slug = next.split('/')[2];
+
   return (
     <Fragment>
       <Formik
@@ -37,16 +40,42 @@ const Login = () => {
         })}
         onSubmit={(values, actions ) => {
           dispatch({ type: 'USER_LOADING' });
-          removeCookie("token");
-          setAuthToken();
+          // removeCookie("token");
+          // setAuthToken();
           axios.post('/login/', values)
           .then(response => {
             // Set token for axios calls.
             setAuthToken(response.data.token);
             // Store token in cookie.
             setCookie("token", response.data.token);
+            // console.log(response.data)
             // Update state information.
             dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
+            console.log('login')
+            // console.log(next)
+            
+            if (next !== "/") {
+              console.log("next get org")
+              console.log(org_slug)
+              console.log(incident_slug)
+              axios.get('/incident/api/organization/?slug=' + org_slug)
+              .then(orgResponse => {
+                if (orgResponse.data.length > 0) {
+                  dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name, watchduty_enabled:orgResponse.data[0].watchduty_enabled, caltopo_enabled:orgResponse.data[0].caltopo_enabled}});
+                  if (incident_slug && incident_slug !== 'accounts') {
+                    axios.get('/incident/api/incident/?incident=' + incident_slug)
+                    .then(incidentResponse => {
+                      dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training, watchduty_map_id:incidentResponse.data[0].watchduty_map_id, caltopo_map_id:incidentResponse.data[0].caltopo_map_id}});
+                    })
+                    .catch(error => {
+                    });
+                  }
+                }
+              })
+              .catch(error => {
+              });
+            }
+
             navigate(next);
           })
           .catch(e => {

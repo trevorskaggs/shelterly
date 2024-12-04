@@ -28,6 +28,7 @@ function auth_reducer(state, action) {
       return {...state, isAuthenticated: true, isLoading: false, logout: false, user: action.user};
 
     case 'LOGIN_SUCCESSFUL':
+      // console.log(action)
       return {...state, user:action.data.user, isAuthenticated: true, isLoading: false, errors: null};
 
     case 'LOGOUT_SUCCESSFUL':
@@ -84,6 +85,7 @@ function AuthProvider(props) {
     const onFocus = () => {
       // Only recheck user auth if in a private route.
       if (!Object.keys(publicRoutes).includes(path)) {
+        console.log("onfocus")
         loadUser({state, dispatch, removeCookie, path});
       }
     };
@@ -93,18 +95,25 @@ function AuthProvider(props) {
 
     // Redirect user if they attempt to access an Organization they aren't a member of.
     if (!Object.keys(publicRoutes).includes(path) && state.user && path !== '/' && !state.user.org_slugs.includes(org_slug) && !path.includes('/signup/')) {
+      console.log('here')
       navigate("/");
     }
 
     // Redirect to next or Home if attempting to access LoginForm while logged in.
     if (state.user && path === '/login') {
+      console.log('here1')
       navigate(next);
     }
 
     // Fetch org and incident data if missing.
     if (state && !state.logout && (!state.organization || (!state.organization.id || !state.incident.name)) && !path.includes('/signup/')) {
+      console.log('here3')
+      console.log(state)
+      // console.log(org_slug)
       // Fetch Organization data.
       if (!state.organization.id && org_slug && org_slug !== 'login') {
+        console.log('organization')
+        console.log(org_slug)
         axios.get('/incident/api/organization/?slug=' + org_slug)
         .then(orgResponse => {
           if (orgResponse.data.length > 0) {
@@ -118,7 +127,7 @@ function AuthProvider(props) {
         });
       }
       // Fetch Incident data.
-      if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
+      if (incident_slug && !state.incident.name && incident_slug !== 'accounts'){
         axios.get('/incident/api/incident/?incident=' + incident_slug)
         .then(incidentResponse => {
           dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training, watchduty_map_id:incidentResponse.data[0].watchduty_map_id, caltopo_map_id:incidentResponse.data[0].caltopo_map_id}});
@@ -129,21 +138,26 @@ function AuthProvider(props) {
     }
     // If we have a token but no user, attempt to authenticate them.
     if (!state.user && !state.logout && cookies.token && !Object.keys(publicRoutes).includes(path)) {
+      console.log('here4')
       loadUser({state, dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.
     else if (!Object.keys(publicRoutes).includes(path) && !state.user && !cookies.token) {
+      
       if (state.logout) {
+        console.log('here5')
         navigate('/login');
       }
       else {
+        console.log('here6')
+        console.log(path)
         navigate('/login?next=' + path);
       }
     }
     return () => {
       window.removeEventListener("focus", onFocus);
   };
-  }, [path, state.user, cookies.token, removeCookie, next]);
+  }, [path, cookies.token, state.user, dispatch, removeCookie]);
 
   return (
     <AuthContext.Provider value={{ state, dispatch }}>
