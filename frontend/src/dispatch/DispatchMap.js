@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Col, Form as BootstrapForm, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash, faExclamation
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
@@ -325,6 +325,10 @@ function Deploy({ incident, organization }) {
           for (const service_request of response.data) {
             // Only add initial settings if we don't already have them.
             if (!current_ids.includes(String(service_request.id))) {
+              setNewData(true);
+              setTimeout(() => {
+                setNewData(false);
+              }, 3000);
               const total_matches = countMatches(service_request.animals);
               const matches = total_matches[0];
               const status_matches = total_matches[1];
@@ -451,8 +455,8 @@ function Deploy({ incident, organization }) {
             }
           >
             <span className="d-inline-block">
-              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={data.isFetching}>
-                <FontAwesomeIcon icon={faRotate} />
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={data.isFetching || newData} style={{width:"40px"}}>
+                <FontAwesomeIcon icon={newData ? faExclamation : faRotate} />
               </Button>
             </span>
           </OverlayTrigger>
