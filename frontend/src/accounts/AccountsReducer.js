@@ -118,7 +118,7 @@ function AuthProvider(props) {
         });
       }
       // Fetch Incident data.
-      if (incident_slug && !state.incident.name && incident_slug !=='accounts'){
+      if (incident_slug && !state.incident.name && incident_slug !== 'accounts'){
         axios.get('/incident/api/incident/?incident=' + incident_slug)
         .then(incidentResponse => {
           dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training, watchduty_map_id:incidentResponse.data[0].watchduty_map_id, caltopo_map_id:incidentResponse.data[0].caltopo_map_id}});
@@ -133,6 +133,7 @@ function AuthProvider(props) {
     }
     // Redirect to login page if no authenticated user object is present.
     else if (!Object.keys(publicRoutes).includes(path) && !state.user && !cookies.token) {
+      
       if (state.logout) {
         navigate('/login');
       }
@@ -143,7 +144,7 @@ function AuthProvider(props) {
     return () => {
       window.removeEventListener("focus", onFocus);
   };
-  }, [path, state.user, cookies.token, removeCookie, next]);
+  }, [path, cookies.token, state.user, dispatch, removeCookie]);
 
   return (
     <AuthContext.Provider value={{ state, dispatch }}>
