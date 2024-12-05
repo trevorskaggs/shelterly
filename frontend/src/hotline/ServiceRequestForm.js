@@ -111,6 +111,7 @@ function ServiceRequestForm(props) {
       enableReinitialize={true}
       validationSchema={Yup.object({
         priority: Yup.number(),
+        followup_date: Yup.date().required('Followup date is required'),
         directions: Yup.string()
           .max(2000, 'Must be 2000 characters or less'),
         verbal_permission: Yup.boolean(),
@@ -246,6 +247,7 @@ function ServiceRequestForm(props) {
                 name={`followup_date`}
                 id={`followup_date`}
                 // more_options={{minDate:new Date()}}
+                clearable={false}
                 xs="4"
                 data-enable-time={false}
                 onChange={(date, dateStr) => {
