@@ -48,16 +48,9 @@ const Login = () => {
             setAuthToken(response.data.token);
             // Store token in cookie.
             setCookie("token", response.data.token);
-            // console.log(response.data)
             // Update state information.
             dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-            console.log('login')
-            // console.log(next)
-            
             if (next !== "/") {
-              console.log("next get org")
-              console.log(org_slug)
-              console.log(incident_slug)
               axios.get('/incident/api/organization/?slug=' + org_slug)
               .then(orgResponse => {
                 if (orgResponse.data.length > 0) {
