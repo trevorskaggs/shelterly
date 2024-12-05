@@ -5,7 +5,7 @@ import { Form, Formik } from 'formik';
 import { Button, Col, Form as BootstrapForm, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash, faExclamation
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
@@ -39,6 +39,7 @@ function Deploy({ incident, organization }) {
   const [data, setData] = useState({service_requests: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
   const [newData, setNewData] = useState(false);
   const [mapState, setMapState] = useState({});
+  const [bounds, setBounds] = useState([]);
   const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, hide_pending: true});
@@ -320,20 +321,27 @@ function Deploy({ incident, organization }) {
         if (!unmounted) {
           setData(prevState => ({ ...prevState, service_requests: response.data, isFetching: false}));
           const map_dict = {...mapState};
-          const bounds = [];
+          let bounds_copy = [...bounds];
           const current_ids = Object.keys(mapState);
           for (const service_request of response.data) {
             // Only add initial settings if we don't already have them.
             if (!current_ids.includes(String(service_request.id))) {
+              if (Object.keys(mapState).length >= 1) {
+                setNewData(true);
+                setTimeout(() => {
+                  setNewData(false);
+                }, 3000);
+              }
               const total_matches = countMatches(service_request.animals);
               const matches = total_matches[0];
               const status_matches = total_matches[1];
               const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
               map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", latitude:service_request.latitude, longitude:service_request.longitude};
-              bounds.push([service_request.latitude, service_request.longitude]);
+              bounds_copy.push([service_request.latitude, service_request.longitude]);
             }
           }
           setMapState(map_dict);
+          setBounds(bounds_copy);
 
           var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
           var matches = {};
@@ -355,8 +363,8 @@ function Deploy({ incident, organization }) {
           })
           setTotalSelectedState(status_matches);
 
-          if (bounds.length > 0 && Object.keys(mapState).length < 1) {
-            setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds) }));
+          if (bounds_copy.length > 0) {
+            setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds_copy) }));
           }
         }
       })
@@ -451,8 +459,8 @@ function Deploy({ incident, organization }) {
             }
           >
             <span className="d-inline-block">
-              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={data.isFetching}>
-                <FontAwesomeIcon icon={faRotate} />
+              <Button className="fa-move-up" onClick={() => setTriggerRefresh(!triggerRefresh)} disabled={data.isFetching || newData} style={{width:"40px"}}>
+                <FontAwesomeIcon icon={newData ? faExclamation : faRotate} />
               </Button>
             </span>
           </OverlayTrigger>

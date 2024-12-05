@@ -250,7 +250,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 service_requests = ServiceRequest.objects.filter(id=service_request['id'])
                 # sr_status = 'open' if service_request.get('unable_to_complete', '') else 'assigned'
                 for animal_dict in service_request['animals']:
-                    id = animal_dict["id"]
+                    id = animal_dict.get("id", None)
                     if id:
                       Animal.objects.filter(id=id).update(animal_count=animal_dict.get("animal_count"))
                       animals_dict[id] = {

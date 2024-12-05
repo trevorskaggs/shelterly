@@ -141,16 +141,17 @@ function AnimalStatus(props) {
         group_2: Yup.number(),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        let test = [...props.sr_updates]
-        test[props.index].animals[props.inception].animal_count = values.animal_count;
-        test[props.index].animals.push({
+        let sr_updates_copy = [...props.sr_updates]
+        sr_updates_copy[props.index].animals[props.inception].animal_count = values.animal_count;
+        sr_updates_copy[props.index].animals.push({
           id:null,
           id_for_incident:null,
-          original_id:props.animal.id,
+          index:props.index,
+          original_id:props.animal.id ? props.animal.id : props.animal.original_id,
           animal_count:values.group_2,
           name:'',
           species:props.animal.species,
-          status:props.animal.status,
+          status:props.formikProps.values.sr_updates[props.index].animals[props.inception].status,
           color_notes:props.animal.color_notes,
           pcolor:props.animal.pcolor,
           scolor:props.animal.scolor,
@@ -161,8 +162,9 @@ function AnimalStatus(props) {
           request:props.service_request_object_id,
           shelter:props.animal.shelter || '',
           room:props.animal.room || ''
-        })
-        props.setData(prevState => ({ ...prevState, "sr_updates":test}));
+        });
+        props.setData(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
+        props.formikProps.setValues(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
         setShowSplit(false);
       }}
     >
@@ -381,7 +383,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                           required = false;
                         }
                       })
-                      if (value.includes('REPORTED') && required) {
+                      if (value && value.includes('REPORTED') && required) {
                         return false;
                       }
                       return true;
@@ -495,8 +497,8 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
                     {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED').map((animal, inception) => (
-                      <ListGroup.Item key={animal.id}>
-                        <AnimalStatus formikProps={props} sr_updates={data.sr_updates} setData={setData} index={index} inception={inception} animal={animal} service_request_object_id={assigned_request.service_request_object.id} shelters={shelters} />
+                      <ListGroup.Item key={inception}>
+                        <AnimalStatus formikProps={props} sr_updates={data.sr_updates} setData={setData} index={animal.index ? animal.index : index} inception={inception} animal={animal} service_request_object_id={assigned_request.service_request_object.id} shelters={shelters} />
                       </ListGroup.Item>
                     ))}
                   </ListGroup>

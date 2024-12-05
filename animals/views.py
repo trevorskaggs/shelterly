@@ -197,6 +197,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     new_animal.animal_count = self.request.data.get('group_2')
                     new_animal.id_for_incident = count
                     new_animal.save()
+                    new_animal.owners.set(animal.owners.all())
 
             # Check if any original front/side images need to be removed.
             for key in ("front_image", "side_image"):
