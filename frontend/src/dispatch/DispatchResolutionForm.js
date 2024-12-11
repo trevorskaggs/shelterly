@@ -22,7 +22,7 @@ import {
 } from "react-register-nodes";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faClipboardList
+  faClipboardList, faPlusSquare
 } from '@fortawesome/free-solid-svg-icons';
 import smoothScrollIntoView from "smooth-scroll-into-view-if-needed";
 import Moment from 'react-moment';
@@ -37,14 +37,21 @@ import { titleCase } from '../components/Utils';
 import ActionsDropdown from '../components/ActionsDropdown';
 import LoadingLink from "../components/LoadingLink";
 import { faSplit } from '@fortawesome/pro-solid-svg-icons';
+import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, unknownChoices, otherAgeChoice } from '../animals/constants';
 
 function AnimalStatus(props) {
 
   const [showSplit, setShowSplit] = useState(false);
   const handleCloseSplit = () => setShowSplit(false);
+  const handleCloseAddNew = () => props.setShowAddNew(false);
 
+  const pcolorRef = useRef(null);
+  const scolorRef = useRef(null);
   const roomRef = useRef(null);
   const shelterRef = useRef(null);
+
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices};
+  const [placeholder, setPlaceholder] = useState("Select a species...");
 
   return (
     <>
@@ -85,9 +92,9 @@ function AnimalStatus(props) {
           <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse />
         </OverlayTrigger>
         : ""}
-        {props.animal.pcolor || props.animal.scolor ? <span className="ml-1">({props.animal.pcolor ? props.animal.pcolor : "" }{props.animal.scolor ? <span>{props.animal.pcolor ? <span>/</span> : ""}{props.animal.scolor}</span> : ""})</span>: ""}
+        {props.animal.pcolor || props.animal.scolor ? <span className="ml-1">({props.animal.pcolor ? titleCase(props.animal.pcolor) : "" }{props.animal.scolor ? <span>{titleCase(props.animal.pcolor) ? <span>/</span> : ""}{titleCase(props.animal.scolor)}</span> : ""})</span>: ""}
       </span>
-      {props.animal.animal_count > 1 ?
+      {props.animal.animal_count > 1 && props.animal.id ?
         <ActionsDropdown alignRight={true} variant="dark" title="Actions" className="pt-0 ml-3">
           <LoadingLink onClick={() => {setShowSplit(true);}} isLoading={false} className="text-white d-block py-1 px-3">
             <FontAwesomeIcon icon={faSplit} style={{cursor:'pointer'}} className='mr-1' size="lg" inverse />
@@ -191,6 +198,166 @@ function AnimalStatus(props) {
       </Modal>
       )}
     </Formik>
+    <Formik
+      initialValues={{'name': '', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown'}}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        name: Yup.string(),
+        animal_count: Yup.number(),
+        species: Yup.string(),
+        pcolor: Yup.string(),
+        scolor: Yup.string(),
+        behavior_notes: Yup.string(),
+      })}
+      onSubmit={(values, { setSubmitting }) => {
+        console.log(values)
+        let sr_updates_copy = [...props.sr_updates]
+        sr_updates_copy[props.index].animals.push({
+          id:null,
+          id_for_incident:null,
+          animal_count:values.animal_count,
+          name:values.name,
+          species:values.species_string,
+          status:'REPORTED',
+          pcolor:values.pcolor,
+          scolor:values.scolor,
+          behavior_notes:values.behavior_notes,
+          aggressive:values.aggressive,
+          aco_required:values.aco_required,
+          injured:values.injured,
+          request:props.service_request_object_id,
+          shelter:'',
+          room:''
+        });
+        props.setData(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
+        props.formikProps.setValues(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
+        props.setShowAddNew(false);
+      }}
+    >
+      {formikProps => (
+      <Modal show={props.showAddNew} onHide={handleCloseAddNew} dialogClassName="wide-modal">
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Animal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <BootstrapForm.Row>
+            <TextInput
+              id="name"
+              name="name"
+              type="text"
+              label="Animal Name"
+              xs="4"
+            />
+            <Col xs="6" style={{textTransform:'capitalize'}}>
+              <DropDown
+                label="Species*"
+                id="speciesDropdown"
+                name="species"
+                type="text"
+                key={`my_unique_species_select_key__${formikProps.values.species}`}
+                options={props.species_options}
+                value={formikProps.values.species}
+                isClearable={false}
+                onChange={(instance) => {
+                  setPlaceholder("Select...")
+                  pcolorRef.current.select.clearValue();
+                  scolorRef.current.select.clearValue();
+                  formikProps.setFieldValue("species", instance.value);
+                  formikProps.setFieldValue("species_string", instance.label);
+                }}
+              />
+            </Col>
+            <TextInput
+              id="animal_count"
+              name="animal_count"
+              type="text"
+              xs="2"
+              label="No. of Animals"
+            />
+          </BootstrapForm.Row>
+          <BootstrapForm.Row>
+            <Col xs="4">
+              <DropDown
+                label="Primary Color"
+                id="pcolor"
+                name="pcolor"
+                type="text"
+                key={`my_unique_pcolor_select_key__${formikProps.values.pcolor}`}
+                ref={pcolorRef}
+                style={{marginTop:"2px"}}
+                options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
+                value={formikProps.values.pcolor||''}
+                placeholder={placeholder}
+              />
+              <DropDown
+                label="Secondary Color"
+                id="scolor"
+                name="scolor"
+                type="text"
+                key={`my_unique_scolor_select_key__${formikProps.values.scolor}`}
+                ref={scolorRef}
+                style={{marginTop:"23px"}}
+                options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
+                value={formikProps.values.scolor||''}
+                placeholder={placeholder}
+              />
+            </Col>
+            <TextInput
+              id="behavior_notes"
+              name="behavior_notes"
+              as="textarea"
+              rows={5}
+              label="Animal Notes"
+              xs="8"
+            />
+          </BootstrapForm.Row>
+          <BootstrapForm.Row>
+            <Col xs="4">
+              <DropDown
+                label="Aggressive"
+                id="aggressive"
+                name="aggressive"
+                type="text"
+                options={unknownChoices}
+                value={formikProps.values.aggressive||'unknown'}
+                isClearable={false}
+                onChange={(instance) => {
+                  formikProps.setFieldValue("aggressive", instance === null ? '' : instance.value);
+                  formikProps.setFieldValue("aco_required", instance && instance.value === 'yes' ? 'yes' : formikProps.values.aco_required);
+                }}
+              />
+            </Col>
+            <Col xs="4">
+              <DropDown
+                label="ACO Required"
+                id="aco_required"
+                name="aco_required"
+                type="text"
+                options={unknownChoices}
+                value={formikProps.values.aco_required||'unknown'}
+                isClearable={false}
+              />
+            </Col>
+            <Col xs="4">
+              <DropDown
+                label="Injured"
+                id="injured"
+                name="injured"
+                type="text"
+                options={unknownChoices}
+                value={formikProps.values.injured||'unknown'}
+                isClearable={false}
+              />
+            </Col>
+          </BootstrapForm.Row>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Save</Button>
+          <Button variant="secondary" onClick={handleCloseAddNew}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      )}
+    </Formik>
     </>
   )
 }
@@ -219,9 +386,12 @@ function DispatchResolutionForm({ id, incident, organization }) {
   const [shelters, setShelters] = useState({options: [], room_options: {}, isFetching: false});
   const [ownerChoices, setOwnerChoices] = useState({});
   const [saveClose, setSaveClose] = useState(false);
+  const [species, setSpecies] = useState({options: []});
 
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
+
+  const [showAddNew, setShowAddNew] = useState(false);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -317,6 +487,31 @@ function DispatchResolutionForm({ id, incident, organization }) {
 
     fetchEvacAssignmentData();
     fetchShelters();
+
+    const fetchSpecies = () => {
+      setSpecies({options: []});
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.id, label: result.name});
+          });
+          setSpecies({options: species_options});
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setSpecies({options: []});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
 
     // Cleanup.
     return () => {
@@ -495,10 +690,22 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   </ListGroup>
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
-                    <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals</h4>
+                    <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals
+                      <OverlayTrigger
+                        key={"add-new-animal"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-add-new-animal`}>
+                            Add a new animal to this dispatch assignment
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faPlusSquare} onClick={() => {setShowAddNew(true);}} style={{cursor:'pointer'}} className='ml-1' size="" inverse />
+                      </OverlayTrigger>
+                    </h4>
                     {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED').map((animal, inception) => (
                       <ListGroup.Item key={inception}>
-                        <AnimalStatus formikProps={props} sr_updates={data.sr_updates} setData={setData} index={animal.index ? animal.index : index} inception={inception} animal={animal} service_request_object_id={assigned_request.service_request_object.id} shelters={shelters} />
+                        <AnimalStatus formikProps={props} sr_updates={data.sr_updates} setData={setData} showAddNew={showAddNew} setShowAddNew={setShowAddNew} index={animal.index ? animal.index : index} inception={inception} animal={animal} service_request_object_id={assigned_request.service_request_object.id} shelters={shelters} species_options={species.options} />
                       </ListGroup.Item>
                     ))}
                   </ListGroup>
