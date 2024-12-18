@@ -178,7 +178,7 @@ class TreatmentPlanViewSet(viewsets.ModelViewSet):
                 TreatmentRequest.objects.filter(treatment_plan=plan).filter(assignee__isnull=True).exclude(not_administered=True).update(quantity=self.request.data.get('quantity'), route=self.request.data.get('route'))
 
     def perform_destroy(self, instance):
-        if self.request.user.is_superuser or self.request.user.perms.filter(organization__slug=self.request.GET.get('organization')[0])[0].vet_perms:
+        if self.request.user.is_superuser or self.request.user.perms.filter(organization__slug=self.request.GET.get('organization'))[0].vet_perms:
             for tr in instance.treatmentrequest_set.filter(assignee__isnull=True).exclude(not_administered=True):
                 tr.delete()
             if len(instance.treatmentrequest_set.all()) == 0:

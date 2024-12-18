@@ -37,8 +37,6 @@ function Vet({ incident, organization }) {
   const [shelterData, setShelterData] = useState({shelters:[]});
   const [selectedShelter, setSelectedShelter] = useState('all');
   const [animalData, setAnimalData] = useState({});
-  const [shelterAnimals, setShelterAnimals] = useState({'Field':[]});
-  const [activeOrders, setActiveOrders] = useState(tab);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -52,7 +50,6 @@ function Vet({ incident, organization }) {
       })
       .then(async (shelterResponse) => {
         if (!unmounted) {
-
           let animal_data = {}
           const [vetResponse, treatmentResponse, diagnosticResponse, procedureResponse] = await Promise.all([
             axios.get('/vet/api/vetrequest/?incident=' + incident + '&today=true'),

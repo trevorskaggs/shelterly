@@ -185,8 +185,8 @@ class TreatmentPlan(models.Model):
 
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
     quantity = models.FloatField(blank=True, null=True)
-    unit = models.CharField(max_length=5, blank=True, null=True)
-    route = models.CharField(max_length=5, blank=True, null=True)
+    unit = models.CharField(max_length=20, blank=True, null=True)
+    route = models.CharField(max_length=8, blank=True, null=True)
     frequency = models.IntegerField(blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
     description = models.CharField(max_length=200, blank=True, null=True)
