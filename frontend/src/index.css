@@ -42,6 +42,12 @@ hr {
   letter-spacing: 0.5rem;
 }
 
+.wide-modal {
+  width: 50vw;
+  max-width: 50vw;
+  min-width: 50vw;
+}
+
 /* Data table CSS */
 .rdt_Pagination { border-bottom-left-radius : .25rem; border-bottom-right-radius : .25rem; }
 
