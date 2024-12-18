@@ -165,7 +165,7 @@ class IntakeSummaryViewSet(viewsets.ModelViewSet):
             # Create VR data if Triage is yellow or red.
             for sr_update in self.request.data.get('sr_updates', []):
                 for animal_dict in sr_update.get('animals', []):
-                    if animal_dict.get('priority', 'green') in ['when_available', 'urgent']:
+                    if animal_dict.get('id', False) and animal_dict.get('priority', 'green') in ['when_available', 'urgent']:
                         animal = Animal.objects.get(id=animal_dict['id'])
                         med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
                         animal.medical_record=med_record

@@ -304,6 +304,12 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         new_animal_dict["shelter"] = Shelter.objects.get(id=animal_dict.get("shelter")) if animal_dict.get("shelter") else None
                         new_animal_dict["species"] = Species.objects.get(name=animal_dict.get("species"))
                         new_animal_dict["incident"] = Incident.objects.get(slug=self.request.GET.get('incident'))
+                        # Clear out extraneous keys not used for animal creation if present.
+                        new_animal_dict.pop("priority", None)
+                        new_animal_dict.pop("presenting_complaints", None)
+                        new_animal_dict.pop("concern", None)
+                        new_animal_dict.pop("caution", None)
+                        new_animal_dict.pop("new", None)
                         new_animal = Animal.objects.create(**new_animal_dict)
                         new_animal.owners.set(sr.owners.all())
                         id = new_animal.id

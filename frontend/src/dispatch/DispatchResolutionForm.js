@@ -37,7 +37,7 @@ import { titleCase } from '../components/Utils';
 import ActionsDropdown from '../components/ActionsDropdown';
 import LoadingLink from "../components/LoadingLink";
 import { faSplit } from '@fortawesome/pro-solid-svg-icons';
-import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, unknownChoices, otherAgeChoice } from '../animals/constants';
+import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, unknownChoices } from '../animals/constants';
 
 function AnimalStatus(props) {
 
@@ -210,7 +210,6 @@ function AnimalStatus(props) {
         behavior_notes: Yup.string(),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        console.log(values)
         let sr_updates_copy = [...props.sr_updates]
         sr_updates_copy[props.index].animals.push({
           id:null,
@@ -352,7 +351,7 @@ function AnimalStatus(props) {
           </BootstrapForm.Row>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Save</Button>
+          <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Add</Button>
           <Button variant="secondary" onClick={handleCloseAddNew}>Close</Button>
         </Modal.Footer>
       </Modal>
