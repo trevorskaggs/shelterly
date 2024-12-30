@@ -313,7 +313,7 @@ function Vet({ incident, organization }) {
             <hr />
             <Scrollbar no_shadow="true" style={{height:"264px", minHeight:"264px"}} renderView={props => <div {...props} style={{...props.style, overflowX:"hidden", marginBottom:"-10px"}}/>}  renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             {Object.keys(animalData).filter(animal_id => selectedShelter === 'Field' ? animalData[animal_id].shelter === null : selectedShelter !== 'all' ? animalData[animal_id].shelter === selectedShelter : animal_id).map((animal_id) => (
-              <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + animalData[animal_id].medical_record} style={{color:"white"}}>
+              <Link href={"/" + organization + "/" + incident + "/vet/medrecord/" + animalData[animal_id].medical_record} style={{color:"white"}} key={animal_id}>
                 <div className="mt-1 mb-1" style={{}}>
                   <div className="card-header rounded">
                     {/* {service_request.injured ?

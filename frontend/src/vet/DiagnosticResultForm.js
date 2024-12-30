@@ -33,7 +33,7 @@ const DiagnosticResultForm = (props) => {
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
-    open: null,
+    open: new Date(),
     complete: null,
     name: '',
     other_name: '',
@@ -128,6 +128,20 @@ const DiagnosticResultForm = (props) => {
           <Card.Body>
             <Form>
               <FormGroup>
+                <Row className="mb-3">
+                  <DateTimePicker
+                    label="Scheduled"
+                    name="open"
+                    id="open"
+                    xs="4"
+                    onChange={(date, dateStr) => {
+                      formikProps.setFieldValue("open", dateStr)
+                    }}
+                    data-enable-time={false}
+                    clearable={false}
+                    value={formikProps.values.open||new Date()}
+                  />
+                </Row>
                 <Row className="mb-3">
                   <Col xs={"6"}>
                     <DropDown

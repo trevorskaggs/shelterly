@@ -125,7 +125,7 @@ function ProcedureCard(props) {
                   </Col>
                   :
                   <Col xs={3}>
-                    <b>Ordered: </b><Moment format="MMM DD, HH:mm">{props.procedure.open}</Moment>
+                    <b>Scheduled: </b><Moment format="MMM DD">{props.procedure.open}</Moment>
                   </Col>
                   }
                   <Col xs={3}>

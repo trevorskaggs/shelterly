@@ -117,6 +117,8 @@ const ProcedureResultForm = (props) => {
         notes: Yup.string().nullable().max(2500, 'Maximum character limit of 2500.'),
       })}
       onSubmit={(values, { setSubmitting }) => {
+        // Janky hack to turn null string cleared date to actual null.
+        values.complete === "" ? values.complete = null : values.complete = values.complete;
         axios.patch('/vet/api/procedureresults/' + props.id + '/', values)
         .then(response => {
           navigate('/' + props.organization + '/' + props.incident + '/vet/medrecord/' + data.medical_record + '?tab=procedures');
@@ -163,6 +165,20 @@ const ProcedureResultForm = (props) => {
                   />
                 </Row>
                 : ""} */}
+                <BootstrapForm.Row className="mb-3">
+                  <DateTimePicker
+                    label="Scheduled"
+                    name="open"
+                    id="open"
+                    xs="4"
+                    onChange={(date, dateStr) => {
+                      formikProps.setFieldValue("open", dateStr)
+                    }}
+                    data-enable-time={false}
+                    clearable={false}
+                    value={formikProps.values.open||new Date()}
+                  />
+                </BootstrapForm.Row>
                 <BootstrapForm.Row>
                   <Col xs={"4"}>
                     <DropDown
@@ -179,7 +195,7 @@ const ProcedureResultForm = (props) => {
                     />
                   </Col>
                 </BootstrapForm.Row>
-                <Row className="mt-3" style={{marginBottom:"-15px"}}>
+                <BootstrapForm.Row className="mt-3" style={{marginBottom:"-15px"}}>
                   <TextInput
                     as="textarea"
                     label="Notes"
@@ -189,8 +205,8 @@ const ProcedureResultForm = (props) => {
                     rows={4}
                     value={formikProps.values.notes || ''}
                   />
-                </Row>
-                <Row className="mt-3">
+                </BootstrapForm.Row>
+                <BootstrapForm.Row className="mt-3">
                   <DateTimePicker
                     label="Completed on"
                     name="complete"
@@ -199,11 +215,11 @@ const ProcedureResultForm = (props) => {
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("complete", dateStr)
                     }}
-                    value={formikProps.values.complete || new Date()}
+                    value={formikProps.values.complete || null}
                     disabled={false}
                     clearable={true}
                   />
-                </Row>
+                </BootstrapForm.Row>
               </FormGroup>
             </Form>
           </Card.Body>

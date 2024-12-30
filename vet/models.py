@@ -96,7 +96,7 @@ class MedicalNote(models.Model):
 
 class VetRequest(models.Model):
 
-    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    open = models.DateTimeField(auto_now=False, auto_now_add=False)
     status = models.CharField(max_length=20, default='Open')
     requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     caution = models.BooleanField(default=False)
@@ -143,7 +143,7 @@ class ExamAnswer(models.Model):
 
 class DiagnosticResult(models.Model):
 
-    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    open = models.DateTimeField(auto_now=False, auto_now_add=False)
     complete = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     other_name = models.CharField(max_length=50, blank=True, null=True)
     result = models.CharField(max_length=20, blank=True, null=True)
@@ -157,7 +157,7 @@ class DiagnosticResult(models.Model):
 
 class ProcedureResult(models.Model):
 
-    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    open = models.DateTimeField(auto_now=False, auto_now_add=False)
     performer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     complete = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     other_name = models.CharField(max_length=50, blank=True, null=True)

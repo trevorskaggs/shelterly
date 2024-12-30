@@ -309,7 +309,7 @@ class VetRequestViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
         if self.request.GET.get('today'):
-            queryset = queryset.filter(status='Open')
+            queryset = queryset.filter(status="Open", open__lte=datetime.today())
         return queryset
 
     def perform_create(self, serializer):
