@@ -204,7 +204,7 @@ function AnimalDetails({ id, incident, organization }) {
             shelter.buildings.forEach(building => {
               building.rooms.forEach(room => {
                 // Build room option list identified by shelter ID.
-                room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + room.animal_count + ' animals)'});
+                room_options[shelter.id].push({value: room.id, label: room.building_name + ' - ' + room.name + ' (' + (room.animal_count || 0) + ' animals)'});
               });
             });
           });
@@ -661,7 +661,12 @@ function AnimalDetails({ id, incident, organization }) {
       onSubmit={(values, { setSubmitting }) => {
         axios.patch('/animals/api/animal/' + data.id + '/', values)
         .then(response => {
-          setData(prevState => ({ ...prevState, shelter:response.data.shelter, shelter_object:response.data.shelter_object, room:response.data.room, room_name:response.data.room_name}));
+          let updated_history = [...data.action_history];
+          updated_history.unshift(state.user.first_name + " " + state.user.last_name + " sheltered animal in " + response.data.shelter_object.name + " 0 minutes ago.");
+          if (response.data.room_name) {
+            updated_history.unshift(state.user.first_name + " " + state.user.last_name + " roomed animal in " + response.data.room_name + " 0 minutes ago.");
+          }
+          setData(prevState => ({ ...prevState, shelter:response.data.shelter, shelter_object:response.data.shelter_object, room:response.data.room, room_name:response.data.room_name, action_history:updated_history}));
           setShowTransfer(false);
         })
         .catch(error => {

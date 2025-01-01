@@ -92,8 +92,12 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
             elif self.request.data.get('new_request_id'):
                 sr = ServiceRequest.objects.get(id=self.request.data.get('new_request_id'))
-                Animal.objects.filter(id__in=self.request.data.get('animal_ids')).update(request=sr)
+                animals = Animal.objects.filter(id__in=self.request.data.get('animal_ids'))
+                animals.update(request=sr)
+                for animal in animals:
+                    action.send(self.request.user, verb='transferred this animal from SR#' + str(service_request.id_for_incident) + ' to SR#' + str(sr.id_for_incident), target=animal)
                 action.send(self.request.user, verb='transferred animals to SR#' + str(sr.id_for_incident), target=service_request)
+                action.send(self.request.user, verb='transferred animals from SR#' + str(service_request.id_for_incident) + ' to here', target=sr)
 
             elif self.request.data.get('reunite_animals'):
                 for animal in service_request.animal_set.exclude(status__in=['DECEASED', 'NO FURTHER ACTION', 'REUNITED']):

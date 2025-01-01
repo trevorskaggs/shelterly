@@ -699,7 +699,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                           </Tooltip>
                         }
                       >
-                        <FontAwesomeIcon icon={faPlusSquare} onClick={() => {setShowAddNew(true);}} style={{cursor:'pointer'}} className='ml-1' size="" inverse />
+                        <FontAwesomeIcon icon={faPlusSquare} onClick={() => {setShowAddNew(true);}} style={{cursor:'pointer'}} className='ml-1' inverse />
                       </OverlayTrigger>
                     </h4>
                     {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED').map((animal, inception) => (
