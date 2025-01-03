@@ -251,7 +251,7 @@ class ProcedureResultViewSet(viewsets.ModelViewSet):
 
 class TreatmentRequestViewSet(viewsets.ModelViewSet):
     queryset = TreatmentRequest.objects.all()
-    search_fields = ['id', 'assignee__first_name', 'assignee__last_name', 'treatment__description', 'medical_record__patient__name']
+    search_fields = ['id', 'assignee__first_name', 'assignee__last_name', 'treatment__description', 'treatment_plan__medical_record__patient__name']
     filter_backends = (filters.SearchFilter,)
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = TreatmentRequestSerializer
