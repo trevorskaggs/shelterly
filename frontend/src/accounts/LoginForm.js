@@ -8,7 +8,7 @@ import { Form as BootstrapForm, Modal, Row } from 'react-bootstrap';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { TextInput } from '../components/Form.js';
 import { AuthContext } from "./AccountsReducer";
 import { setAuthToken } from "./AccountsUtils";
@@ -17,6 +17,7 @@ const Login = () => {
   const { state, dispatch } = useContext(AuthContext);
   const [, setCookie, removeCookie] = useCookies(['token']);
   const [show, setShow] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const handleClose = () => setShow(false);
 
   // Identify any query param data.
@@ -27,6 +28,10 @@ const Login = () => {
 
   const org_slug = next.split('/')[1];
   const incident_slug = next.split('/')[2];
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <Fragment>
@@ -97,7 +102,7 @@ const Login = () => {
               formgroupclasses="mb-0 mt-3"
             />
             <TextInput
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               id="password"
               placeholder="Password"
@@ -105,6 +110,12 @@ const Login = () => {
               label="Password"
               formgroupclasses="mt-0 mb-4 mt-3"
             />
+            <span
+              className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
+              onClick={togglePasswordVisibility}
+            >
+              <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+            </span>
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Login{state.isLoading ? <FontAwesomeIcon icon={faSpinner} className="ml-1" spin inverse /> : ""}</Button>
               <Button size="lg" className="btn-primary" onClick={() => setShow(true)} block>Forgot Password</Button>
