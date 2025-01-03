@@ -178,6 +178,11 @@ function DispatchAssignmentSearch({ incident, organization }) {
                   placeholder="Search"
                   name="searchTerm"
                   onChange={handleChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSubmit(e);
+                    }
+                  }}
                   ref={tempSearchTerm}
               />
               <InputGroup.Append>
