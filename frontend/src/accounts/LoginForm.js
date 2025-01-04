@@ -110,15 +110,13 @@ const Login = () => {
               label="Password"
               formgroupclasses="mt-0 mb-4 mt-3"
             />
-            <span
-              className="absolute inset-y-0 right-3 flex items-center cursor-pointer"
-              onClick={togglePasswordVisibility}
-            >
-              <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-            </span>
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Login{state.isLoading ? <FontAwesomeIcon icon={faSpinner} className="ml-1" spin inverse /> : ""}</Button>
+              <Button size="lg" className="btn-primary" onClick={togglePasswordVisibility} block>
+              {showPassword ? "Hide Password" : "Show Password"}
+              </Button>
               <Button size="lg" className="btn-primary" onClick={() => setShow(true)} block>Forgot Password</Button>
+
               {status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
             </BootstrapForm.Group>
           </BootstrapForm>
