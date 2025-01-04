@@ -416,6 +416,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
               followup_date: assigned_request.followup_date,
               priority: assigned_request.service_request_object.priority,
               date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
+              directions: assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : '',
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
               animals: Object.keys(assigned_request.animals).map(animal_id =>{return {
@@ -553,6 +554,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
             owner: Yup.boolean(),
             priority: Yup.number(),
             unable_to_complete: Yup.boolean(),
+            directions: Yup.string(),
             followup_date: Yup.date().nullable().when(['unable_to_complete'], {
               is: false,
               then: Yup.date().test('required-check', 'Follow-up date is required',
@@ -681,7 +683,6 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       <ListGroup.Item key={owner.id}><b>Owner: </b>{owner.first_name} {owner.last_name}</ListGroup.Item>
                     ))}
                     {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
-                      <ListGroup.Item><b>Instructions for Field Team: </b>{ assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : "N/A"}</ListGroup.Item>
                       <ListGroup.Item>
                         <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"},&nbsp;
                         <b>Turn Around: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"}
@@ -755,6 +756,16 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       }}
                       value={assigned_request.followup_date || null}
                       disabled={data.end_time !== null && assigned_request.followup_date !== assigned_request.service_request_object.followup_date}
+                    />
+                  </BootstrapForm.Row>
+                  <BootstrapForm.Row className="mt-3">
+                    <TextInput
+                      id={`sr_updates.${index}.directions`}
+                      name={`sr_updates.${index}.directions`}
+                      xs="9"
+                      as="textarea"
+                      rows={5}
+                      label="Instructions for Field Team"
                     />
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
