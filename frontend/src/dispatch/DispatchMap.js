@@ -977,22 +977,24 @@ function Deploy({ incident, organization }) {
                       </span>
                     </OverlayTrigger>
                     }
+                    {service_request.directions ?
                     <OverlayTrigger
                       key={"directions"}
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-directions`}>
-                          { service_request.directions? service_request.directions : "N/A" }
+                          {service_request.directions}
                         </Tooltip>
                       }
                     >
-                      <span className="fa-layers ml-1">
+                      <span className="fa-layers" style={{marginLeft:"7px", marginRight:"-5px"}}>
                         <FontAwesomeIcon icon={faClipboardList} />
                       </span>
                     </OverlayTrigger>
+                    : ""}
                     <span className="ml-2">|
                     &nbsp;<Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>SR#{service_request.id_for_incident}</Link>
-                    {service_request.followup_date ? <span style={{color: isFollowupDateBeforeToday(service_request.followup_date) ? 'red' : 'white'}}> (
+                    {service_request.followup_date ? <span style={{color: isFollowupDateBeforeToday(service_request.followup_date) ? 'rgb(255 76 76)' : 'white'}}> (
                       {/* <OverlayTrigger
                       key={"followup-date"}
                       placement="top"

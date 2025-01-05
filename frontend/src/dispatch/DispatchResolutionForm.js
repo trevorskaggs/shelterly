@@ -768,7 +768,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       label="Instructions for Field Team"
                     />
                   </BootstrapForm.Row>
-                  <BootstrapForm.Row className="mt-3">
+                  <BootstrapForm.Row>
                     <TextInput
                       id={`sr_updates.${index}.notes`}
                       name={`sr_updates.${index}.notes`}

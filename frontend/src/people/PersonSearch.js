@@ -343,7 +343,7 @@ function PersonSearch({ incident, organization }) {
         </CardGroup>
       </div>
     ))}
-    <p>{data.isFetching ? 'Fetching ' + statusOptions + '...' :
+    <p className="mt-3">{data.isFetching ? 'Fetching ' + statusOptions + '...' :
       <span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions + ' found.'}</span>}
     </p>
     <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>

@@ -414,7 +414,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
           </CardGroup>
         </div>
       ))}
-      <p>{data.isFetching ? 'Fetching dispatch assignments...' : <span>{filteredEvacAssignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
+      <p className="mt-3">{data.isFetching ? 'Fetching dispatch assignments...' : <span>{filteredEvacAssignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>
