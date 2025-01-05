@@ -10,7 +10,7 @@ import ImageUploading from 'react-images-uploading';
 import FileUploading from 'react-files-uploading';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faTimes, faMinusSquare, faPlusSquare, faFilePdf,
+  faEye, faEyeSlash, faTimes, faMinusSquare, faPlusSquare, faFilePdf,
 } from '@fortawesome/free-solid-svg-icons';
 import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
@@ -188,7 +188,10 @@ const TextInput = React.forwardRef((props, ref) => {
         <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }} {...field} {...props} />
       </OverlayTrigger>
       :
+      <span>
         <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }} {...field} {...props} />
+        {props.id === 'password' ? <FontAwesomeIcon icon={props.showPassword ? faEyeSlash : faEye} onClick={() => props.togglePasswordVisibility()} className="mr-3 float-right" style={{marginTop:"-30px", color:"#222"}} size="lg" inverse /> : ""}
+      </span>
       }
       <Form.Control.Feedback type="invalid" style={props.errstyle}>{meta.error}</Form.Control.Feedback>
     </Form.Group>

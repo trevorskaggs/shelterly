@@ -8,7 +8,7 @@ import { Form as BootstrapForm, Modal, Row } from 'react-bootstrap';
 import * as Yup from "yup";
 import { useCookies } from 'react-cookie';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { TextInput } from '../components/Form.js';
 import { AuthContext } from "./AccountsReducer";
 import { setAuthToken } from "./AccountsUtils";
@@ -109,14 +109,12 @@ const Login = () => {
               size="lg"
               label="Password"
               formgroupclasses="mt-0 mb-4 mt-3"
+              togglePasswordVisibility={togglePasswordVisibility}
+              showPassword={showPassword}
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Login{state.isLoading ? <FontAwesomeIcon icon={faSpinner} className="ml-1" spin inverse /> : ""}</Button>
-              <Button size="lg" className="btn-primary" onClick={togglePasswordVisibility} block>
-              {showPassword ? "Hide Password" : "Show Password"}
-              </Button>
               <Button size="lg" className="btn-primary" onClick={() => setShow(true)} block>Forgot Password</Button>
-
               {status && <div className="invalid-feedback invalid-form" variant="warning">{status}</div>}
             </BootstrapForm.Group>
           </BootstrapForm>
