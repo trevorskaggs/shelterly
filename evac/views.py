@@ -248,7 +248,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
             for service_request in self.request.data.get('sr_updates', []):
                 animals_dict = {}
-                service_requests = ServiceRequest.objects.filter(id=service_request['id'])
+                sr = ServiceRequest.objects.get(id=service_request['id'])
                 # sr_status = 'open' if service_request.get('unable_to_complete', '') else 'assigned'
                 for animal_dict in service_request['animals']:
                     id = animal_dict.get("id", None)
@@ -346,24 +346,27 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date)
                     # Update animal found location with SR location if blank.
                     if not animal.address:
-                        Animal.objects.filter(id=id).update(address=service_requests[0].address, city=service_requests[0].city, state=service_requests[0].state, zip_code=service_requests[0].zip_code, latitude=service_requests[0].latitude, longitude=service_requests[0].longitude)
+                        Animal.objects.filter(id=id).update(address=sr.address, city=sr.city, state=sr.state, zip_code=sr.zip_code, latitude=sr.latitude, longitude=sr.longitude)
 
                 # Update the relevant SR fields.
                 assigned_request = AssignedRequest.objects.get(service_request=service_request['id'], dispatch_assignment=evac_assignment.id)
                 # Update SIP/UTL.
-                service_requests[0].update_sip_utl()
+                sr.update_sip_utl()
                 assigned_request.animals = animals_dict
 
                 # Only make these changes if saving a DAR Form.
                 if self.request.data.get('start_time'):
                     # Only update SR with followup_date while DA is open or if the old AssignedRequest followup_date matches the current SR followup_date.
-                    if not evac_assignment.end_time or (assigned_request.followup_date == service_requests[0].followup_date):
+                    if not evac_assignment.end_time or (assigned_request.followup_date == sr.followup_date):
                         sr_followup_date = service_request['followup_date'] or None
                     else:
-                        sr_followup_date = service_requests[0].followup_date or None
+                        sr_followup_date = sr.followup_date or None
                     assigned_request.followup_date = sr_followup_date
 
-                    service_requests.update(followup_date=sr_followup_date, priority=service_request['priority'])
+                    sr.followup_date=sr_followup_date
+                    sr.priority=service_request['priority']
+                    sr.directions=service_request['directions']
+                    sr.save()
                     # Only create VisitNote on first update, otherwise update existing VisitNote.
                     if service_request.get('date_completed'):
                         if not assigned_request.visit_note:
@@ -389,7 +392,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     evac_assignment.service_requests.remove(service_requests[0])
                     evac_assignment.assigned_requests.remove(assigned_request)
 
-                service_requests[0].update_status(self.request.user)
+                sr.update_status(self.request.user)
 
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
 

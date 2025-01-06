@@ -257,6 +257,11 @@ function ServiceRequestSearch({ incident, organization }) {
                 placeholder="ID #"
                 name="searchIDTerm"
                 onChange={handleIDChange}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSubmit(e);
+                  }
+                }}
               />
               <InputGroup.Append>
                 <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/hotline/servicerequest/" + goToID)}}>Go</Button>

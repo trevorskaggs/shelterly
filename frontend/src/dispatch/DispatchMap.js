@@ -227,6 +227,15 @@ function Deploy({ incident, organization }) {
     setMapState(tempMapState);
   }
 
+  const isFollowupDateBeforeToday = (followupDate) => {
+  if (!followupDate) return false; // Handle undefined or null dates
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Set time to the start of the day for accurate comparison
+  const followupDateObj = new Date(followupDate);
+
+  return followupDateObj < today;
+};
+
   // Locally working websocket connection.
   // TODO: bring back?
   // useWebSocket('ws://' + window.location.host.replace('localhost:3000', 'localhost:8000') + '/ws/map_data/', {
@@ -968,9 +977,24 @@ function Deploy({ incident, organization }) {
                       </span>
                     </OverlayTrigger>
                     }
+                    {service_request.directions ?
+                    <OverlayTrigger
+                      key={"directions"}
+                      placement="top"
+                      overlay={
+                        <Tooltip id={`tooltip-directions`}>
+                          {service_request.directions}
+                        </Tooltip>
+                      }
+                    >
+                      <span className="fa-layers" style={{marginLeft:"7px", marginRight:"-5px"}}>
+                        <FontAwesomeIcon icon={faClipboardList} />
+                      </span>
+                    </OverlayTrigger>
+                    : ""}
                     <span className="ml-2">|
                     &nbsp;<Link href={"/" + organization +"/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>SR#{service_request.id_for_incident}</Link>
-                    {service_request.followup_date ? <span> (
+                    {service_request.followup_date ? <span style={{color: isFollowupDateBeforeToday(service_request.followup_date) ? 'rgb(255 76 76)' : 'white'}}> (
                       {/* <OverlayTrigger
                       key={"followup-date"}
                       placement="top"

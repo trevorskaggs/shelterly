@@ -185,6 +185,11 @@ function PersonSearch({ incident, organization }) {
               name="searchTerm"
               onChange={handleChange}
               ref={tempSearchTerm}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSubmit(e);
+                }
+              }}
               />
             <InputGroup.Append>
               <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
@@ -338,7 +343,7 @@ function PersonSearch({ incident, organization }) {
         </CardGroup>
       </div>
     ))}
-    <p>{data.isFetching ? 'Fetching ' + statusOptions + '...' :
+    <p className="mt-3">{data.isFetching ? 'Fetching ' + statusOptions + '...' :
       <span>{data.owners && data.owners.length ? '' : 'No ' + statusOptions + ' found.'}</span>}
     </p>
     <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>

@@ -387,6 +387,11 @@ function AnimalSearch({ incident, organization }) {
                 name="searchTerm"
                 onChange={handleChange}
                 ref={tempSearchTerm}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSubmit(e);
+                  }
+                }}
               />
               <InputGroup.Append>
                 <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
