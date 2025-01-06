@@ -12,7 +12,7 @@ from actstream import action
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-from animals.models import Animal
+from animals.models import Animal, Species
 from animals.views import MultipleFieldLookupMixin
 from animals.serializers import AnimalSerializer
 from evac.models import AssignedRequest, DispatchTeam, EvacAssignment, EvacTeamMember, email_on_creation
@@ -20,6 +20,7 @@ from evac.serializers import DispatchTeamSerializer, DeployEvacAssignmentSeriali
 from hotline.models import ServiceRequest, VisitNote
 from incident.models import Incident, Organization
 from people.models import OwnerContact, Person
+from shelter.models import Room, Shelter
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
@@ -269,13 +270,15 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                           'aco_required':animal_dict.get("aco_required"),
                           'injured':animal_dict.get("injured"),
                       }
-                    else:
+                    elif animal_dict.get("original_id", None):
                         with transaction.atomic():
-                            new_animal = deepcopy(Animal.objects.get(id=animal_dict["original_id"]))
+                            animal = Animal.objects.get(id=animal_dict["original_id"])
+                            new_animal = deepcopy(animal)
                             new_animal.id = None
                             new_animal.medical_record = None
                             new_animal.animal_count = animal_dict["animal_count"]
                             new_animal.save()
+                            new_animal.owners.set(animal.owners.all())
                             id = new_animal.id
                             animals_dict[id] = {
                                 "id_for_incident":new_animal.id_for_incident,
@@ -293,6 +296,40 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                                 'aco_required':animal_dict.get("aco_required"),
                                 'injured':animal_dict.get("injured"),
                             }
+                    else:
+                        sr = ServiceRequest.objects.get(id=animal_dict.get("request"))
+                        new_animal_dict = animal_dict.copy()
+                        new_animal_dict["request"] = sr
+                        new_animal_dict["room"] = Room.objects.get(id=animal_dict.get("room")) if animal_dict.get("room") else None
+                        new_animal_dict["shelter"] = Shelter.objects.get(id=animal_dict.get("shelter")) if animal_dict.get("shelter") else None
+                        new_animal_dict["species"] = Species.objects.get(name=animal_dict.get("species"))
+                        new_animal_dict["incident"] = Incident.objects.get(slug=self.request.GET.get('incident'))
+                        # Clear out extraneous keys not used for animal creation if present.
+                        new_animal_dict.pop("priority", None)
+                        new_animal_dict.pop("presenting_complaints", None)
+                        new_animal_dict.pop("concern", None)
+                        new_animal_dict.pop("caution", None)
+                        new_animal_dict.pop("new", None)
+                        new_animal = Animal.objects.create(**new_animal_dict)
+                        new_animal.owners.set(sr.owners.all())
+                        id = new_animal.id
+
+                        animals_dict[id] = {
+                          "id_for_incident":new_animal.id_for_incident,
+                          'animal_count':animal_dict["animal_count"],
+                          "name":animal_dict.get("name"),
+                          "species":animal_dict.get("species"),
+                          "status":animal_dict.get("status"),
+                          "color_notes":animal_dict.get("color_notes"),
+                          "pcolor":animal_dict.get("pcolor"),
+                          "scolor":animal_dict.get("scolor"),
+                          "shelter":animal_dict.get("shelter"),
+                          "room":animal_dict.get("room"),
+                          'animal_notes':animal_dict.get("animal_notes"),
+                          'aggressive':animal_dict.get("aggressive"),
+                          'aco_required':animal_dict.get("aco_required"),
+                          'injured':animal_dict.get("injured"),
+                        }
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=id)
                     new_status = animal_dict.get('status')

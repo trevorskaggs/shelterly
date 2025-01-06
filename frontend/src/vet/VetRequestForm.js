@@ -19,7 +19,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import { AuthContext } from "../accounts/AccountsReducer";
-import { DropDown, TextInput } from '../components/Form';
+import { DateTimePicker, DropDown, TextInput } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
 import Patient from './components/Patient';
 
@@ -51,6 +51,7 @@ const VetRequestForm = (props) => {
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
+    open: new Date(),
     patient: props.animalid,
     incident: state.incident.id,
     requested_by: null,
@@ -186,6 +187,20 @@ const VetRequestForm = (props) => {
           <Card.Body>
             <Form>
               <FormGroup>
+                <Row className="mb-3">
+                  <DateTimePicker
+                    label="Scheduled"
+                    name="open"
+                    id="open"
+                    xs="4"
+                    onChange={(date, dateStr) => {
+                      formikProps.setFieldValue("open", dateStr)
+                    }}
+                    data-enable-time={false}
+                    clearable={false}
+                    value={formikProps.values.open||new Date()}
+                  />
+                </Row>
                 <Row>
                   <Col xs={"4"}>
                     <DropDown

@@ -147,7 +147,7 @@ function DiagnosticCard(props) {
                   </Col>
                   :
                   <Col xs={3}>
-                    <b>Ordered: </b><Moment format="MMM DD, HH:mm">{props.diagnostic.open}</Moment>
+                    <b>Scheduled: </b><Moment format="MMM DD">{props.diagnostic.open}</Moment>
                   </Col>
                   }
                   <Col xs={3}>

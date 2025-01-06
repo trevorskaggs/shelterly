@@ -165,7 +165,7 @@ function VetRequestDetails({ id, incident, organization }) {
                     <b>Opened by:</b> {data.requested_by_object ? <span>{data.requested_by_object.first_name} {data.requested_by_object.last_name}</span> : "Unknown"}
                   </span>
                   <span className="col-6">
-                    <b>Opened: </b><Moment format="ll">{data.open}</Moment>
+                    <b>Scheduled: </b><Moment format="ll">{data.open}</Moment>
                   </span>
                 </div>
               </ListGroup.Item>

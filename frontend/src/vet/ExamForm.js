@@ -156,7 +156,7 @@ const ExamForm = (props) => {
   // Determine if we're in the vet exam workflow.
   var is_workflow = window.location.pathname.includes("workflow");
 
-  const initialData = {id: '', exam: null, open: '', medical_plan:'', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':null, 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', fixed:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
+  const initialData = {id: '', exam: null, open: new Date(), medical_plan:'', exam_object: {'medrecord_id':props.medrecordid, vetrequest_id:vetrequest_id, 'confirm_sex_age':false, 'confirm_chip':false, 'weight':null, 'weight_unit':'', 'weight_estimated':false, 'temperature':'', 'temperature_method':'Rectal', 'pulse':null, 'respiratory_rate':''}, animal_object: {id:'', name:'', species:'', species_string: '', category:'', sex:'', age:'', fixed:'', size:'', pcolor:'', scolor:'', medical_notes:''}, vet_requests:[]}
 
   let current_data = {...initialData}
   if (is_workflow) {
@@ -436,7 +436,7 @@ const ExamForm = (props) => {
                     />
                   </Col>
                 </BootstrapForm.Row>
-                {props.id ? <BootstrapForm.Row className="mt-3 pl-0">
+                <BootstrapForm.Row className="mt-3 pl-0">
                   <DateTimePicker
                     label="Performed"
                     name="open"
@@ -445,9 +445,9 @@ const ExamForm = (props) => {
                     onChange={(date, dateStr) => {
                       formikProps.setFieldValue("open", dateStr)
                     }}
-                    value={formikProps.values.open||null}
+                    value={formikProps.values.open||new Date()}
                   />
-                </BootstrapForm.Row> : ""}
+                </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
                   <Col xs="2">
                     <ToggleSwitch id="confirm_sex_age" name="confirm_sex_age" label="Confirm Age/Sex*" disabled={!formikProps.values.age && !formikProps.values.sex} />

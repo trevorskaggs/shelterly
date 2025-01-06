@@ -96,7 +96,7 @@ class MedicalNote(models.Model):
 
 class VetRequest(models.Model):
 
-    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    open = models.DateTimeField(auto_now=False, auto_now_add=False)
     status = models.CharField(max_length=20, default='Open')
     requested_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     caution = models.BooleanField(default=False)
@@ -143,7 +143,7 @@ class ExamAnswer(models.Model):
 
 class DiagnosticResult(models.Model):
 
-    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    open = models.DateTimeField(auto_now=False, auto_now_add=False)
     complete = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     other_name = models.CharField(max_length=50, blank=True, null=True)
     result = models.CharField(max_length=20, blank=True, null=True)
@@ -157,7 +157,7 @@ class DiagnosticResult(models.Model):
 
 class ProcedureResult(models.Model):
 
-    open = models.DateTimeField(auto_now=False, auto_now_add=True)
+    open = models.DateTimeField(auto_now=False, auto_now_add=False)
     performer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     complete = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     other_name = models.CharField(max_length=50, blank=True, null=True)
@@ -185,8 +185,8 @@ class TreatmentPlan(models.Model):
 
     medical_record = models.ForeignKey(MedicalRecord, on_delete=models.SET_NULL, null=True)
     quantity = models.FloatField(blank=True, null=True)
-    unit = models.CharField(max_length=5, blank=True, null=True)
-    route = models.CharField(max_length=5, blank=True, null=True)
+    unit = models.CharField(max_length=20, blank=True, null=True)
+    route = models.CharField(max_length=8, blank=True, null=True)
     frequency = models.IntegerField(blank=True, null=True)
     days = models.IntegerField(blank=True, null=True)
     description = models.CharField(max_length=200, blank=True, null=True)
@@ -200,8 +200,8 @@ class TreatmentRequest(models.Model):
     treatment_plan = models.ForeignKey(TreatmentPlan, on_delete=models.CASCADE, null=True)
     treatment = models.ForeignKey(Treatment, on_delete=models.SET_NULL, null=True)
     quantity = models.FloatField(blank=True)
-    unit = models.CharField(max_length=5, blank=True, null=True)
-    route = models.CharField(max_length=5, blank=True, null=True)
+    unit = models.CharField(max_length=20, blank=True, null=True)
+    route = models.CharField(max_length=8, blank=True, null=True)
     assignee = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
     suggested_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
     actual_admin_time = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)

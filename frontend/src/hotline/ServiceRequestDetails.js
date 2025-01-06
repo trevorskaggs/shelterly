@@ -38,7 +38,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
 
   const [showTransfer, setShowTransfer] = useState(false);
   const handleCloseTransfer = () => setShowTransfer(false);
-  const [transferData, setTransferData] = useState({'new_request_id':null, 'animal_ids':[]});
+  const [transferData, setTransferData] = useState({'new_request_id':null, 'new_request_id_for_incident': null, 'animal_ids':[]});
 
   const openCalendar = () => {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
@@ -185,7 +185,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
         if (!unmounted) {
           let options = [];
           existingSRResponse.data.filter(request => request.id_for_incident !== Number(id)).forEach(request => {
-            options.push({id: request.id, label: 'SR#' + request.id_for_incident + ': ' + request.full_address})
+            options.push({id: request.id, id_for_incident: request.id_for_incident, label: 'SR#' + request.id_for_incident + ': ' + request.full_address})
           })
           setExistingSRs({data:existingSRResponse.data, options:options, fetching:false});
         }
@@ -679,22 +679,24 @@ function ServiceRequestDetails({ id, incident, organization }) {
         </Modal.Footer>
       </Modal>
       <Formik
-      initialValues={transferData}
-      enableReinitialize={true}
-      // validationSchema={Yup.object({
-      // })}
-      onSubmit={(values, { setSubmitting }) => {
-        axios.patch('/hotline/api/servicerequests/' + data.id + '/', values)
-        .then(response => {
-          setData(prevState => ({ ...prevState, animals:response.data.animals.filter(animal => !values.animal_ids.includes(animal.id))}));
-          setTransferData(prevState => ({ ...prevState, animal_ids:transferData.animal_ids.filter(id => (!values.animal_ids.includes(id)))}));
-          setShowTransfer(false);
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
-      }}
-    >
+        initialValues={transferData}
+        enableReinitialize={true}
+        // validationSchema={Yup.object({
+        // })}
+        onSubmit={(values, { setSubmitting }) => {
+          axios.patch('/hotline/api/servicerequests/' + data.id + '/', values)
+          .then(response => {
+            let updated_history = [...data.action_history];
+            updated_history.unshift(state.user.first_name + " " + state.user.last_name + " transferred animals to SR#" + String(transferData.new_request_id_for_incident) + " 0 minutes ago.");
+            setData(prevState => ({ ...prevState, animals:response.data.animals.filter(animal => !values.animal_ids.includes(animal.id)), action_history:updated_history}));
+            setTransferData(prevState => ({ ...prevState, animal_ids:transferData.animal_ids.filter(id => (!values.animal_ids.includes(id)))}));
+            setShowTransfer(false);
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        }}
+      >
       {formikProps => (
       <Modal show={showTransfer} onHide={handleCloseTransfer}>
         <Modal.Header closeButton>
@@ -732,11 +734,11 @@ function ServiceRequestDetails({ id, incident, organization }) {
             id="new_request_id"
             onChange={(values) => {
               if (values.length) {
-                setTransferData(prevState => ({...prevState, 'new_request_id':values[0].id}));
+                setTransferData(prevState => ({...prevState, 'new_request_id':values[0].id, 'new_request_id_for_incident':values[0].id_for_incident}));
                 // setData(existingSRs.data.filter(request => request.id === values[0].id)[0])
               }
               else {
-                setTransferData(prevState => ({...prevState, 'new_request_id':null}));
+                setTransferData(prevState => ({...prevState, 'new_request_id':null, 'new_request_id_for_incident':null}));
               }
             }}
             options={existingSRs.options}
