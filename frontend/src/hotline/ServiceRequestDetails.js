@@ -99,7 +99,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const [transferData, setTransferData] = useState({'new_request_id':null, 'new_request_id_for_incident': null, 'animal_ids':[]});
   const [showNoteModal, setShowNoteModal] = useState(false);
   const handleCloseNoteModal = () => setShowNoteModal(false);
-  const [noteData, setNoteData] = useState({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
+  const [noteData, setNoteData] = useState({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
