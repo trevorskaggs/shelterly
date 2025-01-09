@@ -23,6 +23,14 @@ const ResetPassword = () => {
 
   const [showInvalidToken, setShowInvalidToken] = useState(false);
   const handleClose = () => setShowInvalidToken(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+  const [showSecondPassword, setShowSecondPassword] = useState(false);
+  const toggleSecondPasswordVisibility = () => {
+    setShowSecondPassword(!showSecondPassword);
+  };
 
   return (
     <>
@@ -63,18 +71,22 @@ const ResetPassword = () => {
             <TextInput
               name="password"
               id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
               label="New Password"
               size="lg"
               formgroupclasses="mt-3 mb-0"
+              togglePasswordVisibility={togglePasswordVisibility}
+              showPassword={showPassword}
             />
             <TextInput
-              type="password"
+              type={showSecondPassword ? "text" : "password"}
               name="password2"
               id="password2"
               label="Confirm Password"
               size="lg"
               formgroupclasses="mt-3 mb-4"
+              togglePasswordVisibility={toggleSecondPasswordVisibility}
+              showPassword={showSecondPassword}
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" disabled={isSubmitting} block>Save New Password</Button>
