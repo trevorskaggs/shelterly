@@ -178,7 +178,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
 
   const [showAddNew, setShowAddNew] = useState(false);
   const [newData, setNewData] = useState({'name': '', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', request:null})
-  const handleCloseAddNew = () => props.setShowAddNew(false);
+  const handleCloseAddNew = () => setShowAddNew(false);
 
   // Hook for initializing data.
   useEffect(() => {
