@@ -42,15 +42,8 @@ const customStyles = {
 
 function AnimalStatus(props) {
 
-  const handleCloseAddNew = () => props.setShowAddNew(false);
-
-  const pcolorRef = useRef(null);
-  const scolorRef = useRef(null);
   const roomRef = useRef(null);
   const shelterRef = useRef(null);
-
-  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices};
-  const [placeholder, setPlaceholder] = useState("Select a species...");
 
   return (
     <>
@@ -295,167 +288,6 @@ function AnimalStatus(props) {
       </Col>
     </Row> : ""}
     </span> : ""}
-    <Formik
-      initialValues={{'name': '', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', new:false}}
-      enableReinitialize={true}
-      validationSchema={Yup.object({
-        name: Yup.string(),
-        animal_count: Yup.number(),
-        species: Yup.string(),
-        pcolor: Yup.string(),
-        scolor: Yup.string(),
-        behavior_notes: Yup.string(),
-      })}
-      onSubmit={(values, { setSubmitting }) => {
-        let sr_updates_copy = [...props.sr_updates]
-        sr_updates_copy[props.index].animals.push({
-          id:null,
-          id_for_incident:null,
-          animal_count:values.animal_count,
-          name:values.name,
-          species:values.species_string,
-          status:'SHELTERED',
-          pcolor:values.pcolor,
-          scolor:values.scolor,
-          behavior_notes:values.behavior_notes,
-          aggressive:values.aggressive,
-          aco_required:values.aco_required,
-          injured:values.injured,
-          request:props.service_request_object_id,
-          shelter:Number(props.shelter_id),
-          room:null,
-          priority:'green',
-          new:true,
-        });
-        props.setData(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
-        props.formikProps.setValues(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
-        props.setShowAddNew(false);
-      }}
-    >
-      {formikProps => (
-      <Modal show={props.showAddNew} onHide={handleCloseAddNew} dialogClassName="wide-modal">
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Animal</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <BootstrapForm.Row>
-            <TextInput
-              id="name"
-              name="name"
-              type="text"
-              label="Animal Name"
-              xs="4"
-            />
-            <Col xs="6" style={{textTransform:'capitalize'}}>
-              <DropDown
-                label="Species*"
-                id="speciesDropdown"
-                name="species"
-                type="text"
-                key={`my_unique_species_select_key__${formikProps.values.species}`}
-                options={props.species_options}
-                value={formikProps.values.species}
-                isClearable={false}
-                onChange={(instance) => {
-                  setPlaceholder("Select...")
-                  pcolorRef.current.select.clearValue();
-                  scolorRef.current.select.clearValue();
-                  formikProps.setFieldValue("species", instance.value);
-                  formikProps.setFieldValue("species_string", instance.label);
-                }}
-              />
-            </Col>
-            <TextInput
-              id="animal_count"
-              name="animal_count"
-              type="text"
-              xs="2"
-              label="No. of Animals"
-            />
-          </BootstrapForm.Row>
-          <BootstrapForm.Row>
-            <Col xs="4">
-              <DropDown
-                label="Primary Color"
-                id="pcolor"
-                name="pcolor"
-                type="text"
-                key={`my_unique_pcolor_select_key__${formikProps.values.pcolor}`}
-                ref={pcolorRef}
-                style={{marginTop:"2px"}}
-                options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
-                value={formikProps.values.pcolor||''}
-                placeholder={placeholder}
-              />
-              <DropDown
-                label="Secondary Color"
-                id="scolor"
-                name="scolor"
-                type="text"
-                key={`my_unique_scolor_select_key__${formikProps.values.scolor}`}
-                ref={scolorRef}
-                style={{marginTop:"23px"}}
-                options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
-                value={formikProps.values.scolor||''}
-                placeholder={placeholder}
-              />
-            </Col>
-            <TextInput
-              id="behavior_notes"
-              name="behavior_notes"
-              as="textarea"
-              rows={5}
-              label="Animal Notes"
-              xs="8"
-            />
-          </BootstrapForm.Row>
-          <BootstrapForm.Row>
-            <Col xs="4">
-              <DropDown
-                label="Aggressive"
-                id="aggressive"
-                name="aggressive"
-                type="text"
-                options={unknownChoices}
-                value={formikProps.values.aggressive||'unknown'}
-                isClearable={false}
-                onChange={(instance) => {
-                  formikProps.setFieldValue("aggressive", instance === null ? '' : instance.value);
-                  formikProps.setFieldValue("aco_required", instance && instance.value === 'yes' ? 'yes' : formikProps.values.aco_required);
-                }}
-              />
-            </Col>
-            <Col xs="4">
-              <DropDown
-                label="ACO Required"
-                id="aco_required"
-                name="aco_required"
-                type="text"
-                options={unknownChoices}
-                value={formikProps.values.aco_required||'unknown'}
-                isClearable={false}
-              />
-            </Col>
-            <Col xs="4">
-              <DropDown
-                label="Injured"
-                id="injured"
-                name="injured"
-                type="text"
-                options={unknownChoices}
-                value={formikProps.values.injured||'unknown'}
-                isClearable={false}
-              />
-            </Col>
-          </BootstrapForm.Row>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Add</Button>
-          <Button variant="secondary" onClick={handleCloseAddNew}>Close</Button>
-        </Modal.Footer>
-      </Modal>
-      )}
-    </Formik>
     </>
   )
 }
@@ -468,8 +300,18 @@ function ShelterIntake({ id, incident, organization }) {
   const [data, setData] = useState({shelter_name:'', dispatch_assignments:[], sr_updates:[], shelter: id, da: null, animals:[], animal_count:1, isFetching: false});
   const [selected, setSelected] = useState(null);
   const [showAddNew, setShowAddNew] = useState(false);
+  const handleCloseAddNew = () => setShowAddNew(false);
   const [species, setSpecies] = useState({options: []});
   const [presentingComplaintChoices, setPresentingComplaintChoices] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [selectedSR, setSelectedSR] = useState(null);
+  const [newData, setNewData] = useState({'name': '', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', new:false});
+
+  const pcolorRef = useRef(null);
+  const scolorRef = useRef(null);
+
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices};
+  const [placeholder, setPlaceholder] = useState("Select a species...");
 
   // Hook for initializing data.
   useEffect(() => {
@@ -596,6 +438,7 @@ function ShelterIntake({ id, incident, organization }) {
   }, [id, incident]);
 
   return (
+    <>
     <Formik
       initialValues={data}
       enableReinitialize={true}
@@ -704,12 +547,12 @@ function ShelterIntake({ id, incident, organization }) {
                           </Tooltip>
                         }
                       >
-                        <FontAwesomeIcon icon={faPlusSquare} onClick={() => {setShowAddNew(true);}} style={{cursor:'pointer'}} className='ml-1' inverse />
+                        <FontAwesomeIcon icon={faPlusSquare} onClick={() => {setShowAddNew(true);setSelectedSR(assigned_request.service_request_object.id);setSelectedIndex(index)}} style={{cursor:'pointer'}} className='ml-1' inverse />
                       </OverlayTrigger>
                     </h4>
                     {data.sr_updates[index] && data.sr_updates[index].animals.map((animal, inception) => (
                       <ListGroup.Item key={inception} hidden={animal.status === 'SHELTERED' && data.sr_updates[index] && data.sr_updates[index].animals[inception] && (data.sr_updates[index].animals[inception].shelter !== Number(id))}>
-                        <AnimalStatus formikProps={props} sr_updates={props.values.sr_updates} setData={setData} presentingComplaintChoices={presentingComplaintChoices} showAddNew={showAddNew} setShowAddNew={setShowAddNew} index={animal.index ? animal.index : index} inception={inception} animal={animal} shelter_id={Number(id)} service_request_object_id={assigned_request.service_request_object.id} shelter_options={options.shelter_options} room_options={options.room_options} species_options={species.options} />
+                        <AnimalStatus formikProps={props} sr_updates={props.values.sr_updates} setData={setData} presentingComplaintChoices={presentingComplaintChoices} index={animal.index ? animal.index : index} inception={inception} animal={animal} shelter_id={Number(id)} service_request_object_id={assigned_request.service_request_object.id} shelter_options={options.shelter_options} room_options={options.room_options} />
                       </ListGroup.Item>
                     ))}
                   </ListGroup>
@@ -727,6 +570,169 @@ function ShelterIntake({ id, incident, organization }) {
         </BootstrapForm>
       )}
     </Formik>
+    <Formik
+      initialValues={newData}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        name: Yup.string(),
+        animal_count: Yup.number(),
+        species: Yup.string(),
+        pcolor: Yup.string(),
+        scolor: Yup.string(),
+        behavior_notes: Yup.string(),
+      })}
+      onSubmit={(values, { setSubmitting, setValues }) => {
+        let sr_updates_copy = [...data.sr_updates]
+        sr_updates_copy[selectedIndex].animals.push({
+          id:null,
+          id_for_incident:null,
+          animal_count:values.animal_count,
+          name:values.name,
+          species:values.species_string,
+          status:'SHELTERED',
+          pcolor:values.pcolor,
+          scolor:values.scolor,
+          behavior_notes:values.behavior_notes,
+          aggressive:values.aggressive,
+          aco_required:values.aco_required,
+          injured:values.injured,
+          request:selectedSR,
+          shelter:Number(id),
+          room:null,
+          priority:'green',
+          new:true,
+        });
+        setData(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
+        setValues(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
+        setNewData({'name': '', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', new:false});
+        setShowAddNew(false);
+      }}
+    >
+      {formikProps => (
+      <Modal show={showAddNew} onHide={handleCloseAddNew} dialogClassName="wide-modal">
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Animal</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <BootstrapForm.Row>
+            <TextInput
+              id="name"
+              name="name"
+              type="text"
+              label="Animal Name"
+              xs="4"
+            />
+            <Col xs="6" style={{textTransform:'capitalize'}}>
+              <DropDown
+                label="Species*"
+                id="speciesDropdown"
+                name="species"
+                type="text"
+                key={`my_unique_species_select_key__${formikProps.values.species}`}
+                options={species.options}
+                value={formikProps.values.species}
+                isClearable={false}
+                onChange={(instance) => {
+                  setPlaceholder("Select...")
+                  pcolorRef.current.select.clearValue();
+                  scolorRef.current.select.clearValue();
+                  formikProps.setFieldValue("species", instance.value);
+                  formikProps.setFieldValue("species_string", instance.label);
+                }}
+              />
+            </Col>
+            <TextInput
+              id="animal_count"
+              name="animal_count"
+              type="text"
+              xs="2"
+              label="No. of Animals"
+            />
+          </BootstrapForm.Row>
+          <BootstrapForm.Row>
+            <Col xs="4">
+              <DropDown
+                label="Primary Color"
+                id="pcolor"
+                name="pcolor"
+                type="text"
+                key={`my_unique_pcolor_select_key__${formikProps.values.pcolor}`}
+                ref={pcolorRef}
+                style={{marginTop:"2px"}}
+                options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
+                value={formikProps.values.pcolor||''}
+                placeholder={placeholder}
+              />
+              <DropDown
+                label="Secondary Color"
+                id="scolor"
+                name="scolor"
+                type="text"
+                key={`my_unique_scolor_select_key__${formikProps.values.scolor}`}
+                ref={scolorRef}
+                style={{marginTop:"23px"}}
+                options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
+                value={formikProps.values.scolor||''}
+                placeholder={placeholder}
+              />
+            </Col>
+            <TextInput
+              id="behavior_notes"
+              name="behavior_notes"
+              as="textarea"
+              rows={5}
+              label="Animal Notes"
+              xs="8"
+            />
+          </BootstrapForm.Row>
+          <BootstrapForm.Row>
+            <Col xs="4">
+              <DropDown
+                label="Aggressive"
+                id="aggressive"
+                name="aggressive"
+                type="text"
+                options={unknownChoices}
+                value={formikProps.values.aggressive||'unknown'}
+                isClearable={false}
+                onChange={(instance) => {
+                  formikProps.setFieldValue("aggressive", instance === null ? '' : instance.value);
+                  formikProps.setFieldValue("aco_required", instance && instance.value === 'yes' ? 'yes' : formikProps.values.aco_required);
+                }}
+              />
+            </Col>
+            <Col xs="4">
+              <DropDown
+                label="ACO Required"
+                id="aco_required"
+                name="aco_required"
+                type="text"
+                options={unknownChoices}
+                value={formikProps.values.aco_required||'unknown'}
+                isClearable={false}
+              />
+            </Col>
+            <Col xs="4">
+              <DropDown
+                label="Injured"
+                id="injured"
+                name="injured"
+                type="text"
+                options={unknownChoices}
+                value={formikProps.values.injured||'unknown'}
+                isClearable={false}
+              />
+            </Col>
+          </BootstrapForm.Row>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => {formikProps.submitForm();}}>Add</Button>
+          <Button variant="secondary" onClick={handleCloseAddNew}>Close</Button>
+        </Modal.Footer>
+      </Modal>
+      )}
+    </Formik>
+    </>
   )
 }
 
