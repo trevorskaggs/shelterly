@@ -416,7 +416,7 @@ function Deploy({ incident, organization }) {
           .required('Required'),
       })}
       enableReinitialize={true}
-      onSubmit={(values, { setSubmitting }) => {
+      onSubmit={(values, { setSubmitting, resetForm }) => {
         // Check if assigned team members have been submitted.
         if (!proceed && values.team_members.filter(teammember => (assignedTeamMembers.includes(teammember))).map(teammember => teammember).length > 0) {
           setShowAlreadyAssignedTeamModal(true);
@@ -433,7 +433,14 @@ function Deploy({ incident, organization }) {
             .then(response => {
               // Stay on map and remove selected SRs if in Preplanning mode.
               if (preplan) {
-                setTriggerRefresh(true);
+                setSelectedCount({count:0, disabled:true});
+                const newState = {...mapState};
+                values.service_requests.forEach(sr => {
+                  delete newState[sr];
+                })
+                setMapState(newState);
+                resetForm();
+                setTriggerRefresh(!triggerRefresh);
               }
               // Otherwise navigate to the DA Summary page.
               else {
