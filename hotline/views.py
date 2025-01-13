@@ -7,7 +7,7 @@ from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, V
 from django.http import HttpResponse, JsonResponse
 from actstream import action
 from datetime import datetime
-from .serializers import BarebonesServiceRequestSerializer, ServiceRequestSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
+from .serializers import BarebonesServiceRequestSerializer, ServiceRequestSerializer, ServiceRequestNoteSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from .ordering import MyCustomOrdering
 from wsgiref.util import FileWrapper
 from channels.layers import get_channel_layer
@@ -15,7 +15,7 @@ from asgiref.sync import async_to_sync
 
 from animals.models import Animal
 from animals.views import MultipleFieldLookupMixin
-from hotline.models import ServiceRequest, ServiceRequestImage, VisitNote
+from hotline.models import ServiceRequest, ServiceRequestImage, ServiceRequestNote, VisitNote
 from incident.models import Incident
 
 from rest_framework import filters, permissions, serializers, viewsets
@@ -200,3 +200,15 @@ class VisitNoteViewSet(viewsets.ModelViewSet):
     queryset = VisitNote.objects.all()
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = VisitNoteSerializer
+
+class ServiceRequestNoteViewSet(viewsets.ModelViewSet):
+
+    queryset = ServiceRequestNote.objects.all()
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = ServiceRequestNoteSerializer
+
+    def perform_create(self, serializer):
+        if serializer.is_valid():
+
+            serializer.save()
+            action.send(self.request.user, verb='added a note', target=ServiceRequest.objects.get(id=self.request.data.get('service_request')))

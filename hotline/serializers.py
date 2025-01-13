@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import ServiceRequest, VisitNote
+from .models import ServiceRequest, ServiceRequestNote, VisitNote
 from animals.serializers import SimpleAnimalSerializer, ModestAnimalSerializer, AnimalSerializer
 from location.utils import build_full_address, build_action_string
 
@@ -212,18 +212,32 @@ class SimpleServiceRequestSerializer(MapServiceRequestSerializer):
             data['longitude'] = float("%.6f" % float(data.get('longitude')))
         return super().to_internal_value(data)
 
+
+class ServiceRequestNoteSerializer(serializers.ModelSerializer):
+    
+    author_name = serializers.SerializerMethodField()
+
+    def get_author_name(self, obj):
+        return obj.author.first_name + ' ' + obj.author.last_name
+
+    class Meta:
+        model = ServiceRequestNote
+        fields = '__all__'
+
+
 class ServiceRequestSerializer(SimpleServiceRequestSerializer):
 
     action_history = serializers.SerializerMethodField()
     injured = serializers.BooleanField(read_only=True)
     assigned_requests = serializers.SerializerMethodField()
     animals = serializers.SerializerMethodField()
+    notes = ServiceRequestNoteSerializer(many=True, required=False, read_only=True)
 
     class Meta:
         model = ServiceRequest
         fields = ['id', 'id_for_incident', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
         'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'reported_evac', 'sheltered_in_place', 'reported_sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests']
+        'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests', 'notes']
 
     # Custom field for ordering animals.
     def get_animals(self, obj):

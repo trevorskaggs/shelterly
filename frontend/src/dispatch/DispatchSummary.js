@@ -604,6 +604,17 @@ function DispatchSummary({ id, incident, organization }) {
               </ListGroup.Item>
             ))}
           </ListGroup>
+          {assigned_request.service_request_object.notes.filter(note => note.urgent === true).length ? <span>
+            <hr/>
+            <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+              <h4 className="mt-2" style={{marginBottom:"-2px"}}>Urgent Notes</h4>
+                {assigned_request.service_request_object.notes.filter(note => note.urgent === true).map(note =>
+                <ListGroup.Item key={note.id} style={{whiteSpace:"pre-line"}}>
+                  {note.notes || "No information available."}
+                </ListGroup.Item>
+                )}
+            </ListGroup>
+          </span> : ""}
           {assigned_request.visit_note ?
           <span>
             <hr/>
@@ -614,7 +625,7 @@ function DispatchSummary({ id, incident, organization }) {
                 </ListGroup.Item>
             </ListGroup>
           </span>
-          : "" }
+          : ""}
           {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
           {assigned_request.visit_notes.map(visit_note =>
             <ListGroup variant="flush" style={{marginBottom:"-13px"}} key={visit_note.id}>

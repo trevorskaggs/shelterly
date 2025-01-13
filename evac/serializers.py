@@ -7,7 +7,7 @@ from actstream.models import target_stream
 from animals.serializers import SimpleAnimalSerializer
 from evac.models import DispatchTeam, EvacAssignment, EvacTeamMember, AssignedRequest
 from hotline.models import ServiceRequest, VisitNote
-from hotline.serializers import BarebonesServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
+from hotline.serializers import BarebonesServiceRequestSerializer, ServiceRequestNoteSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from people.serializers import OwnerContactSerializer, SimplePersonSerializer, PersonSerializer
 
 from location.utils import build_action_string
@@ -46,6 +46,7 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class SimpleDispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
+
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
 
     class Meta:
@@ -57,6 +58,7 @@ class SimpleDispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 class DispatchServiceRequestSerializer(SimpleDispatchServiceRequestSerializer):
 
     animals = SimpleAnimalSerializer(many=True, read_only=True)
+    notes = ServiceRequestNoteSerializer(many=True, required=False, read_only=True)
     # owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
@@ -65,7 +67,7 @@ class DispatchServiceRequestSerializer(SimpleDispatchServiceRequestSerializer):
         model = ServiceRequest
         fields = ['id', 'animals', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
         'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'owners', 'owner_objects', 'reporter_object', 'visit_notes']
+        'owners', 'owner_objects', 'reporter_object', 'visit_notes', 'notes']
 
 class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
     service_request_object = SimpleDispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
