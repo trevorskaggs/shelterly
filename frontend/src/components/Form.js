@@ -190,10 +190,11 @@ const TextInput = React.forwardRef((props, ref) => {
       :
       <span>
         <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }} {...field} {...props} />
-        {props.id === 'password' ? <FontAwesomeIcon icon={props.showPassword ? faEyeSlash : faEye} onClick={() => props.togglePasswordVisibility()} className="mr-3 float-right" style={{marginTop:"-30px", color:"#222"}} size="lg" inverse /> : ""}
+        {['password', 'password2'].includes(props.id) ? <FontAwesomeIcon icon={props.showPassword ? faEyeSlash : faEye} onClick={() => props.togglePasswordVisibility()} className="float-right" style={{marginRight: meta.error ? "35px" : "15px", marginTop:"-32px", color:"#222"}} size="lg" inverse /> : ""}
       </span>
       }
-      <Form.Control.Feedback type="invalid" style={props.errstyle}>{meta.error}</Form.Control.Feedback>
+      {/* <Form.Control.Feedback type="invalid" style={props.errstyle ? props.errstyle : props.style}>{meta.error}</Form.Control.Feedback> */}
+      {meta.error ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{meta.error}</div> : ""}
     </Form.Group>
     </>
   );

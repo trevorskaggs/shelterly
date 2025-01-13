@@ -17,7 +17,6 @@ const Login = () => {
   const { state, dispatch } = useContext(AuthContext);
   const [, setCookie, removeCookie] = useCookies(['token']);
   const [show, setShow] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const handleClose = () => setShow(false);
 
   // Identify any query param data.
@@ -29,6 +28,7 @@ const Login = () => {
   const org_slug = next.split('/')[1];
   const incident_slug = next.split('/')[2];
 
+  const [showPassword, setShowPassword] = useState(false);
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
