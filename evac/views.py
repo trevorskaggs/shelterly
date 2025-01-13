@@ -187,7 +187,10 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         'id_for_incident':animal["id_for_incident"],
                         'animal_count':animal["animal_count"],
                         'status':animal["status"],
+                        'sex':animal["sex"],
+                        'age':animal["age"],
                         'name':animal["name"],
+                        'size':animal["size"],
                         'species':animal["species_string"],
                         'color_notes':animal["color_notes"],
                         'pcolor':animal["pcolor"],
@@ -195,9 +198,13 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         'shelter':'',
                         'room':'',
                         'animal_notes':animal["behavior_notes"],
+                        'medical_notes':animal["medical_notes"],
                         'aggressive':animal["aggressive"],
                         'aco_required':animal["aco_required"],
                         'injured':animal["injured"],
+                        'fixed':animal["fixed"],
+                        'confined':animal["confined"],
+                        'last_seen':animal["last_seen"],
                     }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
@@ -231,17 +238,24 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         "id_for_incident": animal["id_for_incident"],
                         'animal_count':animal["animal_count"],
                         "name": animal["name"],
+                        "sex": animal["sex"],
+                        "age": animal["age"],
+                        "size": animal["size"],
                         "species": animal["species_string"],
                         "status": animal["status"],
                         "color_notes": animal["color_notes"],
                         "pcolor": animal["pcolor"],
                         "scolor": animal["scolor"],
+                        "last_seen": animal["last_seen"],
                         "shelter": animal["shelter"],
                         "room": animal["room"],
                         'animal_notes':animal["behavior_notes"],
+                        "medical_notes": animal["medical_notes"],
                         'aggressive':animal["aggressive"],
                         'aco_required':animal["aco_required"],
                         'injured':animal["injured"],
+                        "fixed": animal["fixed"],
+                        "confined": animal["confined"],
                     }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
@@ -253,22 +267,29 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 for animal_dict in service_request['animals']:
                     id = animal_dict.get("id", None)
                     if id:
-                      Animal.objects.filter(id=id).update(animal_count=animal_dict.get("animal_count"))
+                      Animal.objects.filter(id=id).update(animal_count=animal_dict.get("animal_count", 1))
                       animals_dict[id] = {
                           "id_for_incident": animal_dict.get("id_for_incident"),
-                          'animal_count':animal_dict.get("animal_count"),
+                          'animal_count':animal_dict.get("animal_count", 1),
                           "name": animal_dict.get("name"),
+                          "age": animal_dict.get("age"),
+                          "sex": animal_dict.get("sex"),
+                          "size": animal_dict.get("size"),
                           "species": animal_dict.get("species"),
                           "status": animal_dict.get("status"),
                           "color_notes": animal_dict.get("color_notes"),
                           "pcolor": animal_dict.get("pcolor"),
                           "scolor": animal_dict.get("scolor"),
+                          "last_seen": animal_dict.get("last_seen"),
                           "shelter": animal_dict.get("shelter"),
                           "room": animal_dict.get("room"),
                           'animal_notes':animal_dict.get("animal_notes"),
+                          "medical_notes": animal_dict.get("medical_notes"),
                           'aggressive':animal_dict.get("aggressive"),
                           'aco_required':animal_dict.get("aco_required"),
                           'injured':animal_dict.get("injured"),
+                          "fixed": animal_dict.get("fixed"),
+                          "confined": animal_dict.get("confined"),
                       }
                     elif animal_dict.get("original_id", None):
                         with transaction.atomic():
@@ -282,19 +303,26 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                             id = new_animal.id
                             animals_dict[id] = {
                                 "id_for_incident":new_animal.id_for_incident,
-                                'animal_count':animal_dict["animal_count"],
-                                "name":animal_dict.get("name"),
-                                "species":animal_dict.get("species"),
-                                "status":animal_dict.get("status"),
-                                "color_notes":animal_dict.get("color_notes"),
-                                "pcolor":animal_dict.get("pcolor"),
-                                "scolor":animal_dict.get("scolor"),
-                                "shelter":animal_dict.get("shelter"),
-                                "room":animal_dict.get("room"),
+                                'animal_count':animal_dict.get("animal_count", 1),
+                                "name": animal_dict.get("name"),
+                                "age": animal_dict.get("age"),
+                                "sex": animal_dict.get("sex"),
+                                "size": animal_dict.get("size"),
+                                "species": animal_dict.get("species"),
+                                "status": animal_dict.get("status"),
+                                "color_notes": animal_dict.get("color_notes"),
+                                "pcolor": animal_dict.get("pcolor"),
+                                "scolor": animal_dict.get("scolor"),
+                                "last_seen": animal_dict.get("last_seen"),
+                                "shelter": animal_dict.get("shelter"),
+                                "room": animal_dict.get("room"),
                                 'animal_notes':animal_dict.get("animal_notes"),
+                                "medical_notes": animal_dict.get("medical_notes"),
                                 'aggressive':animal_dict.get("aggressive"),
                                 'aco_required':animal_dict.get("aco_required"),
                                 'injured':animal_dict.get("injured"),
+                                "fixed": animal_dict.get("fixed"),
+                                "confined": animal_dict.get("confined"),
                             }
                     else:
                         sr = ServiceRequest.objects.get(id=animal_dict.get("request"))
@@ -304,7 +332,9 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         new_animal_dict["shelter"] = Shelter.objects.get(id=animal_dict.get("shelter")) if animal_dict.get("shelter") else None
                         new_animal_dict["species"] = Species.objects.get(name=animal_dict.get("species"))
                         new_animal_dict["incident"] = Incident.objects.get(slug=self.request.GET.get('incident'))
+                        new_animal_dict["behavior_notes"] = new_animal_dict["animal_notes"]
                         # Clear out extraneous keys not used for animal creation if present.
+                        new_animal_dict.pop("animal_notes", None)
                         new_animal_dict.pop("priority", None)
                         new_animal_dict.pop("presenting_complaints", None)
                         new_animal_dict.pop("concern", None)
@@ -317,18 +347,25 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         animals_dict[id] = {
                           "id_for_incident":new_animal.id_for_incident,
                           'animal_count':animal_dict["animal_count"],
-                          "name":animal_dict.get("name"),
-                          "species":animal_dict.get("species"),
-                          "status":animal_dict.get("status"),
-                          "color_notes":animal_dict.get("color_notes"),
-                          "pcolor":animal_dict.get("pcolor"),
-                          "scolor":animal_dict.get("scolor"),
-                          "shelter":animal_dict.get("shelter"),
-                          "room":animal_dict.get("room"),
+                          "name": animal_dict.get("name"),
+                          "age": animal_dict.get("age"),
+                          "sex": animal_dict.get("sex"),
+                          "size": animal_dict.get("size"),
+                          "species": animal_dict.get("species"),
+                          "status": animal_dict.get("status"),
+                          "color_notes": animal_dict.get("color_notes"),
+                          "pcolor": animal_dict.get("pcolor"),
+                          "scolor": animal_dict.get("scolor"),
+                          "last_seen": animal_dict.get("last_seen"),
+                          "shelter": animal_dict.get("shelter"),
+                          "room": animal_dict.get("room"),
                           'animal_notes':animal_dict.get("animal_notes"),
+                          "medical_notes": animal_dict.get("medical_notes"),
                           'aggressive':animal_dict.get("aggressive"),
                           'aco_required':animal_dict.get("aco_required"),
                           'injured':animal_dict.get("injured"),
+                          "fixed": animal_dict.get("fixed"),
+                          "confined": animal_dict.get("confined"),
                         }
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=id)

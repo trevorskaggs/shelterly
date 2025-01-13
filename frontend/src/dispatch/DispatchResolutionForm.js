@@ -37,7 +37,8 @@ import { titleCase } from '../components/Utils';
 import ActionsDropdown from '../components/ActionsDropdown';
 import LoadingLink from "../components/LoadingLink";
 import { faSplit } from '@fortawesome/pro-solid-svg-icons';
-import { catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, unknownChoices } from '../animals/constants';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, unknownChoices, otherAgeChoice } from '../animals/constants';
+import CustomSelect from "../components/CustomSelect.js";
 
 function AnimalStatus(props) {
 
@@ -170,14 +171,18 @@ function DispatchResolutionForm({ id, incident, organization }) {
 
   const pcolorRef = useRef(null);
   const scolorRef = useRef(null);
-  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices};
+  const sexRef = useRef(null);
+  const sizeRef = useRef(null);
+  const ageChoices = {'':[], 'dog':dogAgeChoices, 'cat':catAgeChoices, 'horse':horseAgeChoices, 'other':otherAgeChoices}
+  const colorChoices = {'':[], 'dog':dogColorChoices, 'cat':catColorChoices, 'horse':horseColorChoices, 'other':otherColorChoices}
+  const sizeChoices = {'':[], 'dog':dogSizeChoices, 'cat':catSizeChoices, 'horse':horseSizeChoices, 'other':otherSizeChoices}
   const [placeholder, setPlaceholder] = useState("Select a species...");
 
   const ordered = useOrderedNodes();
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
 
   const [showAddNew, setShowAddNew] = useState(false);
-  const [newData, setNewData] = useState({'name': '', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', request:null})
+  const [newData, setNewData] = useState({'name': '', sex:'', age:'', size:'', last_seen:'', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', 'color_notes':'', 'medical_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', confined:'unknown', fixed:'unknown', request:null})
   const handleCloseAddNew = () => setShowAddNew(false);
 
   // Hook for initializing data.
@@ -212,13 +217,20 @@ function DispatchResolutionForm({ id, incident, organization }) {
                 id_for_incident:assigned_request.animals[animal_id].id_for_incident,
                 animal_count:assigned_request.animals[animal_id].animal_count,
                 name:assigned_request.animals[animal_id].name,
+                age:assigned_request.animals[animal_id].age,
+                sex:assigned_request.animals[animal_id].sex,
+                size:assigned_request.animals[animal_id].size,
+                last_seen:assigned_request.animals[animal_id].last_seen,
                 species:assigned_request.animals[animal_id].species,
                 status:assigned_request.animals[animal_id].status,
                 color_notes:assigned_request.animals[animal_id].color_notes,
                 pcolor:assigned_request.animals[animal_id].pcolor,
                 scolor:assigned_request.animals[animal_id].scolor,
                 animal_notes:assigned_request.animals[animal_id].animal_notes,
+                medical_notes:assigned_request.animals[animal_id].medical_notes,
                 aggressive:assigned_request.animals[animal_id].aggressive,
+                confined:assigned_request.animals[animal_id].confined,
+                fixed:assigned_request.animals[animal_id].fixed,
                 aco_required:assigned_request.animals[animal_id].aco_required,
                 injured:assigned_request.animals[animal_id].injured,
                 request:assigned_request.service_request_object.id,
@@ -652,20 +664,28 @@ function DispatchResolutionForm({ id, incident, organization }) {
           animal_count:values.animal_count,
           name:values.name,
           species:values.species_string,
+          age:values.age,
+          sex:values.sex,
+          size:values.size,
           status:'REPORTED',
           pcolor:values.pcolor,
           scolor:values.scolor,
-          behavior_notes:values.behavior_notes,
+          animal_notes:values.behavior_notes,
+          color_notes:values.color_notes,
+          medical_notes:values.medical_notes,
+          last_seen:values.last_seen,
           aggressive:values.aggressive,
           aco_required:values.aco_required,
           injured:values.injured,
+          confined:values.confined,
+          fixed:values.fixed,
           request:selectedSR,
           shelter:'',
           room:''
         });
         setData(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
         setValues(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
-        setNewData({'name': '', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', request:null});
+        setNewData({'name': '', sex:'', age:'', size:'', last_seen:'', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', 'color_notes':'', 'medical_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', confined:'unknown', fixed:'unknown', request:null});
         setShowAddNew(false);
       }}
     >
@@ -711,6 +731,46 @@ function DispatchResolutionForm({ id, incident, organization }) {
             />
           </BootstrapForm.Row>
           <BootstrapForm.Row>
+            <Col xs="4">
+              <DropDown
+                label="Sex"
+                id="sexDropDown"
+                name="sex"
+                type="text"
+                key={`my_unique_sex_select_key__${formikProps.values.sex}`}
+                ref={sexRef}
+                options={sexChoices}
+                value={formikProps.values.sex||''}
+              />
+            </Col>
+            <Col xs="4">
+              <CustomSelect
+                label="Age"
+                options={Object.keys(ageChoices).includes(formikProps.values.species_string)
+                  ? ageChoices[formikProps.values.species_string]
+                  : ageChoices['other']}
+                value={formikProps.values.age || ''}
+                handleValueChange={(value) => formikProps.setFieldValue('age', value)}
+                optionsKey={formikProps.values.species_string || ''}
+                formValidationName="age"
+              />
+            </Col>
+            <Col xs="4">
+              <DropDown
+                label="Size"
+                id="sizeDropdown"
+                name="size"
+                type="text"
+                isClearable={true}
+                key={`my_unique_size_select_key__${formikProps.values.size}`}
+                ref={sizeRef}
+                options={Object.keys(sizeChoices).includes(formikProps.values.species_string) ? sizeChoices[formikProps.values.species_string] : sizeChoices['other']}
+                value={formikProps.values.size||''}
+                placeholder={placeholder}
+              />
+            </Col>
+          </BootstrapForm.Row>
+          <BootstrapForm.Row className="mt-3">
             <Col xs="4">
               <DropDown
                 label="Primary Color"
@@ -784,6 +844,63 @@ function DispatchResolutionForm({ id, incident, organization }) {
                 isClearable={false}
               />
             </Col>
+          </BootstrapForm.Row>
+          <BootstrapForm.Row className={"mt-3"}>
+            <Col xs="4">
+              <DropDown
+                label="Confined"
+                id="confined"
+                name="confined"
+                type="text"
+                options={unknownChoices}
+                value={formikProps.values.confined||'unknown'}
+                isClearable={false}
+              />
+            </Col>
+            <Col xs="4">
+              <DropDown
+                label="Fixed"
+                id="fixed"
+                name="fixed"
+                type="text"
+                options={unknownChoices}
+                value={formikProps.values.fixed||'unknown'}
+                isClearable={false}
+              />
+            </Col>
+          </BootstrapForm.Row>
+          <BootstrapForm.Row className={"mt-3"}>
+            <TextInput
+              id="color_notes"
+              name="color_notes"
+              as="textarea"
+              rows={5}
+              label="Breed / Description"
+              xs="12"
+            />
+          </BootstrapForm.Row>
+          <BootstrapForm.Row>
+            <TextInput
+              id="medical_notes"
+              name="medical_notes"
+              as="textarea"
+              rows={5}
+              label="Medical Notes"
+              xs="12"
+            />
+          </BootstrapForm.Row>
+          <BootstrapForm.Row>
+            <DateTimePicker
+              label="Last Seen"
+              name="last_seen"
+              id="last_seen"
+              xs="6"
+              onChange={(date, dateStr) => {
+                formikProps.setFieldValue("last_seen", dateStr)
+              }}
+              value={formikProps.values.last_seen||null}
+              disabled={false}
+            />
           </BootstrapForm.Row>
         </Modal.Body>
         <Modal.Footer>

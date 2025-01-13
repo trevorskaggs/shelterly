@@ -197,12 +197,12 @@ function buildAnimalCountList(pdf, animals, {
   const animalCounts = [];
   animals
     .forEach((animal) => {
-      const countIndex = animalCounts.findIndex(([species]) => animal.species_string === species);
+      const countIndex = animalCounts.findIndex(([species]) => ((animal.species_string ? animal.species_string : (animal.species || 'other')) === species));
       if (countIndex > -1) {
         const [currentSpecies, oldCount] = animalCounts[countIndex];
-        animalCounts[countIndex] = [currentSpecies, oldCount + animal.animal_count];
+        animalCounts[countIndex] = [currentSpecies, oldCount + (animal.animal_count ? animal.animal_count : 1)];
       } else {
-        animalCounts.push([animal.species_string, animal.animal_count]);
+        animalCounts.push([animal.species_string ? animal.species_string : (animal.species || 'other'), (animal.animal_count ? animal.animal_count : 1)]);
       }
     });
 

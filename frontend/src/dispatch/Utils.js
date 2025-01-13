@@ -88,13 +88,8 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       // Animal count
       pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
 
-      const assignedRequestAnimals =
-        assigned_request.service_request_object.animals.filter((animal) =>
-          Object.keys(assigned_request.animals).includes(String(animal.id))
-        );
-
       pdf.setDocumentFontSize({ size: 12 });
-      buildAnimalCountList(pdf, assignedRequestAnimals, { countLabelMarginTop: -12 });
+      buildAnimalCountList(pdf, Object.values(assigned_request.animals), { countLabelMarginTop: -12 });
 
       // rest document font size
       pdf.setDocumentFontSize();
@@ -219,7 +214,8 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
       pdf.setDocumentFontSize();
 
-      assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).forEach((animal) => {
+      Object.values(assigned_request.animals).forEach((animal) => {
+        const species = animal.species_string ? animal.species_string : (animal.species || 'other');
         // if very little page is left that would cause a weird break between the header, manually page break now
         const estimatedReleaseSectionHeight = 106;
         if (pdf.remainderPageHeight <= estimatedReleaseSectionHeight) {
@@ -231,14 +227,14 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           drawAnimalHeader({
             firstLabel: `***A#${
               animal.id_for_incident
-            }\n${animal.animal_count} ${animal.species_string[0].toUpperCase()}${animal.species_string.slice(1)}${((animal.animal_count === 1) && ['sheep', 'cattle'].includes(animal.species_string)) ? "" : "s"}***`,
+            }\n${animal.animal_count} ${species[0].toUpperCase()}${species.slice(1)}${((animal.animal_count === 1) && ['sheep', 'cattle'].includes(species)) ? "" : "s"}***`,
           });
         }
         else {
           drawAnimalHeader({
             firstLabel: `***A#${
               animal.id_for_incident
-            } - ${animal.species_string[0].toUpperCase()}${animal.species_string.slice(1)}\n${
+            } - ${species[0].toUpperCase()}${species.slice(1)}\n${
               animal.name || "Unknown"
             }***`,
           });
@@ -264,15 +260,15 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
         pdf.drawTextList({
           labels: [
-            `Sex: ${animal.sex || 'N/A'}`,
-            `Fixed: ${capitalize(animal.fixed)}`,
-            `ACO Required: ${capitalize(animal.aco_required)}`,
-            `Aggressive: ${capitalize(animal.aggressive)}`,
-            `Confined: ${capitalize(animal.confined)}`,
-            `Injured: ${capitalize(animal.injured)}`,
-            `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'Unknown'}`,
-            `Age: ${capitalize(animal.age) || 'N/A'}`,
-            `Size: ${capitalize(animal.size) || 'N/A'}`,
+            animal.sex ? `Sex: ${animal.sex || 'N/A'}` : '',
+            animal.fixed  ? `Fixed: ${capitalize(animal.fixed)}` : '',
+            animal.aco_required ? `ACO Required: ${capitalize(animal.aco_required)}` : '',
+            animal.aggressive ? `Aggressive: ${capitalize(animal.aggressive)}` : '',
+            animal.confined ? `Confined: ${capitalize(animal.confined)}` : '',
+            animal.injured ? `Injured: ${capitalize(animal.injured)}` : '',
+            animal.last_seen ? `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'Unknown'}` : '',
+            animal.age ? `Age: ${capitalize(animal.age) || 'N/A'}` : '',
+            animal.size ? `Size: ${capitalize(animal.size) || 'N/A'}` : '',
             `Primary Color: ${capitalize(animal.pcolor) || 'N/A'}`,
             `Secondary Color: ${capitalize(animal.scolor) || 'N/A'}`
           ],
@@ -291,7 +287,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           fontSize: 10
         });
         pdf.drawWrappedText({
-          text: `Animal Notes: ${animal.behavior_notes || 'N/A'}`,
+          text: `Animal Notes: ${animal.behavior_notes ? animal.behavior_notes : animal.animal_notes || 'N/A'}`,
           bottomPadding: 0,
           fontSize: 10
         });
