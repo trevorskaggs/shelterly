@@ -6,6 +6,7 @@ from rest_framework.routers import DefaultRouter
 app_name = 'hotline'
 router = DefaultRouter()
 router.register(r'servicerequests', views.ServiceRequestViewSet)
+router.register(r'requestnote', views.ServiceRequestNoteViewSet)
 router.register(r'visitnote', views.VisitNoteViewSet)
 
 sr_detail = views.ServiceRequestViewSet.as_view({

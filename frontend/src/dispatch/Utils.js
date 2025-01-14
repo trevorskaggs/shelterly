@@ -5,6 +5,20 @@ import { priorityChoices, DATE_FORMAT } from '../constants';
 import { statusChoices } from '../animals/constants';
 import { buildAnimalCountList } from '../animals/Utils';
 
+function buildNoteList(pdf, notes, {
+  countLabelMarginTo = 0
+} = {}) {
+  pdf.drawTextList({
+    labels: notes.map((note) => (
+      // capitalize the species
+      `${'Created'}: ${moment(note.open).format('MMMM Do YYYY HH:mm')}`,
+      `${'Author'}: ${note.author_name}`,
+      `${'Note'}: ${note.notes}`
+    )),
+    labelMarginTop: countLabelMarginTo
+  });
+}
+
 const buildDispatchResolutionsDoc = (drs = []) => {
   const pdf = new ShelterlyPDF({}, {
     // adds page numbers to the footer
@@ -96,8 +110,17 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.setDocumentFontSize({ size: 12 });
       buildAnimalCountList(pdf, assignedRequestAnimals, { countLabelMarginTop: -12 });
 
-      // rest document font size
+      // reset document font size
       pdf.setDocumentFontSize();
+      pdf.drawPad(10);
+
+      if (assigned_request.service_request_object.notes.filter(note => note.urgent === true).length > 0) {
+        pdf.drawSectionHeader({ text: 'Notes', fontSize: 14 });
+        pdf.setDocumentFontSize({ size: 12 });
+        buildNoteList(pdf, assigned_request.service_request_object.notes.filter(note => note.urgent === true), { countLabelMarginTop: -12 });
+        // reset document font size
+        pdf.setDocumentFontSize();
+      }
 
       pdf.drawPad(10);
     });
