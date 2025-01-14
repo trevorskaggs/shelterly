@@ -71,6 +71,13 @@ class DispatchServiceRequestSerializer(SimpleDispatchServiceRequestSerializer):
 
 class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
     service_request_object = SimpleDispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
+    visit_notes = serializers.SerializerMethodField()
+
+    def get_visit_notes(self, obj):
+        #TODO: this triggers one request per SR
+        if VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).exists():
+            return VisitNoteSerializer(VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj), many=True).data
+        return []
 
     class Meta:
         model = AssignedRequest
@@ -82,12 +89,6 @@ class AssignedRequestDispatchSerializer(SimpleAssignedRequestDispatchSerializer)
     owner_contact = OwnerContactSerializer(required=False, read_only=True)
     service_request_object = DispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
     visit_notes = serializers.SerializerMethodField()
-
-    def get_visit_notes(self, obj):
-        #TODO: this triggers one request per SR
-        if VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).exists():
-            return VisitNoteSerializer(VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj), many=True).data
-        return []
 
     class Meta:
         model = AssignedRequest
