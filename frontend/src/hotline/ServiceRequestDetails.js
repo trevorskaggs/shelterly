@@ -366,6 +366,14 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       <FontAwesomeIcon icon={faMessagePlus} className="mr-1" inverse />
                       Add Service Request Note
                     </LoadingLink>
+                    {["open", "assigned"].includes(data.status) ? <LoadingLink
+                      href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + id + "/assign"}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faMapMarkedAlt} className="mr-1" inverse />
+                      {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).length ? "Reassign" : "Assign"} Service Request
+                    </LoadingLink> : ""}
                     <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                       Download Service Request as Geojson
@@ -575,19 +583,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
           <Card className="border rounded" style={{width:"100%"}}>
             <Card.Body>
               <Card.Title>
-                <h4 className="mb-0">Visit Log
-                  {["open", "assigned"].includes(data.status) ? <OverlayTrigger
-                    key={"add-to-dispatch"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-add-to-dispatch`}>
-                        {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).length ? "Reassign" : "Assign"} service request to an open dispatch assignment
-                      </Tooltip>
-                    }
-                  >
-                    <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + id + "/assign"}><FontAwesomeIcon icon={faMapMarkedAlt} className="ml-1" inverse /></Link>
-                  </OverlayTrigger> : ""}
-                </h4>
+                <h4 className="mb-0">Visit Log</h4>
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", marginLeft:"-15px"}}>

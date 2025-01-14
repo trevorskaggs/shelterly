@@ -53,7 +53,7 @@ function AnimalStatus(props) {
           name={`sr_updates.${props.index}.animals.${props.inception}.status`}
           type="text"
           className="mt-0"
-          options={props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && props.formikProps.values.sr_updates[props.index].animals[props.inception].status === 'UNABLE TO LOCATE' ? statusChoicesNFA :statusChoices}
+          options={props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && ['UNABLE TO LOCATE', 'NO FURTHER ACTION'].includes(props.formikProps.values.sr_updates[props.index].animals[props.inception].status) ? statusChoicesNFA :statusChoices}
           value={`sr_updates.${props.index}.animals.${props.inception}.status`}
           key={`sr_updates.${props.index}.animals.${props.inception}.status`}
           isClearable={false}
