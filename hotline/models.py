@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.contrib.sites.models import Site
 from django.db.models.signals import post_save
 from django.contrib.auth import get_user_model
+from accounts.models import ShelterlyUser
 from location.models import Location
 from people.models import Person
 from .managers import ServiceRequestQueryset
@@ -207,6 +208,19 @@ class ServiceRequestImage(models.Model):
     image = models.ImageField(upload_to='images/')
     name = models.CharField(max_length=25, blank=True)
     service_request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, null=True)
+
+
+class ServiceRequestNote(models.Model):
+
+    open = models.DateTimeField(auto_now=False, auto_now_add=True, blank=True, null=True)
+    urgent = models.BooleanField(default=False)
+    notes = models.TextField(max_length=2500, blank=True)
+    author = models.ForeignKey(ShelterlyUser, null=True, on_delete=models.SET_NULL)
+    service_request = models.ForeignKey(ServiceRequest, on_delete=models.SET_NULL, null=True, related_name='notes')
+
+    class Meta:
+        ordering = ['-open',]
+
 
 class VisitNote(models.Model):
 

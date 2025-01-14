@@ -3,18 +3,20 @@ import axios from 'axios';
 import { Link } from 'raviger';
 import Moment from 'react-moment';
 import { Typeahead } from 'react-bootstrap-typeahead';
-import { Button, Card, ListGroup, Modal, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
+import { Button, Card, Form as BootstrapForm, ListGroup, Modal, OverlayTrigger, Tooltip, Spinner } from 'react-bootstrap';
 import Flatpickr from 'react-flatpickr';
-import { Formik } from "formik";
+import { Field, Formik } from "formik";
+import * as Yup from 'yup';
+import { Switch } from 'formik-material-ui';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faCar, faClipboardCheck, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faHammerCrash, faHomeHeart, faRightLeft, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faHammerCrash, faHomeHeart, faRightLeft, faPhoneRotary, faMessagePlus } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
-import { Checkbox } from '../components/Form';
+import { Checkbox, TextInput } from '../components/Form';
 import AnimalCards from '../components/AnimalCards';
 import PhotoDocuments from '../components/PhotoDocuments';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -36,16 +38,11 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const { getFullLocationFromPath } = useLocationWithRoutes();
   const datetime = useRef(null);
 
-  const [showTransfer, setShowTransfer] = useState(false);
-  const handleCloseTransfer = () => setShowTransfer(false);
-  const [transferData, setTransferData] = useState({'new_request_id':null, 'new_request_id_for_incident': null, 'animal_ids':[]});
-
   const openCalendar = () => {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
   }
   const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
-  const [showModal, setShowModal] = useState(false);
   const cancelServiceRequest = () => {
     setIsLoading(true);
     axios.patch('/hotline/api/servicerequests/' + data.id + '/', {status:'canceled'})
@@ -86,7 +83,8 @@ function ServiceRequestDetails({ id, incident, organization }) {
     turn_around: false,
     followup_date: null,
     assigned_requests: [],
-    status:'',
+    status: '',
+    notes: [],
     images: [],
     action_history: [],
   });
@@ -95,6 +93,13 @@ function ServiceRequestDetails({ id, incident, organization }) {
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const [showModal, setShowModal] = useState(false);
+  const [showTransfer, setShowTransfer] = useState(false);
+  const handleCloseTransfer = () => setShowTransfer(false);
+  const [transferData, setTransferData] = useState({'new_request_id':null, 'new_request_id_for_incident': null, 'animal_ids':[]});
+  const [showNoteModal, setShowNoteModal] = useState(false);
+  const handleCloseNoteModal = () => setShowNoteModal(false);
+  const [noteData, setNoteData] = useState({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -353,6 +358,14 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
                       Update Service Request
                     </LoadingLink>
+                    <LoadingLink
+                      onClick={() => {setShowNoteModal(true)}}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faMessagePlus} className="mr-1" inverse />
+                      Add Service Request Note
+                    </LoadingLink>
                     <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                       Download Service Request as Geojson
@@ -374,7 +387,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     />
                     <LoadingLink onClick={() => {setShowModal(true)}} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faTimes} className="mr-1" size="lg" style={{cursor:'pointer'}} inverse />
-                      Cancel service request
+                      Cancel Service Request
                     </LoadingLink>
                   </ActionsDropdown>
                 )}
@@ -663,6 +676,28 @@ function ServiceRequestDetails({ id, incident, organization }) {
           </Card>
         </div>
       </div>
+      <div className="row mt-3">
+        <div className="col-12 d-flex">
+          <Card className="border rounded" style={{width:"100%"}}>
+            <Card.Body>
+              <Card.Title>
+                <h4 className="mb-0">Notes</h4>
+              </Card.Title>
+              <hr/>
+              <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", marginLeft:"-15px"}}>
+                {data.notes.map(note => (
+                  <ListGroup.Item key={note.id}>
+                    <div><b>Created:</b>&nbsp;<Moment format="LLL" style={{color:note.urgent ? 'rgb(255 76 76)' : 'white'}}>{note.open}</Moment></div>
+                    <div><b>Author:</b>&nbsp;{note.author_name}</div>
+                    <div><b>Note:</b>&nbsp;{note.notes}</div>
+                  </ListGroup.Item>
+                ))}
+                {data.notes.length < 1 ? <div className="mt-2 mb-1 ml-3">Service Request has no notes yet.</div> : ""}
+              </ListGroup>
+            </Card.Body>
+          </Card>
+        </div>
+      </div>
       <History action_history={data.action_history} />
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
@@ -753,6 +788,55 @@ function ServiceRequestDetails({ id, incident, organization }) {
         </Modal.Footer>
       </Modal>
       )}
+    </Formik>
+    <Formik
+      initialValues={noteData}
+      enableReinitialize={true}
+      validationSchema={Yup.object({
+        notes: Yup.string().required()
+          .max(2500, 'Must be 2500 characters or less'),
+      })}
+      onSubmit={(values, { setSubmitting }) => {
+        // Set actual SR ID instead of ID for incident.
+        values['service_request'] = data.id;
+        axios.post('/hotline/api/requestnote/', values)
+        .then(response => {
+          let updated_notes = [...data.notes];
+          updated_notes.unshift(response.data);
+          setData(prevState => ({ ...prevState, notes:updated_notes}));
+          setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
+          setShowNoteModal(false);
+        })
+        .catch(error => {
+          setShowSystemError(true);
+        });
+      }}
+    >
+    {formikProps => (
+    <Modal show={showNoteModal} onHide={handleCloseNoteModal}>
+      <Modal.Header closeButton>
+        <Modal.Title>Add SR Note</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <BootstrapForm.Row>
+          <TextInput
+            as="textarea"
+            rows={5}
+            label="Note"
+            name="notes"
+            id="notes"
+            xs="12"
+          />
+        </BootstrapForm.Row>
+        <BootstrapForm.Label htmlFor="urgent">Urgent</BootstrapForm.Label>
+        <Field component={Switch} name="urgent" type="checkbox" color="primary" />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => {formikProps.submitForm();}} disabled={!formikProps.values.notes}>Save</Button>
+        <Button variant="secondary" onClick={handleCloseNoteModal}>Close</Button>
+      </Modal.Footer>
+    </Modal>
+    )}
     </Formik>
     </>
   );
