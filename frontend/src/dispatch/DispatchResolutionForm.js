@@ -182,7 +182,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
   const [shouldCheckForScroll, setShouldCheckForScroll] = React.useState(false);
 
   const [showAddNew, setShowAddNew] = useState(false);
-  const [newData, setNewData] = useState({'name': '', sex:'', age:'', size:'', last_seen:'', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', 'color_notes':'', 'medical_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', confined:'unknown', fixed:'unknown', request:null})
+  const [newData, setNewData] = useState({'name': '', sex:'', age:'', size:'', last_seen:null, 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', 'color_notes':'', 'medical_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', confined:'unknown', fixed:'unknown', request:null})
   const handleCloseAddNew = () => setShowAddNew(false);
 
   // Hook for initializing data.
@@ -685,7 +685,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
         });
         setData(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
         setValues(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
-        setNewData({'name': '', sex:'', age:'', size:'', last_seen:'', 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', 'color_notes':'', 'medical_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', confined:'unknown', fixed:'unknown', request:null});
+        setNewData({'name': '', sex:'', age:'', size:'', last_seen:null, 'animal_count':1, 'species':'', 'pcolor':'', 'scolor':'', 'behavior_notes':'', 'color_notes':'', 'medical_notes':'', aggressive:'unknown', aco_required:'unknown', injured:'unknown', confined:'unknown', fixed:'unknown', request:null});
         setShowAddNew(false);
       }}
     >
