@@ -556,7 +556,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={assigned_request.followup_date || null}
+                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date().setDate(new Date().getDate() + 1)}
                       disabled={data.end_time !== null && assigned_request.followup_date !== assigned_request.service_request_object.followup_date}
                     />
                   </BootstrapForm.Row>
