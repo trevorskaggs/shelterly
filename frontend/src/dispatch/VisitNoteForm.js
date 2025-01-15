@@ -73,12 +73,12 @@ const VisitNoteForm = ({ id, incident, organization }) => {
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
           axios.patch('/hotline/api/visitnote/' + values.id + '/', values)
-            .then(
-              navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + values.service_request)
-            )
-            .catch(error => {
-              setShowSystemError(true);
-            });
+          .then(response => {
+            navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + values.service_request)
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
           setSubmitting(false);
         }, 500);
       }}
