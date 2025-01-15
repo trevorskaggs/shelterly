@@ -18,7 +18,7 @@ class ReportViewSet(viewsets.ViewSet):
     incident_slug = self.request.GET.get('incident', '')
     if ServiceRequest.objects.filter(incident__slug=incident_slug).exists():
         start_date = ServiceRequest.objects.select_related('incident').filter(incident__slug=incident_slug).annotate(date=TruncDay('timestamp')).values('date').earliest('date')['date']
-        end_date = timezone.now()
+        end_date = timezone.localtime(timezone.now())
 
         daily_report = []
         sr_worked_report = []
