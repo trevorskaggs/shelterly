@@ -705,7 +705,20 @@ function ServiceRequestDetails({ id, incident, organization }) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", marginLeft:"-15px"}}>
                 {data.notes.map(note => (
                   <ListGroup.Item key={note.id}>
-                    <div><b>Created:</b>&nbsp;<Moment format="LLL" style={{color:note.urgent ? 'rgb(255 76 76)' : 'white'}}>{note.open}</Moment></div>
+                    <div>
+                      <b>Created:</b>&nbsp;<Moment format="LLL" style={{color:note.urgent ? 'rgb(255 76 76)' : 'white'}}>{note.open}</Moment>
+                      <OverlayTrigger
+                        key={"edit-note"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-edit-note`}>
+                            Update note
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon onClick={() => {setNoteData(note);setShowNoteModal(true)}} icon={faEdit} className="ml-1" style={{cursor:'pointer'}} inverse />
+                      </OverlayTrigger>
+                    </div>
                     <div><b>Author:</b>&nbsp;{note.author_name}</div>
                     <div><b>Note:</b>&nbsp;{note.notes}</div>
                   </ListGroup.Item>
@@ -817,17 +830,37 @@ function ServiceRequestDetails({ id, incident, organization }) {
       onSubmit={(values, { setSubmitting }) => {
         // Set actual SR ID instead of ID for incident.
         values['service_request'] = data.id;
-        axios.post('/hotline/api/requestnote/', values)
-        .then(response => {
-          let updated_notes = [...data.notes];
-          updated_notes.unshift(response.data);
-          setData(prevState => ({ ...prevState, notes:updated_notes}));
-          setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
-          setShowNoteModal(false);
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
+        if (values.id) {
+          axios.patch('/hotline/api/requestnote/' + values.id + '/', values)
+          .then(response => {
+            let updated_notes = [...data.notes];
+            updated_notes.forEach(note => {
+              if (note.id === values.id) {
+                note.urgent = values.urgent;
+                note.notes = values.notes;
+              }
+            });
+            setData(prevState => ({ ...prevState, notes:updated_notes}));
+            setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
+            setShowNoteModal(false);
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        }
+        else {
+          axios.post('/hotline/api/requestnote/', values)
+          .then(response => {
+            let updated_notes = [...data.notes];
+            updated_notes.unshift(response.data);
+            setData(prevState => ({ ...prevState, notes:updated_notes}));
+            setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
+            setShowNoteModal(false);
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        }
       }}
     >
     {formikProps => (

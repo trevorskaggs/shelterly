@@ -71,6 +71,28 @@ function buildServiceRequestsDoc(srs = []) {
 
     pdf.drawHRule();
 
+    // SR notes
+    data.notes?.forEach((note, i) => {
+      if (i === 0) {
+        pdf.drawSectionHeader({ text: 'Notes' });
+        pdf.drawPad(20);
+      }
+
+      if (note) {
+        pdf.drawWrappedText({
+          text: `Created: ${moment(note.open).format('MMMM Do')}${note.urgent ? ' (Urgent)' : ''}`,
+        });
+        pdf.drawWrappedText({
+          text: `Author: ${note.author_name}`,
+        });
+        pdf.drawWrappedText({
+          text: `Note: ${(note?.notes && note?.notes) || ''}`,
+        });
+      }
+    });
+
+    pdf.drawHRule();
+
     // visit notes
     data.assigned_requests?.forEach?.(({ visit_note }, i) => {
       if (i === 0) {
