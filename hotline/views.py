@@ -17,6 +17,7 @@ from animals.models import Animal
 from animals.views import MultipleFieldLookupMixin
 from hotline.models import ServiceRequest, ServiceRequestImage, ServiceRequestNote, VisitNote
 from incident.models import Incident
+from evac.models import AssignedRequest
 
 from rest_framework import filters, permissions, serializers, viewsets
 from rest_framework.decorators import action as drf_action
@@ -194,6 +195,15 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     success = False
                 data[sr.id_for_incident] = {'status': success}
         return JsonResponse(data)
+
+    @drf_action(detail=True, methods=['GET'], name='Remove from Active Dispatch')
+    def remove_active(self, request, pk=None):
+        from rest_framework import response
+        sr = ServiceRequest.objects.get(id=pk)
+        for assigned_request in AssignedRequest.objects.filter(service_request=sr, dispatch_assignment__end_time=None):
+            assigned_request.delete()
+        sr.update_status(self.request.user)
+        return response.Response(ServiceRequestSerializer(sr).data, status=200)
 
 class VisitNoteViewSet(viewsets.ModelViewSet):
 

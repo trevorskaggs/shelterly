@@ -24,7 +24,7 @@ class VisitNoteSerializer(serializers.ModelSerializer):
     
     def get_service_request(self, obj):
         if obj.assigned_request.first():
-            return obj.assigned_request.first().service_request.id
+            return obj.assigned_request.first().service_request.id_for_incident
         return None
 
     def get_team_name(self, obj):
