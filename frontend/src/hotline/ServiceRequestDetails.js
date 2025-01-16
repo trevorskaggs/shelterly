@@ -28,6 +28,7 @@ import { useLocationWithRoutes } from '../hooks';
 import { printServiceRequestSummary, printSrAnimalCareSchedules } from './Utils';
 
 import '../assets/styles.css';
+import { faLocationXmark } from '@fortawesome/pro-regular-svg-icons';
 
 function ServiceRequestDetails({ id, incident, organization }) {
 
@@ -99,6 +100,8 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const [transferData, setTransferData] = useState({'new_request_id':null, 'new_request_id_for_incident': null, 'animal_ids':[]});
   const [showNoteModal, setShowNoteModal] = useState(false);
   const handleCloseNoteModal = () => setShowNoteModal(false);
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const handleCloseRemoveModal = () => setShowRemoveModal(false);
   const [noteData, setNoteData] = useState({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});
 
   // Handle animal reunification submit.
@@ -154,6 +157,17 @@ function ServiceRequestDetails({ id, incident, organization }) {
             console.log(res);
         }).catch(err => {
         }).finally(() => setIsLoading(false));
+  }
+
+  const handleSRRemove = () => {
+    axios.get('/hotline/api/servicerequests/' + data.id + '/remove_active/')
+    .then(response => {
+      setData(prevState => ({ ...prevState, "status":response.data.status, "assigned_requests":response.data.assigned_requests }));
+      handleCloseRemoveModal();
+    })
+    .catch(error => {
+      setShowSystemError(true);
+    })
   }
 
   // Hook for initializing data.
@@ -372,7 +386,15 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       className="text-white d-block py-1 px-3"
                     >
                       <FontAwesomeIcon icon={faMapMarkedAlt} className="mr-1" inverse />
-                      {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).length ? "Reassign" : "Assign"} Service Request
+                      {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).length ? "Reassign" : "Assign"} Service Request to DA
+                    </LoadingLink> : ""}
+                    {data.status === 'assigned' ? <LoadingLink
+                      onClick={() => {setShowRemoveModal(true)}}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
+                      <FontAwesomeIcon icon={faLocationXmark} className="mr-1" inverse />
+                      Remove Service Request from DA
                     </LoadingLink> : ""}
                     <LoadingLink onClick={handleGeoJsonDownload} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
@@ -683,7 +705,20 @@ function ServiceRequestDetails({ id, incident, organization }) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", marginLeft:"-15px"}}>
                 {data.notes.map(note => (
                   <ListGroup.Item key={note.id}>
-                    <div><b>Created:</b>&nbsp;<Moment format="LLL" style={{color:note.urgent ? 'rgb(255 76 76)' : 'white'}}>{note.open}</Moment></div>
+                    <div>
+                      <b>Created:</b>&nbsp;<Moment format="LLL" style={{color:note.urgent ? 'rgb(255 76 76)' : 'white'}}>{note.open}</Moment>
+                      <OverlayTrigger
+                        key={"edit-note"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-edit-note`}>
+                            Update note
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon onClick={() => {setNoteData(note);setShowNoteModal(true)}} icon={faEdit} className="ml-1" style={{cursor:'pointer'}} inverse />
+                      </OverlayTrigger>
+                    </div>
                     <div><b>Author:</b>&nbsp;{note.author_name}</div>
                     <div><b>Note:</b>&nbsp;{note.notes}</div>
                   </ListGroup.Item>
@@ -795,17 +830,37 @@ function ServiceRequestDetails({ id, incident, organization }) {
       onSubmit={(values, { setSubmitting }) => {
         // Set actual SR ID instead of ID for incident.
         values['service_request'] = data.id;
-        axios.post('/hotline/api/requestnote/', values)
-        .then(response => {
-          let updated_notes = [...data.notes];
-          updated_notes.unshift(response.data);
-          setData(prevState => ({ ...prevState, notes:updated_notes}));
-          setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
-          setShowNoteModal(false);
-        })
-        .catch(error => {
-          setShowSystemError(true);
-        });
+        if (values.id) {
+          axios.patch('/hotline/api/requestnote/' + values.id + '/', values)
+          .then(response => {
+            let updated_notes = [...data.notes];
+            updated_notes.forEach(note => {
+              if (note.id === values.id) {
+                note.urgent = values.urgent;
+                note.notes = values.notes;
+              }
+            });
+            setData(prevState => ({ ...prevState, notes:updated_notes}));
+            setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
+            setShowNoteModal(false);
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        }
+        else {
+          axios.post('/hotline/api/requestnote/', values)
+          .then(response => {
+            let updated_notes = [...data.notes];
+            updated_notes.unshift(response.data);
+            setData(prevState => ({ ...prevState, notes:updated_notes}));
+            setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
+            setShowNoteModal(false);
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+        }
       }}
     >
     {formikProps => (
@@ -834,6 +889,18 @@ function ServiceRequestDetails({ id, incident, organization }) {
     </Modal>
     )}
     </Formik>
+    <Modal show={showRemoveModal} onHide={handleCloseRemoveModal}>
+      <Modal.Header closeButton>
+        <Modal.Title>Remove SR from Active Dispatch</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        Are you sure you would like to remove this SR from its active dispatch assignment?
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => {handleSRRemove();}}>Yes</Button>
+        <Button variant="secondary" onClick={handleCloseRemoveModal}>No</Button>
+      </Modal.Footer>
+    </Modal>
     </>
   );
 };

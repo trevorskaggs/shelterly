@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
 from django.http import HttpResponse, JsonResponse
 from actstream import action
-from datetime import datetime
+from datetime import datetime, timedelta
 from .serializers import BarebonesServiceRequestSerializer, ServiceRequestSerializer, ServiceRequestNoteSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from .ordering import MyCustomOrdering
 from wsgiref.util import FileWrapper
@@ -17,6 +17,7 @@ from animals.models import Animal
 from animals.views import MultipleFieldLookupMixin
 from hotline.models import ServiceRequest, ServiceRequestImage, ServiceRequestNote, VisitNote
 from incident.models import Incident
+from evac.models import AssignedRequest
 
 from rest_framework import filters, permissions, serializers, viewsets
 from rest_framework.decorators import action as drf_action
@@ -117,7 +118,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             )
             .annotate(
-                pending=Case(When(followup_date__gte=datetime.today(), then=Value(True)), default=Value(False), output_field=BooleanField())
+                pending=Case(When(followup_date__gte=datetime.today() if self.request.query_params.get('when', '') == 'today' else datetime.today() + timedelta(days=1), then=Value(True)), default=Value(False), output_field=BooleanField())
             ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED').order_by('id').prefetch_related('owners').select_related('species'), to_attr='animals'))
             .prefetch_related('owners')
             .select_related('reporter')
@@ -194,6 +195,15 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     success = False
                 data[sr.id_for_incident] = {'status': success}
         return JsonResponse(data)
+
+    @drf_action(detail=True, methods=['GET'], name='Remove from Active Dispatch')
+    def remove_active(self, request, pk=None):
+        from rest_framework import response
+        sr = ServiceRequest.objects.get(id=pk)
+        for assigned_request in AssignedRequest.objects.filter(service_request=sr, dispatch_assignment__end_time=None):
+            assigned_request.delete()
+        sr.update_status(self.request.user)
+        return response.Response(ServiceRequestSerializer(sr).data, status=200)
 
 class VisitNoteViewSet(viewsets.ModelViewSet):
 

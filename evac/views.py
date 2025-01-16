@@ -426,7 +426,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
                 assigned_request.save()
                 if service_request.get('unable_to_complete', False):
-                    evac_assignment.service_requests.remove(service_requests[0])
+                    evac_assignment.service_requests.remove(sr)
                     evac_assignment.assigned_requests.remove(assigned_request)
 
                 sr.update_status(self.request.user)

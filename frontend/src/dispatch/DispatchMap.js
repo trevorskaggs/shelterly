@@ -322,6 +322,7 @@ function Deploy({ incident, organization }) {
       await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
           status: 'open',
+          when: preplan ? 'tomorrow' : 'today',
           landingmap: true
         },
         cancelToken: source.token,

@@ -18,7 +18,7 @@ class ReportViewSet(viewsets.ViewSet):
     incident_slug = self.request.GET.get('incident', '')
     if ServiceRequest.objects.filter(incident__slug=incident_slug).exists():
         start_date = ServiceRequest.objects.select_related('incident').filter(incident__slug=incident_slug).annotate(date=TruncDay('timestamp')).values('date').earliest('date')['date']
-        end_date = timezone.now()
+        end_date = timezone.localtime(timezone.now())
 
         daily_report = []
         sr_worked_report = []
@@ -51,7 +51,7 @@ class ReportViewSet(viewsets.ViewSet):
             'utl_sr_worked': utl_sr_worked,
             'total': total_assigned,
             'teams': teams,
-            'sr_per_team': total_assigned / teams if teams > 0 else 0
+            'sr_per_team': round(total_assigned / teams, 1) if teams > 0 else 0
           }
           sr_worked_report.append(sr_data)
 
@@ -99,14 +99,15 @@ class ReportViewSet(viewsets.ViewSet):
         active_incident_srs = ServiceRequest.objects.filter(incident__slug=incident_slug).exclude(status='canceled')
         for dupe_sr in active_incident_srs.values('address', 'city', 'state', 'zip_code').order_by('address', 'city', 'state', 'zip_code').annotate(Count('pk')).filter(pk__count__gt=1):
             dupe_sr_ids = ', '.join([str(pk) for pk in active_incident_srs.filter(address=dupe_sr['address'], city=dupe_sr['city'], state=dupe_sr['state'], zip_code=dupe_sr['zip_code']).values_list('id_for_incident', flat=True)])
-            duplicate_sr_report.append({
-              'address': dupe_sr['address'],
-              'city': dupe_sr['city'],
-              'state': dupe_sr['state'],
-              'zip_code': dupe_sr['zip_code'],
-              'count': dupe_sr['pk__count'],
-              'sr_ids': dupe_sr_ids
-            })
+            if ServiceRequest.objects.filter(id__in=active_incident_srs.filter(address=dupe_sr['address'], city=dupe_sr['city'], state=dupe_sr['state'], zip_code=dupe_sr['zip_code']).values_list('id', flat=True), status__in=['closed', 'canceled']).count() != ServiceRequest.objects.filter(id__in=active_incident_srs.filter(address=dupe_sr['address'], city=dupe_sr['city'], state=dupe_sr['state'], zip_code=dupe_sr['zip_code']).values_list('id', flat=True)).count():
+              duplicate_sr_report.append({
+                'address': dupe_sr['address'],
+                'city': dupe_sr['city'],
+                'state': dupe_sr['state'],
+                'zip_code': dupe_sr['zip_code'],
+                'count': dupe_sr['pk__count'],
+                'sr_ids': dupe_sr_ids
+              })
 
         data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True), 'duplicate_sr_report': duplicate_sr_report}
         return Response(data)
