@@ -55,16 +55,25 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     pdf.drawPad(10);
 
     // summary page
-    data.assigned_requests.forEach((assigned_request) => {
+    data.assigned_requests.forEach((assigned_request, index) => {
+
+      if (index > 0) {
+        pdf.drawHRule();
+      }
       // service request priority
       const srPriority = priorityChoices.find(({ value }) => value === (assigned_request.service_request_object.priority || 2))
 
       // Summary page
+      if (assigned_request.service_request_object.priority === 1) {
+        pdf.setDocumentColors({ rgb: [255, 76, 76]});
+      }
+
       pdf.drawSectionHeader({
         text: `SR#${assigned_request.service_request_object.id_for_incident} - ${srPriority.label} Priority`,
-        fontSize: 14
+        fontSize: 14,
       });
 
+      pdf.setDocumentColors({ backgroundColor: 'DEFAULT' });
       pdf.drawPad(10);
 
       // status
