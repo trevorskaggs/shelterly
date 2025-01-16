@@ -118,7 +118,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             )
             .annotate(
-                pending=Case(When(followup_date__gte=datetime.today() if self.request.query_params.get('when', '') == 'today' else datetime.today() + timedelta(days=1), then=Value(True)), default=Value(False), output_field=BooleanField())
+                pending=Case(When(followup_date__gte=datetime.today() + timedelta(days=1), then=Value(True) if self.request.query_params.get('when', '') == 'tomorrow' else datetime.today()), default=Value(False), output_field=BooleanField())
             ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED').order_by('id').prefetch_related('owners').select_related('species'), to_attr='animals'))
             .prefetch_related('owners')
             .select_related('reporter')
