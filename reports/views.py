@@ -46,7 +46,7 @@ class ReportViewSet(viewsets.ViewSet):
 
           sr_data = {
             'date': end_date.strftime('%m/%d/%Y'),
-            'new_sr_worked': total_assigned - sip_sr_worked - utl_sr_worked,
+            'new_sr_worked': service_requests.filter(sip=False).filter(utl=False).count(),
             'sip_sr_worked': sip_sr_worked,
             'utl_sr_worked': utl_sr_worked,
             'total': total_assigned,
