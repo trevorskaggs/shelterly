@@ -393,13 +393,8 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
                 # Only make these changes if saving a DAR Form.
                 if self.request.data.get('start_time'):
-                    # Only update SR with followup_date while DA is open or if the old AssignedRequest followup_date matches the current SR followup_date.
-                    if not evac_assignment.end_time or (assigned_request.followup_date == sr.followup_date):
-                        sr_followup_date = service_request['followup_date'] or None
-                    else:
-                        sr_followup_date = sr.followup_date or None
+                    sr_followup_date = service_request.get('followup_date', sr.followup_date)
                     assigned_request.followup_date = sr_followup_date
-
                     sr.followup_date=sr_followup_date
                     sr.priority=service_request['priority']
                     sr.directions=service_request['directions']

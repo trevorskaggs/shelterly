@@ -208,7 +208,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
               id: assigned_request.service_request_object.id,
               followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + 1)),
               priority: assigned_request.service_request_object.priority,
-              date_completed: assigned_request.visit_note ? assigned_request.visit_note.date_completed : new Date(),
+              date_completed: assigned_request.visit_note && assigned_request.visit_note.date_completed ? assigned_request.visit_note.date_completed : new Date(),
               directions: assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : '',
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
