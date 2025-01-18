@@ -111,7 +111,18 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
         model = EvacAssignment
         fields = ['id', 'id_for_incident', 'start_time', 'end_time', 'team_name', 'team_member_names', 'closed']
 
-class AssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
+
+class BarebonesAssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
+
+    visit_note = VisitNoteSerializer(required=False, read_only=True)
+
+    class Meta:
+        model = AssignedRequest
+        fields = ['id', 'visit_note', 'followup_date', 'timestamp']
+
+
+
+class AssignedRequestServiceRequestSerializer(BarebonesAssignedRequestServiceRequestSerializer):
 
     dispatch_assignment = SimpleEvacAssignmentSerializer(required=False, read_only=True)
     visit_note = VisitNoteSerializer(required=False, read_only=True)

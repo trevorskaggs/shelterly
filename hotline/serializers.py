@@ -178,15 +178,21 @@ class SimpleServiceRequestSerializer(MapServiceRequestSerializer):
     reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
     evacuation_assignments = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    assigned_requests = serializers.SerializerMethodField()
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'evacuation_assignments', 'pending',
+        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'evacuation_assignments', 'pending', 'assigned_requests',
         'images', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reported_evac', 'reporter_object', 'owner_objects', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
     def get_evacuation_assignments(self, obj):
         from evac.serializers import SimpleEvacAssignmentSerializer
         return SimpleEvacAssignmentSerializer(obj.evacuation_assignments, many=True, required=False, read_only=True).data
+
+    def get_assigned_requests(self, obj):
+        from evac.serializers import BarebonesAssignedRequestServiceRequestSerializer
+
+        return BarebonesAssignedRequestServiceRequestSerializer(obj.assignedrequest_set.all(), many=True, required=False, read_only=True).data
 
     def get_images(self, obj):
         try:
@@ -245,10 +251,9 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
         return AnimalSerializer(obj.animal_set.all().exclude(status='CANCELED').order_by('id'), many=True, required=False, read_only=True).data
 
     def get_assigned_requests(self, obj):
-        from evac.models import AssignedRequest
         from evac.serializers import AssignedRequestServiceRequestSerializer
 
-        return AssignedRequestServiceRequestSerializer(AssignedRequest.objects.filter(service_request=obj), many=True, required=False, read_only=True).data
+        return AssignedRequestServiceRequestSerializer(obj.assignedrequest_set.all(), many=True, required=False, read_only=True).data
 
     # Custom field for the action history list.
     def get_action_history(self, obj):
