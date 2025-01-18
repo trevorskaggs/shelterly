@@ -222,7 +222,7 @@ function Dispatch({ incident, organization }) {
                   icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : finishedMarkerIcon}
                   onClick={() => navigate('/' + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id_for_incident)}
                 >
-                <MapTooltip key={`${index}-${selectedTeam}`} autoPan={false} closeButton={true} permanent={selectedTeam === dispatch_assignment.id ? true : false}>
+                <MapTooltip key={`${index}-${selectedTeam}`} direction={"top"} autoPan={false} closeButton={true}>
                   <span>
                     <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
                     {mapState[dispatch_assignment.id] ?
