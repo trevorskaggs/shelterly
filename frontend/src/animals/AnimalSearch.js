@@ -163,7 +163,7 @@ function AnimalSearch({ incident, organization }) {
     fixedRef.current.select.clearValue();
     pcolorRef.current.select.clearValue();
     shelterRef.current.select.clearValue();
-    idSearchRef.current.value = '';
+    // idSearchRef.current.value = '';
     setOptions({id:null, species:'', status:null, sex:null, owned:null, pcolor:'', fixed:null, latlng:null, radius:1.60934});
     setAnimals(data.animals.map((animal) => (animal.id)));
   };

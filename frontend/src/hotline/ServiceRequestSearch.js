@@ -185,7 +185,7 @@ function ServiceRequestSearch({ incident, organization }) {
     statusRef.current.select.clearValue();
     openStartRef.current.flatpickr.clear();
     openEndRef.current.flatpickr.clear();
-    idSearchRef.current.value = '';
+    // idSearchRef.current.value = '';
     setOptions({id:null, priority:null, status:null, open_start:null, open_end:null});
     setFilteredServiceRequests(data.service_requests.map((service_request) => (service_request.id)));
   };
@@ -403,7 +403,7 @@ function ServiceRequestSearch({ incident, organization }) {
                         ref={openEndRef}
                         onChange={(dateRange) => {
                           // setEndDate(dateRange.length ? dateRange[0] : null)
-                          setOptions({...options, end_start: dateRange.length ? dateRange[0] : null})
+                          setOptions({...options, open_end: dateRange.length ? dateRange[0] : null})
                           setTriggerRefresh(!triggerRefresh)
                         }}
                       />
