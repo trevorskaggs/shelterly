@@ -269,6 +269,7 @@ function Deploy({ incident, organization }) {
           axios.get('/evac/api/evacassignment/', {
             params: {
               deploy_map: true,
+              status: preplan ? 'preplanned' : 'active',
               incident,
             },
             cancelToken: source.token,
