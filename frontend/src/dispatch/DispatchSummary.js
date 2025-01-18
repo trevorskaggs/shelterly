@@ -384,17 +384,7 @@ function DispatchSummary({ id, incident, organization }) {
                     {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ?
                     <span>&nbsp;({team_member.agency_id})</span> : ""}
                     {team_member.display_phone ?
-                    <OverlayTrigger
-                      key={"team-member-phone"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-team-member-phone`}>
-                          Phone: {team_member.display_phone}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
-                    </OverlayTrigger>
+                    <span>&nbsp;{team_member.display_phone}</span>
                     : ""}
                     <OverlayTrigger
                       key={"remove-team-member"}
@@ -488,19 +478,7 @@ function DispatchSummary({ id, incident, organization }) {
               {assigned_request.service_request_object.owner_objects.map(owner => (
                 <ListGroup.Item key={owner.id}>
                   <b>Owner: </b><Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
-                  {owner.display_phone ?
-                  <OverlayTrigger
-                    key={"owner-phone"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-owner-phone`}>
-                        Phone: {owner.display_phone}
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
-                  </OverlayTrigger>
-                  : ""}
+                  {owner.display_phone ? <span>&nbsp;{owner.display_phone}</span>: ""}
                   {owner.email ?
                   <OverlayTrigger
                     key={"owner-email"}
@@ -537,19 +515,7 @@ function DispatchSummary({ id, incident, organization }) {
               <ListGroup.Item>
                 <b>Reporter: </b>{assigned_request.service_request_object.reporter_object.first_name + " " + assigned_request.service_request_object.reporter_object.last_name}
                 {assigned_request.service_request_object.reporter_object.agency ? <span className="ml-1">({assigned_request.service_request_object.reporter_object.agency})</span> : "" }
-                {assigned_request.service_request_object.reporter_object.display_phone ?
-                <OverlayTrigger
-                  key={"reporter-phone"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-reporter-phone`}>
-                      Phone: {assigned_request.service_request_object.reporter_object.display_phone}
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
-                </OverlayTrigger>
-                : ""}
+                {assigned_request.service_request_object.reporter_object.display_phone ?<span>&nbsp;{assigned_request.service_request_object.reporter_object.display_phone}</span>: ""}
               </ListGroup.Item> : ""}
             <ListGroup.Item><b>Instructions for Field Team:</b> {assigned_request.service_request_object.directions||"No instructions available."}</ListGroup.Item>
           </ListGroup>
