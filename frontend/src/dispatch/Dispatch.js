@@ -224,7 +224,7 @@ function Dispatch({ incident, organization }) {
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} direction={"top"} autoPan={false} closeButton={true}>
                   <span>
-                    <div>{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
+                    <div>DA#{dispatch_assignment.id_for_incident} -&nbsp;{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
                     {mapState[dispatch_assignment.id] ?
                       <span>
                         {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).length > 0 ? Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
@@ -257,7 +257,8 @@ function Dispatch({ incident, organization }) {
         <Scrollbar no_shadow="true" style={{height:"450px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
         <Button variant={"info"} className="border" onClick={() => setShowActive(!showActive)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Active {showActive ? <FontAwesomeIcon icon={faChevronCircleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleDown} size="sm" />}</Button>
         {data.dispatch_assignments.filter(da => showActive ? da.team_member_names.length > 0 : null).map(dispatch_assignment => (
-          <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+          <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px", textAlign:"left", fontSize:"14px"}}>
+            DA#{dispatch_assignment.id_for_incident} -&nbsp;
             {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
             {dispatch_assignment.team_member_names ?
               <OverlayTrigger
@@ -276,7 +277,8 @@ function Dispatch({ incident, organization }) {
         ))}
         <Button variant={"info"} className="border" onClick={() => setShowPreplanned(!showPreplanned)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Preplanned {showPreplanned ? <FontAwesomeIcon icon={faChevronCircleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleDown} size="sm" />}</Button>
         {data.dispatch_assignments.filter(da => showPreplanned ? da.team_member_names.length === 0 : null).map(dispatch_assignment => (
-          <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>
+          <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px", textAlign:"left", fontSize:"14px"}}>
+            DA#{dispatch_assignment.id_for_incident} -&nbsp;
             {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
             {dispatch_assignment.team_member_names ?
               <OverlayTrigger

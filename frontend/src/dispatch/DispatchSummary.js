@@ -274,7 +274,7 @@ function DispatchSummary({ id, incident, organization }) {
 
   return (
     <>
-    <Header>Dispatch Assignment Summary</Header>
+    <Header>Dispatch Assignment Summary #{id}</Header>
     <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     <hr/>
     <Row className="mb-3">
