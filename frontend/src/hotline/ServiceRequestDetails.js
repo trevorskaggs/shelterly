@@ -482,17 +482,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                 {data.owner_objects.map(owner => (
                   <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                     {owner.display_phone ?
-                    <OverlayTrigger
-                      key={"owner-phone"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-owner-phone`}>
-                          Phone: {owner.display_phone}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
-                    </OverlayTrigger>
+                      <span>&nbsp;{owner.display_phone}</span>
                     : ""}
                     {owner.email ?
                     <OverlayTrigger
@@ -514,17 +504,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                   <b>Reporter: </b><Link href={"/" + organization + "/" + incident + "/people/reporter/" + data.reporter} className="text-link" style={{textDecoration:"none", color:"white"}}>{data.reporter_object.first_name} {data.reporter_object.last_name}</Link>
                   {data.reporter_object.agency ? <span className="ml-1">({data.reporter_object.agency})</span> : "" }
                   {data.reporter_object.display_phone ?
-                  <OverlayTrigger
-                    key={"reporter-phone"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-reporter-phone`}>
-                        Phone: {data.reporter_object.display_phone}
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
-                  </OverlayTrigger>
+                    <span>&nbsp;{data.reporter_object.display_phone}</span>
                   : ""}
                 </ListGroup.Item> : ""}
               </ListGroup>
