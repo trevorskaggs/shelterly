@@ -471,17 +471,7 @@ function AnimalDetails({ id, incident, organization }) {
               {data.owners.map(owner => (
                 <ListGroup.Item key={owner.id}><b>Owner: </b><Link href={"/" + organization + "/" + incident + "/people/owner/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name}</Link>
                 {owner.display_phone ?
-                  <OverlayTrigger
-                    key={"owner-phone"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-owner-phone`}>
-                        {owner.display_phone}
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faPhoneRotary} className="ml-1" inverse />
-                  </OverlayTrigger>
+                  <span>&nbsp;{owner.display_phone}</span>
                   : ""}
                   {owner.email ?
                   <OverlayTrigger

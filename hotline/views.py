@@ -122,6 +122,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED').order_by('id').prefetch_related('owners').select_related('species'), to_attr='animals'))
             .prefetch_related('owners')
             .select_related('reporter')
+            .prefetch_related('assignedrequest_set')
             .prefetch_related(Prefetch('evacuation_assignments', EvacAssignment.objects.select_related('team').prefetch_related('team__team_members')))
         )
 

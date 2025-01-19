@@ -112,7 +112,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.request.query_params.get('deploy_map', False):
             if hasattr(self, 'deploy_serializer_class'):
-                return self.map_serializer_class
+                return self.deploy_serializer_class
         elif self.request.query_params.get('map', False):
             if hasattr(self, 'map_serializer_class'):
                 return self.map_serializer_class
