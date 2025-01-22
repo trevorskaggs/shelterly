@@ -559,7 +559,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                         <FontAwesomeIcon icon={faPlusSquare} className="mr-1" inverse />
                         Add an Animal
                       </LoadingLink>
-                      {data.status.toLowerCase() !== 'closed' ?
+                      {data.status.toLowerCase() === 'open' ?
                         <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
                           <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
                           Reunite All Animals
