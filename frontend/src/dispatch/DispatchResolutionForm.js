@@ -442,7 +442,6 @@ function DispatchResolutionForm({ id, incident, organization }) {
               </Card.Body>
             </Card>
             {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map((assigned_request, index) => (
-              <>
               <Card key={assigned_request.service_request_object.id} className="mt-3 border rounded">
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
@@ -580,6 +579,14 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       label="Visit Notes"
                     />
                   </BootstrapForm.Row>
+                  {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+                  {assigned_request.visit_notes.map(visit_note =>
+                    <ListGroup variant="flush" key={visit_note.id}>
+                      <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
+                      <Moment format="l">{visit_note.date_completed}</Moment>: {visit_note.notes || "No information available."}
+                      </ListGroup.Item>
+                    </ListGroup>
+                  ) || "None"}
                   <BootstrapForm.Row>
                     <Col>
                       <BootstrapForm.Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-1">Forced Entry</BootstrapForm.Label>
@@ -631,7 +638,6 @@ function DispatchResolutionForm({ id, incident, organization }) {
                     : ""}
                 </Card.Body>
               </Card>
-              </>
             ))}
             <ButtonGroup size="lg" className="col-12 pl-0 pr-0 mt-3 mb-3">
               <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block border" type="submit" onClick={() => { setSaveClose(false); setShouldCheckForScroll(true); }}>
