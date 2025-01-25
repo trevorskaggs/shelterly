@@ -16,8 +16,8 @@ export function loadUser({state, dispatch, removeCookie, path}) {
   })
   .catch(e => {
     // Raise error.
-    removeCookie("token");
-    setAuthToken();
+    // removeCookie("token");
+    // setAuthToken();
     dispatch({type: "AUTHENTICATION_ERROR", data: e});
     if (!Object.keys(publicRoutes).includes(path)) {
       navigate('/login?next=' + path);
