@@ -35,11 +35,13 @@ function Shelterly() {
             <Sidebar state={state} dispatch={dispatch} removeCookie={removeCookie} />
           </span>
           : ""}
+          {Object.keys(publicRoutes).includes(path) || (state && state.user && path === '/') || (state && state.organization.id && (path === '/' + organization) || path.includes('/accounts/') || path.includes('/signup/') || path.includes('/incident/')) || (state && state.organization.id && state.incident.id) ?
           <span className='d-flex flex-column col-9 pl-0 pr-0' style={style}>
             <Fragment>
               {routeResult || <PageNotFound state={state} />}
             </Fragment>
           </span>
+          : ""}
         </Row>
       </Container>
     </ThemeProvider>
