@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faClockRotateLeft, faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
@@ -47,6 +47,8 @@ function DispatchSummary({ id, incident, organization }) {
   const [defaultTeamName, setDefaultTeamName] = useState(false);
   const [showTeamName, setShowTeamName] = useState(false)
   const handleTeamNameClose = () => {setShowTeamName(false);}
+  const [showReopenModal, setShowReopenModal] = useState(false)
+  const handleReopenModalClose = () => {setShowReopenModal(false);}
   const [teamMembers, setTeamMembers] = useState([]);
   const [show, setShow] = useState(false);
   const handleClose = () => {setShow(false);}
@@ -170,6 +172,19 @@ function DispatchSummary({ id, incident, organization }) {
       setData(prevState => ({ ...prevState, "team_member_objects":response.data.team_member_objects, "team_members":response.data.team_members }));
       setTeamData(prevState => ({ ...prevState, "options":prevState.options.concat([{id: [teamMemberToDelete.id], label: teamMemberToDelete.display_name}]) }));
       handleTeamMemberClose();
+    })
+    .catch(error => {
+      setShowSystemError(true);
+    })
+    .finally(() => setIsLoading(false));
+  }
+
+  const handleReopenSubmit = async () => {
+    setIsLoading(true);
+    await axios.patch('/evac/api/evacassignment/'+ data.id + '/', {'closed':false, 'end_time':null})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "closed":false, "end_time":null }));
+      handleReopenModalClose();
     })
     .catch(error => {
       setShowSystemError(true);
@@ -354,6 +369,16 @@ function DispatchSummary({ id, incident, organization }) {
                     Resolve Dispatch Assignment
                   </LoadingLink>
                 }
+                {data.end_time ?
+                <LoadingLink
+                  onClick={() => {setShowReopenModal(true)}}
+                  className="text-white d-block py-1 px-3"
+                  isLoading={isLoading}
+                >
+                  <FontAwesomeIcon icon={faClockRotateLeft} className="mr-1"  inverse />
+                  Reopen Dispatch Assignment
+                </LoadingLink>
+                : ''}
                 <LoadingLink
                   onClick={handleGeoJsonDownload}
                   className="text-white d-block py-1 px-3"
@@ -362,7 +387,7 @@ function DispatchSummary({ id, incident, organization }) {
                   <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                   Download Dispatch Assignment as Geojson
                 </LoadingLink>
-                { state.incident.caltopo_map_id ?
+                {state.incident.caltopo_map_id ?
                 <LoadingLink
                   onClick={handleGeoJsonPush}
                   className="text-white d-block py-1 px-3"
@@ -667,6 +692,20 @@ function DispatchSummary({ id, incident, organization }) {
       <Modal.Footer>
         <Button variant="primary" onClick={handleRemoveTeamMemberSubmit}>Yes</Button>
         <Button variant="secondary" onClick={handleTeamMemberClose}>Cancel</Button>
+      </Modal.Footer>
+    </Modal>
+    <Modal show={showReopenModal} onHide={handleReopenModalClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Dispatch Assignment Reopen</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Are you sure you would like to reopen this dispatch assignment?
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleReopenSubmit}>Yes</Button>
+        <Button variant="secondary" onClick={handleReopenModalClose}>Cancel</Button>
       </Modal.Footer>
     </Modal>
     </>
