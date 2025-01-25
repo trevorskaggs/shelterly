@@ -38,8 +38,8 @@ export function logoutUser({dispatch}, {removeCookie}) {
     navigate('/login')
   })
   .catch(e => {
-    removeCookie("token");
-    setAuthToken();
+    // removeCookie("token");
+    // setAuthToken();
     // Raise error.
     dispatch({type: "LOGOUT_FAILED", data: e});
   });

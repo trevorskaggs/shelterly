@@ -285,14 +285,14 @@ function DispatchSummary({ id, incident, organization }) {
       source.cancel();
     };
 
-  }, [id]);
+  }, [id, state.incident.id]);
 
   return (
     <>
     <Header>Dispatch Assignment Summary #{id}</Header>
     <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
     <hr/>
-    <Row className="mb-3">
+    <Row className="mb-2">
       <Col>
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
           <Card.Body style={{marginTop:"-10px"}}>
@@ -429,7 +429,7 @@ function DispatchSummary({ id, incident, organization }) {
           </Card.Body>
         </Card>
       </Col>
-      <Col className="border rounded pl-0 pr-0" style={{marginTop:"4px", marginRight:"15px", maxHeight:"311px"}}>
+      <Col className="border rounded pl-0 pr-0" style={{marginRight:"15px", maxHeight:"327px"}}>
         <Map className="d-block dispatch-leaflet-container" bounds={data.bounds}>
           {data.assigned_requests.map(assigned_request => (
             <Marker

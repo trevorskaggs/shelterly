@@ -99,6 +99,7 @@ function AuthProvider(props) {
         .then(orgResponse => {
           if (orgResponse.data.length > 0) {
             dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name, watchduty_enabled:orgResponse.data[0].watchduty_enabled, caltopo_enabled:orgResponse.data[0].caltopo_enabled}});
+            // state['organization'] = {id:orgResponse.data[0].id, name:orgResponse.data[0].name, watchduty_enabled:orgResponse.data[0].watchduty_enabled, caltopo_enabled:orgResponse.data[0].caltopo_enabled}
           }
           else {
             navigate('/')
@@ -119,7 +120,7 @@ function AuthProvider(props) {
     }
 
     // If we have a token but no user, attempt to authenticate them.
-    if (!state.user && !state.logout && cookies.token && !Object.keys(publicRoutes).includes(path)) {
+    if (!state.user && !state.logout && cookies.token && state.organization && state.incident && !Object.keys(publicRoutes).includes(path)) {
       loadUser({state, dispatch, removeCookie, path});
     }
     // Redirect to login page if no authenticated user object is present.

@@ -33,10 +33,10 @@ const Login = () => {
     setShowPassword(!showPassword);
   };
 
-  useEffect(() => {
-    removeCookie("token");
-    setAuthToken();
-  }, []);
+  // useEffect(() => {
+    // removeCookie("token");
+    // setAuthToken();
+  // }, []);
 
   return (
     <Fragment>
@@ -54,36 +54,21 @@ const Login = () => {
           // setAuthToken();
           axios.post('/login/', values)
           .then(response => {
+
             // Set token for axios calls.
             setAuthToken(response.data.token);
+
             // Store token in cookie.
             setCookie("token", response.data.token);
+
             // Update state information.
             dispatch({type: 'LOGIN_SUCCESSFUL', data: response.data });
-            if (next !== "/") {
-              axios.get('/incident/api/organization/?slug=' + org_slug)
-              .then(orgResponse => {
-                if (orgResponse.data.length > 0) {
-                  dispatch({type: "SET_ORGANIZATION", data: {id:orgResponse.data[0].id, name:orgResponse.data[0].name, watchduty_enabled:orgResponse.data[0].watchduty_enabled, caltopo_enabled:orgResponse.data[0].caltopo_enabled}});
-                  if (incident_slug && incident_slug !== 'accounts') {
-                    axios.get('/incident/api/incident/?incident=' + incident_slug)
-                    .then(incidentResponse => {
-                      dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training, watchduty_map_id:incidentResponse.data[0].watchduty_map_id, caltopo_map_id:incidentResponse.data[0].caltopo_map_id}});
-                    })
-                    .catch(error => {
-                    });
-                  }
-                }
-              })
-              .catch(error => {
-              });
-            }
 
             navigate(next);
           })
           .catch(e => {
-            removeCookie("token");
-            setAuthToken();
+            // removeCookie("token");
+            // setAuthToken();
             actions.setStatus('Failed to log in with this username and password combination.')
             dispatch({type: "LOGIN_FAILED", data: e});
           });
