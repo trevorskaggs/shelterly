@@ -153,6 +153,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
     assigned_requests: [],
     start_time: null,
     end_time: null,
+    dispatch_date: null,
     sr_updates: [],
     incident_slug: incident,
   });
@@ -346,6 +347,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
       enableReinitialize={true}
       validationSchema={Yup.object({
         start_time: Yup.date(),
+        dispatch_date: Yup.date(),
         end_time: Yup.date().nullable(),
         service_requests: Yup.array(),
         team_members: Yup.array(),
@@ -423,7 +425,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
         <>
           <BootstrapForm as={Form}>
             <Header>Dispatch Assignment and Resolution
-              <div style={{ fontSize: "18px", marginTop: "10px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+              {/* <div style={{ fontSize: "18px", marginTop: "10px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div> */}
             </Header>
             <hr/>
             <Card className="mt-3 border rounded">
@@ -438,6 +440,21 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ? <span>&nbsp;({team_member.agency_id})</span> : ""}
                     </ListGroup.Item>
                   ))}
+                  <ListGroup.Item className="ml-0 pl-0">
+                    <DateTimePicker
+                      label="Dispatch Date"
+                      name={"dispatch_date"}
+                      id={"dispatch_date"}
+                      xs="4"
+                      data-enable-time={false}
+                      clearable={false}
+                      onChange={(date, dateStr) => {
+                        props.setFieldValue("dispatch_date", dateStr)
+                      }}
+                      disabled={false}
+                      // value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
+                    />
+                  </ListGroup.Item>
                 </ListGroup>
               </Card.Body>
             </Card>
@@ -555,7 +572,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date().setDate(new Date().getDate() + 1)}
+                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date().setDate(new Date().getDate() + 2)}
                       disabled={data.end_time !== null && assigned_request.followup_date !== assigned_request.service_request_object.followup_date}
                     />
                   </BootstrapForm.Row>
@@ -569,24 +586,6 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       label="Instructions for Field Team"
                     />
                   </BootstrapForm.Row>
-                  <BootstrapForm.Row>
-                    <TextInput
-                      id={`sr_updates.${index}.notes`}
-                      name={`sr_updates.${index}.notes`}
-                      xs="9"
-                      as="textarea"
-                      rows={5}
-                      label="Visit Notes"
-                    />
-                  </BootstrapForm.Row>
-                  {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
-                  {assigned_request.visit_notes.map(visit_note =>
-                    <ListGroup variant="flush" key={visit_note.id}>
-                      <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
-                      <Moment format="l">{visit_note.date_completed}</Moment>: {visit_note.notes || "No information available."}
-                      </ListGroup.Item>
-                    </ListGroup>
-                  ) || "None"}
                   <BootstrapForm.Row>
                     <Col>
                       <BootstrapForm.Label htmlFor={`sr_updates.${index}.forced_entry`} className="mt-1">Forced Entry</BootstrapForm.Label>
@@ -635,7 +634,26 @@ function DispatchResolutionForm({ id, incident, organization }) {
                         />
                       </BootstrapForm.Row>
                     </span>
-                    : ""}
+                  : ""}
+                  <BootstrapForm.Row className="mt-2" style={{marginBottom:"-13px"}}>
+                    <TextInput
+                      id={`sr_updates.${index}.notes`}
+                      name={`sr_updates.${index}.notes`}
+                      xs="9"
+                      as="textarea"
+                      rows={5}
+                      label="Visit Notes"
+                    />
+                  </BootstrapForm.Row>
+                  <hr/>
+                  {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+                  <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
+                  {assigned_request.visit_notes.map(visit_note =>
+                    <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
+                      <Moment format="l">{visit_note.date_completed}</Moment>: {visit_note.notes || "No information available."}
+                    </ListGroup.Item>
+                  ) || "None"}
+                  </ListGroup>
                 </Card.Body>
               </Card>
             ))}
