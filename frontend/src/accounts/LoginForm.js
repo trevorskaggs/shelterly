@@ -33,10 +33,10 @@ const Login = () => {
     setShowPassword(!showPassword);
   };
 
-  // useEffect(() => {
-    // removeCookie("token");
-    // setAuthToken();
-  // }, []);
+  useEffect(() => {
+    removeCookie("token");
+    setAuthToken();
+  }, []);
 
   return (
     <Fragment>
