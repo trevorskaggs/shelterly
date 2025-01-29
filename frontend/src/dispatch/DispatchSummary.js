@@ -688,6 +688,7 @@ function DispatchSummary({ id, incident, organization }) {
             </ListGroup>
           </span>
           : ""}
+          {assigned_request.visit_notes.length > 0 ? <hr/> : ""}
           {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
           <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
           {assigned_request.visit_notes.map(visit_note =>
