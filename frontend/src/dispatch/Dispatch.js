@@ -113,7 +113,7 @@ function Dispatch({ incident, organization }) {
             map_dict[dispatch_assignment.id] = {service_requests:sr_dict}
           });
           setMapState(map_dict);
-          setData({dispatch_assignments: response.data.sort((a, b) => a.team_object.name.localeCompare(b.team_object.name)), isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
+          setData({dispatch_assignments: response.data.sort((a, b) => a.team_name.localeCompare(b.team_name)), isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
           setInitialBounds(bounds);
         }
       })
@@ -224,7 +224,7 @@ function Dispatch({ incident, organization }) {
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} direction={"top"} autoPan={false} closeButton={true}>
                   <span>
-                    <div>DA#{dispatch_assignment.id_for_incident} -&nbsp;{dispatch_assignment.team_object ? dispatch_assignment.team_object.name : ""}</div>
+                    <div>DA#{dispatch_assignment.id_for_incident} -&nbsp;{dispatch_assignment.team_object ? dispatch_assignment.team_name : ""}</div>
                     {mapState[dispatch_assignment.id] ?
                       <span>
                         {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).length > 0 ? Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
@@ -257,9 +257,9 @@ function Dispatch({ incident, organization }) {
         <Scrollbar no_shadow="true" style={{height:"450px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
         <Button variant={"info"} className="border" onClick={() => setShowActive(!showActive)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Active {showActive ? <FontAwesomeIcon icon={faChevronCircleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleDown} size="sm" />}</Button>
         {data.dispatch_assignments.filter(da => showActive ? da.team_member_names.length > 0 : null).map(dispatch_assignment => (
-          <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px", textAlign:"left", fontSize:"14px"}}>
+          <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px", textAlign:"left", fontSize:"14px", paddingLeft:"8px", paddingRight:"0px"}}>
             DA#{dispatch_assignment.id_for_incident} -&nbsp;
-            {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
+            {dispatch_assignment.team ? dispatch_assignment.team_name : "Preplanned"}
             {dispatch_assignment.team_member_names ?
               <OverlayTrigger
                 key={"team-names"}
@@ -277,9 +277,9 @@ function Dispatch({ incident, organization }) {
         ))}
         <Button variant={"info"} className="border" onClick={() => setShowPreplanned(!showPreplanned)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Preplanned {showPreplanned ? <FontAwesomeIcon icon={faChevronCircleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleDown} size="sm" />}</Button>
         {data.dispatch_assignments.filter(da => showPreplanned ? da.team_member_names.length === 0 : null).map(dispatch_assignment => (
-          <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px", textAlign:"left", fontSize:"14px"}}>
+          <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px", textAlign:"left", fontSize:"14px", paddingLeft:"8px", paddingRight:"0px"}}>
             DA#{dispatch_assignment.id_for_incident} -&nbsp;
-            {dispatch_assignment.team ? dispatch_assignment.team_object.name : "Preplanned"}
+            {dispatch_assignment.team ? dispatch_assignment.team_name : "Preplanned"}
             {dispatch_assignment.team_member_names ?
               <OverlayTrigger
                 key={"team-names"}
@@ -300,8 +300,7 @@ function Dispatch({ incident, organization }) {
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
       <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
-        Assignments&nbsp;&nbsp; -
-        <span className="fa-layers ml-3 mr-1">
+        <span className="fa-layers ml-1 mr-1">
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
           <FontAwesomeIcon icon={faExclamationCircle} className="icon-border fa-move-down" color="#ff4c4c" />
         </span>

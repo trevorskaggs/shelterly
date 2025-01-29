@@ -429,7 +429,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
             <Card className="mt-3 border rounded">
               <Card.Body>
                 <Card.Title>
-                  <h4>{data.team_object.name}</h4>
+                  <h4>{data.team_name}</h4>
                 </Card.Title>
                 <hr />
                 <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px", textTransform: "capitalize" }}>

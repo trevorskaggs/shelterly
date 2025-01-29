@@ -226,7 +226,7 @@ function DispatchSummary({ id, incident, organization }) {
           setData(response.data);
           setMapState(map_dict);
           setTeamData({teams: [], options: [], isFetching: true});
-          setTeamName(response.data.team_object.name);
+          setTeamName(response.data.team_name);
           setIsPreplanned(response.data.team_name.match(/^Preplanned [0-9]+$/));
           axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
             cancelToken: source.token,
@@ -298,7 +298,7 @@ function DispatchSummary({ id, incident, organization }) {
           <Card.Body style={{marginTop:"-10px"}}>
             <div className="d-flex justify-content-between" style={{marginBottom:"-10px"}}>
               <h4 style={{paddingTop:"12px"}}>
-                {data.team_object ? data.team_object.name : "Preplanned"}
+                {data.team_object ? data.team_name : "Preplanned"}
                 <OverlayTrigger
                   key={"edit-team-name"}
                   placement="top"

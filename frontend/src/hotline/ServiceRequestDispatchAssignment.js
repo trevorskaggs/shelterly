@@ -338,7 +338,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
             >
               <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id_for_incident}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
             </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
-            {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
+            {dispatch_assignment.team ? dispatch_assignment.team_name : ""}
             {dispatch_assignment.team ?
               <OverlayTrigger
                 key={"team-names"}
@@ -405,7 +405,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
               >
                 <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id_for_incident}><FontAwesomeIcon icon={faClipboardList} className="ml-1" inverse /></Link>
               </OverlayTrigger>&nbsp;&nbsp;|&nbsp;
-              {dispatch_assignment.team ? dispatch_assignment.team_object.name : ""}
+              {dispatch_assignment.team ? dispatch_assignment.team_name : ""}
               {dispatch_assignment.team_member_names ?
                 <OverlayTrigger
                   key={"team-names"}
