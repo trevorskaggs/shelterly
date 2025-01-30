@@ -71,12 +71,13 @@ class DispatchServiceRequestSerializer(SimpleDispatchServiceRequestSerializer):
 
 class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
     service_request_object = SimpleDispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
-    visit_notes = serializers.SerializerMethodField()
+    # visit_notes = serializers.SerializerMethodField()
 
     def get_visit_notes(self, obj):
         #TODO: this triggers one request per SR
-        if VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj).exists():
-            return VisitNoteSerializer(VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj), many=True).data
+        notes = VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj)
+        if notes:
+            return VisitNoteSerializer(notes, many=True).data
         return []
 
     class Meta:
@@ -142,7 +143,7 @@ class DeployEvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
         model = EvacAssignment
         fields = '__all__'
 
-class MapEvacAssignmentSerializer(DeployEvacAssignmentSerializer):
+class MapEvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
 
     assigned_requests = SimpleAssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
 
@@ -150,7 +151,7 @@ class MapEvacAssignmentSerializer(DeployEvacAssignmentSerializer):
         model = EvacAssignment
         fields = '__all__'
 
-class EvacAssignmentSerializer(MapEvacAssignmentSerializer):
+class EvacAssignmentSerializer(DeployEvacAssignmentSerializer):
 
     assigned_requests = AssignedRequestDispatchSerializer(many=True, required=False, read_only=True)
 

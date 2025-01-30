@@ -39,7 +39,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     }
 
     // draw team section
-    pdf.drawSectionHeader({ text: data.team_object.name, hRule: false, fontSize: 14 });
+    pdf.drawSectionHeader({ text: data.team_name, hRule: false, fontSize: 14 });
     pdf.drawPad(10)
     pdf.setDocumentFontSize({ size: 10 });
     pdf.drawTextList({

@@ -346,7 +346,7 @@ function ShelterIntake({ id, incident, organization }) {
             if (!unmounted) {
               let da_options = [];
               response.data.forEach((da, index) => {
-                da_options.push({value: da.id, label: "DA#" + da.id_for_incident + " | " + da.team_name + ": " + da.team_object.display_name});
+                da_options.push({value: da.id, label: "DA#" + da.id_for_incident + " | " + da.team_name + ": " + da.team_member_names});
                 response.data[index]["sr_updates"] = [];
                 da.assigned_requests.forEach((assigned_request, inception) => {
                   response.data[index].sr_updates.push({

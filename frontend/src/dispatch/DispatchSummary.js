@@ -1,13 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner } from 'react-bootstrap';
+import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner, ListGroupItem } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList,  faChevronDown, faChevronUp, faEquals, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faExclamationSquare, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faClockRotateLeft, faExclamationSquare, faChevronDoubleDown, faChevronDoubleUp } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
@@ -47,6 +47,8 @@ function DispatchSummary({ id, incident, organization }) {
   const [defaultTeamName, setDefaultTeamName] = useState(false);
   const [showTeamName, setShowTeamName] = useState(false)
   const handleTeamNameClose = () => {setShowTeamName(false);}
+  const [showReopenModal, setShowReopenModal] = useState(false)
+  const handleReopenModalClose = () => {setShowReopenModal(false);}
   const [teamMembers, setTeamMembers] = useState([]);
   const [show, setShow] = useState(false);
   const handleClose = () => {setShow(false);}
@@ -55,6 +57,7 @@ function DispatchSummary({ id, incident, organization }) {
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
   const [error, setError] = useState('');
   const [isPreplanned, setIsPreplanned] = useState(false);
+  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   const handleTeamNameSubmit = async () => {
     let requestBody;
@@ -177,6 +180,19 @@ function DispatchSummary({ id, incident, organization }) {
     .finally(() => setIsLoading(false));
   }
 
+  const handleReopenSubmit = async () => {
+    setIsLoading(true);
+    await axios.patch('/evac/api/evacassignment/'+ data.id + '/', {'closed':false, 'end_time':null})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "closed":false, "end_time":null }));
+      handleReopenModalClose();
+    })
+    .catch(error => {
+      setShowSystemError(true);
+    })
+    .finally(() => setIsLoading(false));
+  }
+
   const handleDownloadPdfClick = async () => {
     setIsLoading(true);
     // wait for 1 tick so spinner will set before the print button locks up the browser
@@ -211,7 +227,7 @@ function DispatchSummary({ id, incident, organization }) {
           setData(response.data);
           setMapState(map_dict);
           setTeamData({teams: [], options: [], isFetching: true});
-          setTeamName(response.data.team_object.name);
+          setTeamName(response.data.team_name);
           setIsPreplanned(response.data.team_name.match(/^Preplanned [0-9]+$/));
           axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
             cancelToken: source.token,
@@ -270,42 +286,21 @@ function DispatchSummary({ id, incident, organization }) {
       source.cancel();
     };
 
-  }, [id]);
+  }, [id, state.incident.id]);
 
   return (
     <>
     <Header>Dispatch Assignment Summary #{id}</Header>
-    <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div>
+    {/* <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>
+    {data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div> */}
     <hr/>
-    <Row className="mb-3">
+    <Row className="mb-2">
       <Col>
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
           <Card.Body style={{marginTop:"-10px"}}>
             <div className="d-flex justify-content-between" style={{marginBottom:"-10px"}}>
               <h4 style={{paddingTop:"12px"}}>
-                {data.team_object ? data.team_object.name : "Preplanned"}
-                <OverlayTrigger
-                  key={"edit-team-name"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-edit-team-name`}>
-                      Edit team name
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
-                </OverlayTrigger>
-                <OverlayTrigger
-                  key={"add-team-member"}
-                  placement="top"
-                  overlay={
-                    <Tooltip id={`tooltip-add-team-member`}>
-                      Add team member
-                    </Tooltip>
-                  }
-                >
-                  <FontAwesomeIcon icon={faUserPlus} className="ml-1 fa-move-up" size="sm" onClick={() => {setShow(true)}} style={{cursor:'pointer'}} inverse />
-                </OverlayTrigger>
+                Information
               </h4>
               {isLoading ? (
                 <Spinner
@@ -326,16 +321,6 @@ function DispatchSummary({ id, incident, organization }) {
                 />
               ) : (
               <ActionsDropdown alignRight={true} variant="dark" title="Actions">
-                <ShelterlyPrintifyButton
-                  id="dispatch-assignment"
-                  spinnerSize={2.0}
-                  tooltipPlacement='right'
-                  tooltipText='Print Dispatch Assignment as PDF'
-                  printFunc={handleDownloadPdfClick}
-                  disabled={isLoading}
-                  noOverlay={true}
-                />
-  
                 {data.end_time
                   ? <LoadingLink
                     href={"/" + organization + "/" + incident + "/dispatch/resolution/" + id}
@@ -355,6 +340,33 @@ function DispatchSummary({ id, incident, organization }) {
                   </LoadingLink>
                 }
                 <LoadingLink
+                  onClick={() => {setShow(true)}}
+                  className="text-white d-block py-1 px-3"
+                  isLoading={isLoading}
+                >
+                  <FontAwesomeIcon icon={faUserPlus} className="mr-1"  inverse />
+                  Add Team Member
+                </LoadingLink>
+                <ShelterlyPrintifyButton
+                  id="dispatch-assignment"
+                  spinnerSize={2.0}
+                  tooltipPlacement='right'
+                  tooltipText='Print Dispatch Assignment as PDF'
+                  printFunc={handleDownloadPdfClick}
+                  disabled={isLoading}
+                  noOverlay={true}
+                />
+                {data.end_time ?
+                <LoadingLink
+                  onClick={() => {setShowReopenModal(true)}}
+                  className="text-white d-block py-1 px-3"
+                  isLoading={isLoading}
+                >
+                  <FontAwesomeIcon icon={faClockRotateLeft} className="mr-1"  inverse />
+                  Reopen Dispatch Assignment
+                </LoadingLink>
+                : ''}
+                <LoadingLink
                   onClick={handleGeoJsonDownload}
                   className="text-white d-block py-1 px-3"
                   isLoading={isLoading}
@@ -362,7 +374,7 @@ function DispatchSummary({ id, incident, organization }) {
                   <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                   Download Dispatch Assignment as Geojson
                 </LoadingLink>
-                { state.incident.caltopo_map_id ?
+                {state.incident.caltopo_map_id ?
                 <LoadingLink
                   onClick={handleGeoJsonPush}
                   className="text-white d-block py-1 px-3"
@@ -379,12 +391,32 @@ function DispatchSummary({ id, incident, organization }) {
             {data.team_member_objects && data.team_member_objects.length > 0 ?
             <Scrollbar no_shadow="true" style={{height:"225px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
+                <ListGroup.Item>
+                  <Row>
+                    <Col><b>Opened: </b>{<Moment format="MMM Do YYYY, HH:mm">{data.start_time}</Moment>}</Col>
+                    <Col><b>Closed: </b>{data.end_time ? <Moment format="MMM Do YYYY, HH:mm">{data.end_time}</Moment> : "N/A"}</Col>
+                  </Row>
+                </ListGroup.Item>
+                <ListGroup.Item>
+                  <b>Team: </b>{data.team_object ? data.team_name : "Preplanned"}
+                  <OverlayTrigger
+                    key={"edit-team-name"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-edit-team-name`}>
+                        Edit team name
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
+                  </OverlayTrigger>
+                </ListGroup.Item>
                 {data.team_member_objects.map(team_member => (
                   <ListGroup.Item key={team_member.id}>
                     {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ?
                     <span>&nbsp;({team_member.agency_id})</span> : ""}
                     {team_member.display_phone ?
-                    <span>&nbsp;{team_member.display_phone}</span>
+                    <span>&nbsp;-&nbsp;{team_member.display_phone}</span>
                     : ""}
                     <OverlayTrigger
                       key={"remove-team-member"}
@@ -404,7 +436,7 @@ function DispatchSummary({ id, incident, organization }) {
           </Card.Body>
         </Card>
       </Col>
-      <Col className="border rounded pl-0 pr-0" style={{marginTop:"4px", marginRight:"15px", maxHeight:"311px"}}>
+      <Col className="border rounded pl-0 pr-0" style={{marginRight:"15px", maxHeight:"327px"}}>
         <Map className="d-block dispatch-leaflet-container" bounds={data.bounds}>
           {data.assigned_requests.map(assigned_request => (
             <Marker
@@ -435,9 +467,70 @@ function DispatchSummary({ id, incident, organization }) {
     {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map(assigned_request => (
       <Row key={assigned_request.service_request_object.id}>
         <Card className="mb-3 ml-3 mr-3 border rounded" style={{width:"100%"}}>
-          <Card.Body>
+          <Card.Body style={{marginBottom:"6px"}}>
             <Card.Title>
               <h4>
+                {assigned_request.service_request_object.priority === 1 ?
+                  <OverlayTrigger
+                    key={"highest"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-highest`}>
+                        {priorityText[assigned_request.service_request_object.priority]} priority
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faChevronDoubleUp} className="mr-1"/>
+                  </OverlayTrigger>
+                : assigned_request.service_request_object.priority === 2 ?
+                  <OverlayTrigger
+                    key={"high"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-high`}>
+                        {priorityText[assigned_request.service_request_object.priority]} priority
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faChevronUp} className="mr-1"/>
+                  </OverlayTrigger>
+                : assigned_request.service_request_object.priority === 3 ?
+                  <OverlayTrigger
+                    key={"medium"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-medium`}>
+                        {priorityText[assigned_request.service_request_object.priority]} priority
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faEquals} className="mr-1"/>
+                  </OverlayTrigger>
+                : assigned_request.service_request_object.priority === 4 ?
+                  <OverlayTrigger
+                    key={"low"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-low`}>
+                        {priorityText[assigned_request.service_request_object.priority]} priority
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faChevronDown} className="mr-1"/>
+                  </OverlayTrigger>
+                : assigned_request.service_request_object.priority === 5 ?
+                  <OverlayTrigger
+                    key={"lowest"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-lowest`}>
+                        {priorityText[assigned_request.service_request_object.priority]} priority
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faChevronDoubleDown} className="mr-1"/>
+                  </OverlayTrigger>
+                : ""}
                 SR#{assigned_request.service_request_object.id_for_incident} -&nbsp;
                 <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 {assigned_request.visit_note && assigned_request.visit_note.forced_entry ?
@@ -465,11 +558,14 @@ function DispatchSummary({ id, incident, organization }) {
                   >
                     <FontAwesomeIcon icon={faCalendarDay} className="ml-1 fa-move-up" size="sm" />
                   </OverlayTrigger> : ""}
-                &nbsp;| {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {assigned_request.visit_note ? <Moment format="[ on ]l">{assigned_request.visit_note.date_completed}</Moment> : ""}
+                &nbsp;
               </h4>
             </Card.Title>
             <hr style={{marginBottom:"7px"}}/>
             <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
+              <ListGroup.Item>
+                <b>Status: </b>{Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].includes(animal.status)).length === 0 ? <Moment format="[ on ]l">{assigned_request.visit_note.date_completed}</Moment> : <Moment format="[ on ]l">{data.dispatch_date}</Moment>}
+              </ListGroup.Item>
               <ListGroup.Item>
                 <b>Latitude: </b>{assigned_request.service_request_object.latitude}
                 <br />
@@ -592,14 +688,15 @@ function DispatchSummary({ id, incident, organization }) {
             </ListGroup>
           </span>
           : ""}
+          {assigned_request.visit_notes.length > 0 ? <hr/> : ""}
           {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+          <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
           {assigned_request.visit_notes.map(visit_note =>
-            <ListGroup variant="flush" style={{marginBottom:"-13px"}} key={visit_note.id}>
-              <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
-              <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
-              </ListGroup.Item>
-            </ListGroup>
+            <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
+              <Link href={"/" + organization + "/" + incident + "/dispatch/assignment/note/" + visit_note.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
+            </ListGroup.Item>
           ) || "None"}
+          </ListGroup>
         </Card.Body>
       </Card>
     </Row>
@@ -667,6 +764,20 @@ function DispatchSummary({ id, incident, organization }) {
       <Modal.Footer>
         <Button variant="primary" onClick={handleRemoveTeamMemberSubmit}>Yes</Button>
         <Button variant="secondary" onClick={handleTeamMemberClose}>Cancel</Button>
+      </Modal.Footer>
+    </Modal>
+    <Modal show={showReopenModal} onHide={handleReopenModalClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Dispatch Assignment Reopen</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          Are you sure you would like to reopen this dispatch assignment?
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleReopenSubmit}>Yes</Button>
+        <Button variant="secondary" onClick={handleReopenModalClose}>Cancel</Button>
       </Modal.Footer>
     </Modal>
     </>
