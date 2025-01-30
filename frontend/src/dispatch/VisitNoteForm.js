@@ -18,10 +18,12 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import * as Yup from 'yup';
 import { DateTimePicker, TextInput } from '../components/Form';
+import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 
 const VisitNoteForm = ({ id, incident, organization }) => {
 
+  const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
   const [data, setData] = useState({
@@ -74,7 +76,12 @@ const VisitNoteForm = ({ id, incident, organization }) => {
         setTimeout(() => {
           axios.patch('/hotline/api/visitnote/' + values.id + '/', values)
           .then(response => {
-            navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + values.service_request)
+            if (state.prevLocation) {
+              navigate(state.prevLocation);
+            }
+            else {
+              navigate('/' + organization + '/' + incident + '/hotline/servicerequest/' + data.service_request);
+            }
           })
           .catch(error => {
             setShowSystemError(true);

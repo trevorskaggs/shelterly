@@ -467,7 +467,7 @@ function DispatchSummary({ id, incident, organization }) {
     {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map(assigned_request => (
       <Row key={assigned_request.service_request_object.id}>
         <Card className="mb-3 ml-3 mr-3 border rounded" style={{width:"100%"}}>
-          <Card.Body>
+          <Card.Body style={{marginBottom:"6px"}}>
             <Card.Title>
               <h4>
                 {assigned_request.service_request_object.priority === 1 ?
@@ -693,7 +693,7 @@ function DispatchSummary({ id, incident, organization }) {
           <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
           {assigned_request.visit_notes.map(visit_note =>
             <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
-              <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + visit_note.dispatch_assignment} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
+              <Link href={"/" + organization + "/" + incident + "/dispatch/assignment/note/" + visit_note.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
             </ListGroup.Item>
           ) || "None"}
           </ListGroup>

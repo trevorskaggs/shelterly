@@ -224,7 +224,7 @@ function Dispatch({ incident, organization }) {
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} direction={"top"} autoPan={false} closeButton={true}>
                   <span>
-                    <div>DA#{dispatch_assignment.id_for_incident} -&nbsp;{dispatch_assignment.team_object ? dispatch_assignment.team_name : ""}</div>
+                    <div>DA#{dispatch_assignment.id_for_incident} -&nbsp;{dispatch_assignment.team_name ? dispatch_assignment.team_name : ""}</div>
                     {mapState[dispatch_assignment.id] ?
                       <span>
                         {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).length > 0 ? Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
