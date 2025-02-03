@@ -261,7 +261,7 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
         Returns: Queryset of treatment requests.
         """
         queryset = (
-            TreatmentRequest.objects.all().select_related("treatment").select_related("treatment_plan", "treatment_plan__medical_record", "treatment_plan__medical_record__patient").exclude(treatment_plan__medical_record__patient__status__in=["CANCELED", "REUNITED"])
+            TreatmentRequest.objects.all().select_related("treatment").select_related("treatment_plan", "treatment_plan__medical_record", "treatment_plan__medical_record__patient").exclude(treatment_plan__medical_record__patient__status__in=["CANCELED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(treatment_plan__medical_record__patient__incident__slug=self.request.GET.get('incident'))
