@@ -207,7 +207,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
             })
             response.data.sr_updates.push({
               id: assigned_request.service_request_object.id,
-              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + 1)),
+              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + 2)),
               priority: assigned_request.service_request_object.priority,
               date_completed: assigned_request.visit_note && assigned_request.visit_note.date_completed ? assigned_request.visit_note.date_completed : new Date(),
               directions: assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : '',
@@ -485,7 +485,6 @@ function DispatchResolutionForm({ id, incident, organization }) {
                             setData(prevState => ({...prevState, sr_updates: newItems}))
                             props.setFieldValue(`sr_updates.${index}.unable_to_complete`, true);
                             props.setFieldValue(`sr_updates.${index}.date_completed`, null);
-                            props.setFieldValue(`sr_updates.${index}.followup_date`, null);
                           }
                         }}
                         style={{
