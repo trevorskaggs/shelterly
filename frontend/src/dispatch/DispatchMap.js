@@ -620,6 +620,9 @@ function Deploy({ incident, organization }) {
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
+              .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
+              .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
+              .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .map(service_request => (
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
@@ -774,8 +777,8 @@ function Deploy({ incident, organization }) {
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
-              .filter(service_request => filterData.followup_date_start ? service_request.followup_date >= filterData.followup_date_start : true)
-              .filter(service_request => filterData.followup_date_end ? service_request.followup_date <= filterData.followup_date_end : true)
+              .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
+              .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .sort((a, b) => {
                 // Sort by followup_date
                 if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom

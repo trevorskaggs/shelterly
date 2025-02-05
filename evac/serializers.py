@@ -110,7 +110,7 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EvacAssignment
-        fields = ['id', 'id_for_incident', 'start_time', 'end_time', 'team_name', 'team_member_names', 'closed']
+        fields = ['id', 'id_for_incident', 'dispatch_date', 'start_time', 'end_time', 'team_name', 'team_member_names', 'closed']
 
 
 class BarebonesAssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
