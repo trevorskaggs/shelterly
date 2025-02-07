@@ -23,6 +23,7 @@ class ReportViewSet(viewsets.ViewSet):
         daily_report = []
         sr_worked_report = []
         shelter_intake_report = []
+        sr_followup_date_report = []
         delta = datetime.timedelta(days=1)
 
         animals = Animal.objects.select_related('incident').select_related('species').select_related('species__category').prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=incident_slug)
@@ -109,6 +110,22 @@ class ReportViewSet(viewsets.ViewSet):
                 'sr_ids': dupe_sr_ids
               })
 
-        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True), 'duplicate_sr_report': duplicate_sr_report}
+        followup_start_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').earliest('date')['date']
+        followup_end_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').latest('date')['date']
+        while followup_end_date >= followup_start_date:
+          srs = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).filter(incident__slug=incident_slug, followup_date__date=followup_end_date).exclude(status__in=['closed', 'canceled']).distinct()
+          test = srs.count()
+          followup_data = {
+            'date': followup_end_date.strftime('%m/%d/%Y'),
+            'new': len(srs.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'])),
+            # 'new': ServiceRequest.objects.filter(incident__slug=incident_slug, followup_date__date=end_date, animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)']).count(),
+            'sip': len(srs.filter(animal__status__in=['SHELTERED IN PLACE'])),
+            'utl': len(srs.filter(animal__status__in=['UNABLE TO LOCATE'])),
+            'total': test,
+          }
+          sr_followup_date_report.insert(0, followup_data)
+          followup_end_date -= delta
+
+        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True), 'duplicate_sr_report':duplicate_sr_report, 'sr_followup_date_report':sr_followup_date_report}
         return Response(data)
     return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report': []})

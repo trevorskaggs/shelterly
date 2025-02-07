@@ -254,8 +254,8 @@ function DispatchAssignmentSearch({ incident, organization }) {
               DA#{evacuation_assignment.id_for_incident} -&nbsp;
               <Moment format="L">{evacuation_assignment.start_time}</Moment>
               &nbsp;|&nbsp;
-              <span title={evacuation_assignment.team ? evacuation_assignment.team_object.name + ": " + evacuation_assignment.team_member_names : ""}>
-                {(evacuation_assignment.team && evacuation_assignment.team_object.name) || "Preplanned"}
+              <span title={evacuation_assignment.team ? evacuation_assignment.team_name + ": " : ""}>
+                {(evacuation_assignment.team && evacuation_assignment.team_name) || "Preplanned"}
                 {evacuation_assignment.team_member_names ?
                 <OverlayTrigger
                   key={"team-names"}

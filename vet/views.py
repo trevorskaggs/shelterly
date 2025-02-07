@@ -209,7 +209,7 @@ class DiagnosticResultViewSet(viewsets.ModelViewSet):
         Returns: Queryset of diagnostic results.
         """
         queryset = (
-            DiagnosticResult.objects.all().select_related("diagnostic").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
+            DiagnosticResult.objects.all().select_related("diagnostic").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -240,7 +240,7 @@ class ProcedureResultViewSet(viewsets.ModelViewSet):
         Returns: Queryset of procedure results.
         """
         queryset = (
-            ProcedureResult.objects.all().select_related("procedure").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
+            ProcedureResult.objects.all().select_related("procedure").select_related("medical_record", "medical_record__patient").exclude(medical_record__patient__status__in=["CANCELED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -261,7 +261,7 @@ class TreatmentRequestViewSet(viewsets.ModelViewSet):
         Returns: Queryset of treatment requests.
         """
         queryset = (
-            TreatmentRequest.objects.all().select_related("treatment").select_related("treatment_plan", "treatment_plan__medical_record", "treatment_plan__medical_record__patient").exclude(treatment_plan__medical_record__patient__status__in=["CANCELED", "REUNITED"])
+            TreatmentRequest.objects.all().select_related("treatment").select_related("treatment_plan", "treatment_plan__medical_record", "treatment_plan__medical_record__patient").exclude(treatment_plan__medical_record__patient__status__in=["CANCELED"])
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(treatment_plan__medical_record__patient__incident__slug=self.request.GET.get('incident'))
@@ -303,7 +303,7 @@ class VetRequestViewSet(viewsets.ModelViewSet):
             VetRequest.objects.exclude(status="CANCELED").distinct()
             # .prefetch_related("owners")
             .select_related("medical_record", "medical_record__patient")
-            .exclude(medical_record__patient__status__in=["CANCELED", "REUNITED"])
+            .exclude(medical_record__patient__status__in=["CANCELED"])
             # .order_by('order')
         )
         if self.request.GET.get('incident'):

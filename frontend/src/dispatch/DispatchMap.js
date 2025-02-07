@@ -1,29 +1,33 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate } from 'raviger';
 import { Form, Formik } from 'formik';
 import { Button, Col, Form as BootstrapForm, FormCheck, Modal, OverlayTrigger, Row, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash, faExclamation
+  faBan, faBandAid, faBullseye, faCalendarDay, faCar, faCheckCircle, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash, faExclamation, faFilter
 } from '@fortawesome/free-solid-svg-icons';
 import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
+import { useDateRange } from '../hooks';
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
+import moment from 'moment';
 import useWebSocket from 'react-use-websocket';
 import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
-import { Checkbox, TextInput } from "../components/Form";
+import { Checkbox, DateRangePicker, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
 import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
+import { priorityChoices } from '../constants';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
+// import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
 
 function Deploy({ incident, organization }) {
 
@@ -34,7 +38,11 @@ function Deploy({ incident, organization }) {
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
 
   // Determine if this is a preplanning workflow.
-  let preplan = window.location.pathname.includes("preplan")
+  let preplan = window.location.pathname.includes("preplan");
+
+  const filterRef = useRef(null);
+  const openStartRef = useRef(null);
+  const openEndRef = useRef(null);
 
   const [data, setData] = useState({service_requests: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
   const [newData, setNewData] = useState(false);
@@ -53,6 +61,11 @@ function Deploy({ incident, organization }) {
   const [error, setError] = useState('');
   const [showAddTeamMember, setShowAddTeamMember] = useState(false);
   const handleCloseShowAddTeamMember = () => setShowAddTeamMember(false);
+  const [filterData, setFilterData] = useState({priority:[], followup_date_start:null, followup_date_end:null});
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [showFilterModal, setShowFilterModal] = useState(false);
+  const handleCloseFilterModal = () => setShowFilterModal(false);
   const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
   const [duplicateSRs, setDuplicateSRs] = useState([]);
   const handleCloseDispatchDuplicateSRModal = () => {setDuplicateSRs([]);setShowDispatchDuplicateSRModal(false);}
@@ -607,6 +620,9 @@ function Deploy({ incident, organization }) {
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
+              .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
+              .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
+              .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .map(service_request => (
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
@@ -712,7 +728,36 @@ function Deploy({ incident, organization }) {
         <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"-23px", marginLeft:"6px", minHeight:"36vh", paddingRight:"14px"}}>
           <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"-2px", height:"277px"}}>
             <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
-              <h5 className="mb-0 text-center">Options</h5>
+              <h5 className="mb-0 text-center">Options
+              {filterData.priority.length > 0 || filterData.followup_date_start || filterData.followup_date_end ?
+                <OverlayTrigger
+                  key={"filtered"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-filtered`}>
+                      Filtered options
+                    </Tooltip>
+                  }
+                >
+                  <span className="fa-layers" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer"}}>
+                    <FontAwesomeIcon icon={faFilter} className="ml-1" />
+                    <FontAwesomeIcon icon={faCheckCircle} size="sm" className="fa-inverse" transform={'shrink-4 down-3 right-10'} inverse />
+                  </span>
+                </OverlayTrigger>
+              :
+                <OverlayTrigger
+                  key={"filter"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-filter`}>
+                      Filter options
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faFilter} className="ml-1" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer"}} />
+                </OverlayTrigger>
+              }
+              </h5>
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
               <FormCheck
@@ -731,6 +776,9 @@ function Deploy({ incident, organization }) {
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
+              .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
+              .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
+              .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .sort((a, b) => {
                 // Sort by followup_date
                 if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom
@@ -1103,6 +1151,83 @@ function Deploy({ incident, organization }) {
           <Modal.Footer>
             <Button variant="primary" onClick={() => handleSubmit(props)}>Save</Button>
             <Button variant="secondary" onClick={handleClose}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal show={showFilterModal} onHide={handleCloseFilterModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Filter Options</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <label>Priority</label>
+            <Typeahead
+              id="priority"
+              multiple
+              onChange={(values) => {setFilterData((prevState) => ({...prevState, priority:values.map(option => option.value)}))}}
+              options={priorityChoices}
+              placeholder="Choose priorities..."
+              className="priority-typeahead mb-3"
+              selected={priorityChoices.filter(choice => filterData.priority.includes(choice.value))}
+            />
+            <label>Followup Date</label>
+            <Row>
+              <Col>
+                <DateRangePicker
+                  name={`start_date_range_picker`}
+                  id={`start_date_range_picker`}
+                  placeholder={"Filter by Start Date"}
+                  style={{height:"35px", marginRight:"-10px"}}
+                  mode="single"
+                  data-enable-time={false}
+                  clearable={"true"}
+                  ref={openStartRef}
+                  onChange={(dateRange) => {
+                    setStartDate(dateRange);
+                    if (dateRange.length) {
+                      let parsedDateRange = dateRange.toString().split(',');
+                      let start_date = moment(parsedDateRange[0]).format('YYYY-MM-DD');
+                      setFilterData((prevState) => ({...prevState, followup_date_start:start_date}))
+                    } else {
+                      setFilterData((prevState) => ({...prevState, followup_date_start:null}))
+                    }
+                  }}
+                  value={startDate}
+                />
+              </Col>
+              <Col>
+                <DateRangePicker
+                  name={`end_date_range_picker`}
+                  id={`end_date_range_picker`}
+                  placeholder={"Filter by End Date"}
+                  style={{height:"35px", marginLeft:"-10px"}}
+                  mode="single"
+                  data-enable-time={false}
+                  clearable={"true"}
+                  ref={openEndRef}
+                  onChange={(dateRange) => {
+                    setEndDate(dateRange);
+                    if (dateRange.length) {
+                      let parsedDateRange = dateRange.toString().split(',');
+                      let end_date = moment(parsedDateRange[0]).format('YYYY-MM-DD');
+                      setFilterData((prevState) => ({...prevState, followup_date_end:end_date}))
+                    } else {
+                      setFilterData((prevState) => ({...prevState, followup_date_end:null}))
+                    }
+                  }}
+                  value={endDate}
+                />
+              </Col>
+            </Row>
+            {/* <TextInput
+              label="Team Name"
+              id="temp_team_name"
+              name="temp_team_name"
+              type="text"
+            /> */}
+            {/* {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""} */}
+          </Modal.Body>
+          <Modal.Footer>
+            {/* <Button variant="primary" onClick={() => applyFilters()}>Save</Button> */}
+            <Button variant="secondary" onClick={handleCloseFilterModal}>Close</Button>
           </Modal.Footer>
         </Modal>
         <Formik

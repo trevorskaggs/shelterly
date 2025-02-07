@@ -559,7 +559,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                         <FontAwesomeIcon icon={faPlusSquare} className="mr-1" inverse />
                         Add an Animal
                       </LoadingLink>
-                      {data.status.toLowerCase() !== 'closed' ?
+                      {data.status.toLowerCase() === 'open' ?
                         <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1 px-3">
                           <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
                           Reunite All Animals
@@ -592,7 +592,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                 {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Active Dispatch Assignment:</b>
-                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.start_time}</Moment></Link>&nbsp;|&nbsp;
+                    &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.dispatch_date}</Moment></Link>&nbsp;|&nbsp;
                     {assigned_request.dispatch_assignment.team_name}
                     <OverlayTrigger
                       key={"team-names"}
