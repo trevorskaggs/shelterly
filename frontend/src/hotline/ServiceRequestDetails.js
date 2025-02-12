@@ -102,6 +102,8 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const handleCloseNoteModal = () => setShowNoteModal(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const handleCloseRemoveModal = () => setShowRemoveModal(false);
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const handleCloseSRModal = () => setShowCloseModal(false);
   const [noteData, setNoteData] = useState({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});
 
   // Handle animal reunification submit.
@@ -164,6 +166,17 @@ function ServiceRequestDetails({ id, incident, organization }) {
     .then(response => {
       setData(prevState => ({ ...prevState, "status":response.data.status, "assigned_requests":response.data.assigned_requests }));
       handleCloseRemoveModal();
+    })
+    .catch(error => {
+      setShowSystemError(true);
+    })
+  }
+
+  const handleSRClose = () => {
+    axios.patch('/hotline/api/servicerequests/' + data.id + '/', {status:'closed'})
+    .then(response => {
+      setData(prevState => ({ ...prevState, "status":"closed" }));
+      handleCloseSRModal();
     })
     .catch(error => {
       setShowSystemError(true);
@@ -369,7 +382,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       isLoading={isLoading}
                       className="text-white d-block py-1 px-3"
                     >
-                      <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                      <FontAwesomeIcon icon={faEdit} className="mr-1" style={{marginLeft:"-1px"}}  inverse />
                       Update Service Request
                     </LoadingLink>
                     <LoadingLink
@@ -385,7 +398,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       isLoading={isLoading}
                       className="text-white d-block py-1 px-3"
                     >
-                      <FontAwesomeIcon icon={faMapMarkedAlt} className="mr-1" inverse />
+                      <FontAwesomeIcon icon={faMapMarkedAlt} className="mr-1" style={{marginLeft:"-1px"}} inverse />
                       {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).length ? "Reassign" : "Assign"} Service Request to DA
                     </LoadingLink> : ""}
                     {data.status === 'assigned' ? <LoadingLink
@@ -415,8 +428,16 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       disabled={isLoading}
                       noOverlay={true}
                     />
-                    <LoadingLink onClick={() => {setShowModal(true)}} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                    {data.animals.length === 0 && data.status === 'open' ? <LoadingLink
+                      onClick={() => {setShowCloseModal(true)}}
+                      isLoading={isLoading}
+                      className="text-white d-block py-1 px-3"
+                    >
                       <FontAwesomeIcon icon={faTimes} className="mr-1" size="lg" style={{cursor:'pointer'}} inverse />
+                      Close Service Request
+                    </LoadingLink> : ""}
+                    <LoadingLink onClick={() => {setShowModal(true)}} isLoading={isLoading} className="text-white d-block py-1 px-3">
+                      <FontAwesomeIcon icon={faBan} className="mr-1" style={{cursor:'pointer', marginLeft:"-1px"}} inverse />
                       Cancel Service Request
                     </LoadingLink>
                   </ActionsDropdown>
@@ -879,6 +900,18 @@ function ServiceRequestDetails({ id, incident, organization }) {
       <Modal.Footer>
         <Button variant="primary" onClick={() => {handleSRRemove();}}>Yes</Button>
         <Button variant="secondary" onClick={handleCloseRemoveModal}>No</Button>
+      </Modal.Footer>
+    </Modal>
+    <Modal show={showCloseModal} onHide={handleCloseSRModal}>
+      <Modal.Header closeButton>
+        <Modal.Title>Close Service Request</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        Are you sure you would like to close this Service Request?
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={() => {handleSRClose();}}>Yes</Button>
+        <Button variant="secondary" onClick={handleCloseSRModal}>No</Button>
       </Modal.Footer>
     </Modal>
     </>

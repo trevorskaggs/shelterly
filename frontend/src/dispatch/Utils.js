@@ -77,10 +77,10 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawPad(10);
 
       // status
-      pdf.drawWrappedText({
-        text: `Status: ${assigned_request.service_request_object.status.toUpperCase()}`,
-        fontSize: 10
-      });
+      // pdf.drawWrappedText({
+      //   text: `Status: ${assigned_request.service_request_object.status.toUpperCase()}`,
+      //   fontSize: 10
+      // });
 
       // summary address
       pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
@@ -109,7 +109,9 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       });
 
       // Animal count
-      pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
+      if (Object.keys(assigned_request.animals).length) {
+        pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
+      }
 
       pdf.setDocumentFontSize({ size: 12 });
       buildAnimalCountList(pdf, Object.values(assigned_request.animals), { countLabelMarginTop: -12 });
@@ -212,9 +214,11 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawWrappedText({ text: `Key at Staging: ${assigned_request.service_request_object.key_provided ? 'Yes': 'No'}`})
 
       // animals
-      pdf.drawSectionHeader({
-        text: 'Animals'
-      });
+      if (Object.keys(assigned_request.animals).length) {
+        pdf.drawSectionHeader({
+          text: 'Animals'
+        });
+      }
 
       function drawAnimalHeader({
         firstLabel = 'ID - Species\nName'
