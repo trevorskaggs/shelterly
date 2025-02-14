@@ -89,7 +89,7 @@ class AssignedRequestDispatchSerializer(SimpleAssignedRequestDispatchSerializer)
     visit_note = VisitNoteSerializer(required=False, read_only=True)
     owner_contact = OwnerContactSerializer(required=False, read_only=True)
     service_request_object = DispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
-    visit_notes = serializers.SerializerMethodField()
+    visit_notes = VisitNoteSerializer(source='previous_assigned_requests', required=False, read_only=True, many=True)
 
     class Meta:
         model = AssignedRequest

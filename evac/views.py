@@ -132,6 +132,11 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     is_animal_owner=Exists(Animal.objects.filter(owners__id=OuterRef('id'))))))
             .select_related('reporter')
             # .prefetch_related('evacuation_assignments')
+        )).prefetch_related(Prefetch('assigned_requests',
+                queryset=AssignedRequest.objects.select_related(
+                    'service_request', 'owner_contact', 'visit_note'
+                ),
+                to_attr='previous_assigned_requests'
         )).prefetch_related(Prefetch('team', DispatchTeam.objects.prefetch_related('team_members')
         )).prefetch_related(Prefetch('assigned_requests', AssignedRequest.objects.select_related('service_request', 'owner_contact', 'visit_note').prefetch_related('service_request__owners', 'service_request__ownercontact_set',)
                                .prefetch_related(Prefetch('service_request__animal_set', queryset=Animal.objects.exclude(status='CANCELED'), to_attr='animals')).order_by('service_request__priority')))
