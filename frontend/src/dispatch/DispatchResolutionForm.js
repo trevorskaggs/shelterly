@@ -363,7 +363,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
               .test('required-check', 'Service Request cannot remain assigned.',
                 function(value) {
                   let required = true;
-                  data.sr_updates.filter(sr => sr.id === this.id).forEach(sr_update => {
+                  data.sr_updates.filter(sr => sr.id === this.parent.id).forEach(sr_update => {
                     if (sr_update.unable_to_complete || !saveClose) {
                       required = false;
                     }
@@ -527,7 +527,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   <hr />
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: data.sr_updates[index].animals.length ? "-2px" : "5px" }}>Animals
-                      <OverlayTrigger
+                      {!data.end_time ? <OverlayTrigger
                         key={"add-new-animal"}
                         placement="top"
                         overlay={
@@ -537,7 +537,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                         }
                       >
                         <FontAwesomeIcon icon={faPlusSquare} onClick={() => {setShowAddNew(true);setSelectedSR(assigned_request.service_request_object.id);setSelectedIndex(index)}} style={{cursor:'pointer'}} className='ml-1' inverse />
-                      </OverlayTrigger>
+                      </OverlayTrigger> : ""}
                     </h4>
                     {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED').map((animal, inception) => (
                       <ListGroup.Item key={inception}>
