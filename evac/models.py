@@ -1,3 +1,4 @@
+from datetime import date
 from django.contrib.auth import get_user_model
 from django.contrib.sites.models import Site
 from django.core.mail import send_mass_mail
@@ -66,6 +67,9 @@ class EvacAssignment(models.Model):
                 super(EvacAssignment, self).save(*args, **kwargs)
         else:
             super(EvacAssignment, self).save(*args, **kwargs)
+
+    def check_overdue(self):
+        return self.service_requests.filter(followup_date__lt=date.today()).exists()
 
     class Meta:
         ordering = ['-start_time',]

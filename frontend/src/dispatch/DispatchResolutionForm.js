@@ -506,6 +506,26 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       </ListGroup.Item>
                   </ListGroup>
                   <hr />
+                  <BootstrapForm.Row className="mt-2" style={{marginBottom:"-13px"}}>
+                    <TextInput
+                      id={`sr_updates.${index}.notes`}
+                      name={`sr_updates.${index}.notes`}
+                      xs="9"
+                      as="textarea"
+                      rows={5}
+                      label="Visit Notes"
+                    />
+                  </BootstrapForm.Row>
+                  <hr/>
+                  {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+                  <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
+                  {assigned_request.visit_notes.map(visit_note =>
+                    <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
+                      <Moment format="l">{visit_note.date_completed}</Moment>: {visit_note.notes || "No information available."}
+                    </ListGroup.Item>
+                  ) || "None"}
+                  </ListGroup>
+                  <hr/>
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
                     <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals
                       <OverlayTrigger
@@ -634,25 +654,6 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       </BootstrapForm.Row>
                     </span>
                   : ""}
-                  <BootstrapForm.Row className="mt-2" style={{marginBottom:"-13px"}}>
-                    <TextInput
-                      id={`sr_updates.${index}.notes`}
-                      name={`sr_updates.${index}.notes`}
-                      xs="9"
-                      as="textarea"
-                      rows={5}
-                      label="Visit Notes"
-                    />
-                  </BootstrapForm.Row>
-                  <hr/>
-                  {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
-                  <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-                  {assigned_request.visit_notes.map(visit_note =>
-                    <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
-                      <Moment format="l">{visit_note.date_completed}</Moment>: {visit_note.notes || "No information available."}
-                    </ListGroup.Item>
-                  ) || "None"}
-                  </ListGroup>
                 </Card.Body>
               </Card>
             ))}
