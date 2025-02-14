@@ -78,7 +78,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
                         animal.medical_record=med_record
                         animal.save()
-                        vet_request = VetRequest.objects.create(priority=self.request.data.get('priority'), requested_by=self.request.user, caution=self.request.data.get('caution', 'false') == 'true', complaints_other=self.request.data.get('complaints_other'), concern=self.request.data.get('concern'), medical_record=med_record)
+                        vet_request = VetRequest.objects.create(open=datetime.now(), priority=self.request.data.get('priority'), requested_by=self.request.user, caution=self.request.data.get('caution', 'false') == 'true', complaints_other=self.request.data.get('complaints_other'), concern=self.request.data.get('concern'), medical_record=med_record)
                         vet_request.presenting_complaints.add(*self.request.data.get('presenting_complaints').split(','))
 
                     if animal.shelter:
