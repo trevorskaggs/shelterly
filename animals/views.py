@@ -29,7 +29,7 @@ class MultipleFieldLookupMixin(object):
         return obj
 
 class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
-    queryset = Animal.objects.with_images().exclude(status="CANCELED").order_by('order')
+    queryset = Animal.objects.with_images().exclude(status="CANCELED")
     lookup_fields = ['pk', 'incident', 'id_for_incident']
     search_fields = ['name', 'microchip', 'address', 'city', 'request__address', 'request__city', 'owners__address', 'owners__city', 'owners__last_name', 'reporter__last_name']
     filter_backends = (filters.SearchFilter,)
@@ -163,7 +163,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             for field, value in serializer.validated_data.items():
                 new_value = value
                 old_value = getattr(serializer.instance, field)
-                if field not in ['status', 'room', 'shelter', 'order', 'owners'] and new_value != old_value:
+                if field not in ['status', 'room', 'shelter', 'owners'] and new_value != old_value:
                     changed_fields.append(field)
 
             animal = serializer.save()
@@ -176,11 +176,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     assigned_request.animals[str(self.request.data.get('remove_animal'))]['status'] = 'CANCELED'
                     assigned_request.save()
 
-            # Set order if present, add 1 to avoid 0 index since order is a PositiveIntergerField.
-            if type(self.request.data.get('set_order', '')) == int:
-                animal.to(int(self.request.data.get('set_order'))+1)
-
-            # Only record animal update if a field other than status, shelter, room, order, or owner has changed.
+            # Only record animal update if a field other than status, shelter, room, or owner has changed.
             if len(changed_fields) > 0:
                 action.send(self.request.user, verb='updated animal', target=animal)
 
@@ -235,7 +231,6 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             Animal.objects.with_images().with_history().exclude(status="CANCELED").distinct()
             .prefetch_related("owners")
             .select_related("reporter", "room", "request", "shelter")
-            .order_by('order')
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))

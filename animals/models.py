@@ -1,6 +1,5 @@
 from django.db import models, transaction
 from location.models import Location
-from ordered_model.models import OrderedModel
 
 from animals.choices import ALL_AGE_CHOICES, ALL_SIZE_CHOICES, SEX_CHOICES, STATUS_CHOICES, UNKNOWN_CHOICES
 from animals.colors import ALL_COLOR_CHOICES
@@ -32,7 +31,7 @@ class Species(models.Model):
         ordering = ('name',)
 
 # Create your models here.
-class Animal(Location, OrderedModel):
+class Animal(Location):
 
     id_for_incident = models.IntegerField(blank=True, null=True)
 
@@ -70,7 +69,6 @@ class Animal(Location, OrderedModel):
     microchip = models.CharField(max_length=50, blank=True)
     animal_count = models.IntegerField(default=1)
 
-    order_with_respect_to = 'room'
     objects = AnimalQueryset.as_manager()
 
     @property
@@ -93,7 +91,7 @@ class Animal(Location, OrderedModel):
             super(Animal, self).save(*args, **kwargs)
 
     class Meta:
-        ordering = ('order', 'id')
+        ordering = ('id',)
 
 class AnimalImage(models.Model):
 
