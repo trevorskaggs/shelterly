@@ -91,6 +91,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   });
 
   const [existingSRs, setExistingSRs] = useState({data:{}, options:[], fetching:true});
+  const [noteData, setNoteData] = useState({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -99,12 +100,11 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const handleCloseTransfer = () => setShowTransfer(false);
   const [transferData, setTransferData] = useState({'new_request_id':null, 'new_request_id_for_incident': null, 'animal_ids':[]});
   const [showNoteModal, setShowNoteModal] = useState(false);
-  const handleCloseNoteModal = () => setShowNoteModal(false);
+  const handleCloseNoteModal = () => {setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});setShowNoteModal(false);};
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const handleCloseRemoveModal = () => setShowRemoveModal(false);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const handleCloseSRModal = () => setShowCloseModal(false);
-  const [noteData, setNoteData] = useState({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});
 
   // Handle animal reunification submit.
   const handleSubmit = async () => {
@@ -828,7 +828,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
         notes: Yup.string().required()
           .max(2500, 'Must be 2500 characters or less'),
       })}
-      onSubmit={(values, { setSubmitting }) => {
+      onSubmit={(values, { setSubmitting, resetForm }) => {
         // Set actual SR ID instead of ID for incident.
         values['service_request'] = data.id;
         if (values.id) {
@@ -842,6 +842,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
               }
             });
             setData(prevState => ({ ...prevState, notes:updated_notes}));
+            resetForm();
             setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
             setShowNoteModal(false);
           })
@@ -855,6 +856,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
             let updated_notes = [...data.notes];
             updated_notes.unshift(response.data);
             setData(prevState => ({ ...prevState, notes:updated_notes}));
+            resetForm();
             setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
             setShowNoteModal(false);
           })
@@ -867,7 +869,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
     {formikProps => (
     <Modal show={showNoteModal} onHide={handleCloseNoteModal}>
       <Modal.Header closeButton>
-        <Modal.Title>Add SR Note</Modal.Title>
+        <Modal.Title>Add Service Request Note</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <BootstrapForm.Row>
