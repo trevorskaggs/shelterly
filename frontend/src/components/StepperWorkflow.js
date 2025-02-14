@@ -221,13 +221,19 @@ function StepperWorkflow({ incident, organization }) {
         }))
       }
       // Otherwise add a new animal to the list.
-      else {
+      else if (Object.keys(data).length) {
         setState((prevState) => ({
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
           animalIndex: index,
           animalCount: prevState.animalCount + Number(data.get('animal_count')),
           steps: { ...prevState.steps, [currentStep]:[...prevState.steps.animals, data] }
+        }))
+      }
+      else {
+        setState((prevState) => ({
+          ...prevState,
+          stepIndex: prevState.stepIndex + 1,
         }))
       }
     }

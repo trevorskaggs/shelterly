@@ -25,7 +25,6 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
             .prefetch_related(Prefetch('diagnosticresult_set', DiagnosticResult.objects.select_related('medical_record').select_related('medical_record__patient').select_related('diagnostic')))
             .prefetch_related(Prefetch('procedureresult_set', ProcedureResult.objects.select_related('medical_record').select_related('medical_record__patient').select_related('procedure')))
             .prefetch_related("diagnosis")
-            # .order_by('order')
         )
         # if self.request.GET.get('incident'):
         #     queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
@@ -74,7 +73,6 @@ class ExamViewSet(viewsets.ModelViewSet):
             Exam.objects.all()
             .select_related("medical_record").select_related("medical_record__patient").select_related("medical_record__patient__shelter").select_related("medical_record__patient__room")
             .prefetch_related(Prefetch('examanswer_set', ExamAnswer.objects.select_related('question')))
-            # .order_by('order')
         )
         # if self.request.GET.get('incident'):
         #     queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
@@ -304,7 +302,6 @@ class VetRequestViewSet(viewsets.ModelViewSet):
             # .prefetch_related("owners")
             .select_related("medical_record", "medical_record__patient")
             .exclude(medical_record__patient__status__in=["CANCELED"])
-            # .order_by('order')
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(medical_record__patient__incident__slug=self.request.GET.get('incident'))

@@ -9,8 +9,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBell, faBellSlash, faCircle, faExclamationCircle, faSearch, faPhone } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faCircleBolt, faHomeAlt, faDoNotEnter } from '@fortawesome/pro-solid-svg-icons';
-import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import { faCircleBolt, faHomeAlt, faDoNotEnter, faLocationCrosshairs } from '@fortawesome/pro-solid-svg-icons';
+import Map, { prettyText, closedMarkerIcon, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, operationsMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import { AddressLookup, countMatches } from '../components/Map';
 import { SystemErrorContext } from '../components/SystemError';
@@ -185,7 +185,7 @@ function Hotline({ incident, organization }) {
               <Marker
                 key={service_request.id}
                 position={[service_request.latitude, service_request.longitude]}
-                icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : closedMarkerIcon}
+                icon={service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate > 0 ? UTLMarkerIcon : service_request.animals.length === 0 ? operationsMarkerIcon : closedMarkerIcon}
                 onClick={() => navigate('/' + organization + "/" + incident + "/hotline/servicerequest/" + service_request.id_for_incident)}
               >
                 <MapTooltip autoPan={false}>
@@ -226,7 +226,6 @@ function Hotline({ incident, organization }) {
     </Row>
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
       <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>
-        Service Requests&nbsp;&nbsp; -
         <span className="fa-layers mr-1 ml-3">
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />
           <FontAwesomeIcon icon={faExclamationCircle} className="icon-border fa-move-down" color="#ff4c4c" />
@@ -261,6 +260,13 @@ function Hotline({ incident, organization }) {
             <FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border fa-move-down" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}}  />
           </span>
           UTL
+        </span>
+        <span style={{paddingRight:"15px"}}>
+          <span className="fa-layers ml-1 mr-1">
+            <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="grey" />
+            <FontAwesomeIcon icon={faLocationCrosshairs} className="icon-border fa-move-down" color="white" />
+          </span>
+          Operation
         </span>
         <span className="fa-layers ml-1 mr-1">
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />

@@ -10,8 +10,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faQuestionCircle as faQuestionCircleDuo, faChevronCircleDown, faChevronCircleUp } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
-import Map, { prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, finishedMarkerIcon } from "../components/Map";
+import { faCircleBolt, faHomeAlt, faLocationCrosshairs } from '@fortawesome/pro-solid-svg-icons';
+import Map, { prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, finishedMarkerIcon, operationsMarkerIcon } from "../components/Map";
 import Header from "../components/Header";
 import Scrollbar from '../components/Scrollbars';
 import { SystemErrorContext } from '../components/SystemError';
@@ -58,30 +58,6 @@ function Dispatch({ incident, organization }) {
       axios.patch('/incident/api/incident/' + state.incident.id + '/subscribe/', {'dispatch_subscribe':!isSubscribed})
       .finally(() => setIsSubscribed(!isSubscribed));
   }
-
-  // Counts the number of size/species matches for a service request by status.
-// const countMatches = (animal_dict) => {
-//   var matches = {};
-//   var status_matches = {'REPORTED':{}, 'SHELTERED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
-
-//   Object.keys(animal_dict).forEach((animal) => {
-//     if (['REPORTED', 'SHELTERED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].indexOf(animal_dict[animal]['status']) > -1) {
-//       if (!matches[[animal_dict[animal]['species']]]) {
-//         matches[[animal_dict[animal]['species']]] = 1;
-//       }
-//       else {
-//         matches[[animal_dict[animal]['species']]] += 1;
-//       }
-//       if (!status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]]) {
-//         status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] = 1;
-//       }
-//       else {
-//         status_matches[animal_dict[animal]['status']][[animal_dict[animal]['species']]] += 1;
-//       }
-//     }
-//   });
-//   return [matches, status_matches]
-// }
 
   // Hook for initializing data.
   useEffect(() => {
@@ -219,7 +195,7 @@ function Dispatch({ incident, organization }) {
                 <Marker
                   key={assigned_request.service_request_object.id}
                   position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-                  icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : finishedMarkerIcon}
+                  icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : Object.keys(assigned_request.animals).length === 0 ? operationsMarkerIcon : finishedMarkerIcon}
                   onClick={() => navigate('/' + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id_for_incident)}
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} direction={"top"} autoPan={false} closeButton={true}>
@@ -334,6 +310,13 @@ function Dispatch({ incident, organization }) {
             <FontAwesomeIcon icon={faQuestionCircleDuo} className="icon-border fa-move-down" style={{"--fa-primary-color":'white', "--fa-secondary-color":'#5f5fff', "--fa-secondary-opacity": 1}} />
           </span>
           UTL
+        </span>
+        <span style={{paddingRight:"15px"}}>
+          <span className="fa-layers ml-1 mr-1">
+            <FontAwesomeIcon icon={faCircle} className="icon-border fa-move-down" color="grey" />
+            <FontAwesomeIcon icon={faLocationCrosshairs} className="icon-border fa-move-down" color="white" />
+          </span>
+          Operation
         </span>
         <span className="fa-layers ml-1 mr-1">
           <FontAwesomeIcon icon={faCircle} className="fa-move-down" color="white" />

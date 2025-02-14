@@ -87,7 +87,6 @@ INSTALLED_APPS = [
     'shelter',
     'vet',
     'frontend',
-    'ordered_model',
     'actstream'
 ]
 

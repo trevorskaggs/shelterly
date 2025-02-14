@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faBandAid, faBullseye, faCalendarDay, faCar, faCheckCircle, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash, faExclamation, faFilter
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faRotate } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faLocationCrosshairs, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
@@ -17,7 +17,7 @@ import { Typeahead } from 'react-bootstrap-typeahead';
 import Moment from 'react-moment';
 import moment from 'moment';
 import useWebSocket from 'react-use-websocket';
-import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon } from "../components/Map";
+import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon, operationsMarkerIcon } from "../components/Map";
 import { Checkbox, DateRangePicker, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
@@ -48,7 +48,7 @@ function Deploy({ incident, organization }) {
   const [newData, setNewData] = useState(false);
   const [mapState, setMapState] = useState({});
   const [bounds, setBounds] = useState([]);
-  const [totalSelectedState, setTotalSelectedState] = useState({'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
+  const [totalSelectedState, setTotalSelectedState] = useState({'ANIMALLESS':{}, 'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, hide_pending: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
@@ -358,7 +358,7 @@ function Deploy({ incident, organization }) {
               }
               const total_matches = countMatches(service_request.animals);
               const matches = total_matches[0];
-              const status_matches = total_matches[1];
+              const status_matches = service_request.animals.length ? total_matches[1] : {'ANIMALLESS':{animalless:1}};
               const color = service_request.reported_animals > 0 ? '#ff4c4c' : service_request.unable_to_locate > 0 ? '#5f5fff' : '#f5ee0f';
               map_dict[service_request.id] = {checked:false, hidden:false, color:color, matches:matches, status_matches:status_matches, radius:"disabled", latitude:service_request.latitude, longitude:service_request.longitude};
               bounds_copy.push([service_request.latitude, service_request.longitude]);
@@ -367,7 +367,7 @@ function Deploy({ incident, organization }) {
           setMapState(map_dict);
           setBounds(bounds_copy);
 
-          var status_matches = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+          var status_matches = {'ANIMALLESS':{}, 'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
           var matches = {};
           var total = 0;
           // Recount the total state tracker for selected SRs on refresh.
@@ -501,6 +501,28 @@ function Deploy({ incident, organization }) {
           <Col xs={2} className="border rounded">
           <Scrollbar no_shadow="true" style={{height:"50vh", marginLeft:"-15px", marginRight:"-15px", right:"-5px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
             <h4 className="text-center mt-1 mr-1">Selected</h4><hr style={{marginTop:"-5px", marginBottom:"-5px", marginLeft:"10px", marginRight:"20px"}} />
+            {Object.keys(totalSelectedState["ANIMALLESS"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
+              <p className="mb-2" style={{marginTop:"-5px"}}>Operations
+                <OverlayTrigger
+                  key={"selected-animal-less"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-selected-animal-less`}>
+                      Operations
+                    </Tooltip>
+                  }
+                >
+                  <span className="fa-layers ml-1 mr-1">
+                    <FontAwesomeIcon icon={faCircle} color="grey" />
+                    <FontAwesomeIcon icon={faLocationCrosshairs} className="icon-border" color="white" />
+                  </span>
+                </OverlayTrigger>
+              </p>
+              <hr className="mt-1 mb-1"/>
+              {Object.keys(totalSelectedState["ANIMALLESS"]).map(key => (
+                <div key={key} style={{textTransform:"capitalize", marginTop:"5px", marginBottom:"-5px"}}>{prettyText(key.split(',')[0], totalSelectedState["ANIMALLESS"][key])}</div>
+              ))}
+            </div> : ""}
             {Object.keys(totalSelectedState["REPORTED"]).length > 0 ? <div className="card-header border rounded mt-3 text-center" style={{paddingRight:"15px", paddingLeft:"15px", marginLeft:"8px", marginRight:"18px", marginBottom:"-4px"}}>
               <p className="mb-2" style={{marginTop:"-5px"}}>Reported
                 <OverlayTrigger
@@ -627,23 +649,24 @@ function Deploy({ incident, organization }) {
                 <span key={service_request.id}> {mapState[service_request.id] ? 
                   <Marker
                     position={[service_request.latitude, service_request.longitude]}
-                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
+                    icon={mapState[service_request.id] && mapState[service_request.id].checked ? checkMarkerIcon : service_request.reported_animals > 0 ? reportedMarkerIcon : service_request.reported_evac > 0 ? reportedEvacMarkerIcon : service_request.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : service_request.sheltered_in_place > 0 ? SIPMarkerIcon : service_request.unable_to_locate ? UTLMarkerIcon : operationsMarkerIcon}
                     onClick={() => handleMapState(service_request.id)}
                     zIndexOffset={mapState[service_request.id].checked ? 1000 : 0}
                   >
                     <MapTooltip autoPan={false}>
                       <span>
+                        SR#{service_request.id_for_incident}: {service_request.full_address}
                         {mapState[service_request.id] ?
                           <span>
+                            <br />
                             {Object.keys(mapState[service_request.id].matches).map((key,i) => (
                               <span key={key} style={{textTransform:"capitalize"}}>
                                 {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[service_request.id].matches[key])}
                               </span>
                             ))}
+                            {Object.keys(mapState[service_request.id].matches).length === 0 ? "0 Animals" : ""}
                           </span>
                         :""}
-                        <br />
-                        SR#{service_request.id_for_incident}: {service_request.full_address}
                         {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
                         <div>
                         {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
@@ -820,6 +843,7 @@ function Deploy({ incident, organization }) {
                       ))}
                     </span>
                     : ""}
+                    {Object.keys(mapState[service_request.id].matches).length === 0 ? "0 Animals" : ""}
                     {service_request.reported_animals > 0 ?
                     <OverlayTrigger
                       key={"reported"}

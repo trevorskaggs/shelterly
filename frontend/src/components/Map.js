@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { faCheckCircle, faQuestionCircle as faQuestionCircleDuo } from '@fortawesome/pro-duotone-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
-import { faCircleBolt, faHomeAlt, faDoNotEnter, faHouseMedical, faLocationCheck, faLocationExclamation, faHouseMedicalCircleCheck, faHouseMedicalCircleExclamation } from '@fortawesome/pro-solid-svg-icons';
+import { faCircleBolt, faHomeAlt, faLocationCrosshairs, faDoNotEnter, faHouseMedical, faLocationCheck, faLocationExclamation, faHouseMedicalCircleCheck, faHouseMedicalCircleExclamation } from '@fortawesome/pro-solid-svg-icons';
 
 export const Legend = (props) => {
   const { map } = useLeaflet();
@@ -253,6 +253,23 @@ export const finishedMarkerIcon = new L.DivIcon({
   shadowAnchor: null
 });
 
+const operationsIconHTML = ReactDOMServer.renderToString(
+  <span className="fa-layers">
+    <FontAwesomeIcon icon={faCircle} className="icon-border" color="grey" size="lg" />
+    <FontAwesomeIcon icon={faLocationCrosshairs} className="icon-border" size="lg" color="white" transform={'shrink-2'} />
+  </span>
+);
+export const operationsMarkerIcon = new L.DivIcon({
+  html: operationsIconHTML,
+  iconSize: [0, 0],
+  iconAnchor: [8, 9],
+  className: "operations-icon",
+  popupAnchor: null,
+  shadowUrl: null,
+  shadowSize: null,
+  shadowAnchor: null
+});
+
 // Counts the number of size/species matches for a service request by status.
 export const countMatches = (animals) => {
   var matches = {};
@@ -311,7 +328,10 @@ export const prettyText = (species, count) => {
   if (count <= 0) {
     return "";
   }
-  let plural = ""
+  if (species === "animalless") {
+    species = "location"
+  }
+  let plural = "";
   if (count > 1 && !["sheep", "cattle"].includes(species)) {
     plural = "s"
   }

@@ -997,14 +997,14 @@ const AnimalForm = (props) => {
                   setAddAnother(true);
                   setIsButtonSubmitting(true);
                   formikProps.submitForm();
-                  speciesRef.current.focus()
+                  speciesRef.current.focus();
                 }}>
                   {props.state.steps.animals.length -1 > props.state.animalIndex ? "Next Animal" : "Add Another"}
                 </ButtonSpinner> :
                 <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
-                  formikProps.submitForm()
+                  formikProps.submitForm();
                 }}>
                   Save
                 </ButtonSpinner>
@@ -1013,7 +1013,13 @@ const AnimalForm = (props) => {
                 <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
-                  formikProps.submitForm()
+                  if (formikProps.values.species) {
+                    formikProps.submitForm();
+                  }
+                  else{
+                    props.onSubmit('animals', {}, 'request');
+                  }
+                  
                 }}>
                   Next Step
                 </ButtonSpinner> : ""}
@@ -1021,7 +1027,7 @@ const AnimalForm = (props) => {
                 <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {
                   setAddAnother(false);
                   setIsButtonSubmitting(true);
-                  formikProps.submitForm()
+                  formikProps.submitForm();
                 }}>
                   Save and Finish
                 </ButtonSpinner> : ""}

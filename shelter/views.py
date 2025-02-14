@@ -2,6 +2,7 @@
 from shelter.models import Shelter, Building, IntakeSummary, Room
 from rest_framework import viewsets
 from actstream import action
+from datetime import datetime
 from actstream.models import Action
 from django_filters import rest_framework as filters
 from django.db.models import Count, Prefetch, Q, Sum
@@ -170,5 +171,5 @@ class IntakeSummaryViewSet(viewsets.ModelViewSet):
                         med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
                         animal.medical_record=med_record
                         animal.save()
-                        vet_request = VetRequest.objects.create(priority=animal_dict.get('priority'), requested_by=self.request.user, caution=animal_dict.get('caution', 'false') == 'true', complaints_other=animal_dict.get('complaints_other'), concern=animal_dict.get('concern'), medical_record=med_record)
+                        vet_request = VetRequest.objects.create(open=datetime.now(), priority=animal_dict.get('priority'), requested_by=self.request.user, caution=animal_dict.get('caution', 'false') == 'true', complaints_other=animal_dict.get('complaints_other'), concern=animal_dict.get('concern'), medical_record=med_record)
                         vet_request.presenting_complaints.add(*animal_dict.get('presenting_complaints'))
