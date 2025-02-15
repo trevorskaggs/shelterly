@@ -43,9 +43,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     pdf.drawPad(10)
     pdf.setDocumentFontSize({ size: 10 });
     pdf.drawTextList({
-      labels: data.team && data.team_object.team_member_objects.map(team_member => (
-        `${team_member.first_name} ${team_member.last_name} ${team_member.display_phone ? `${team_member.display_phone}` : ''}`
-      )),
+      labels: [data.team_member_names],
       labelMarginTop: -10
     });
 
