@@ -128,7 +128,7 @@ class ServiceRequest(Location):
         if self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)']).exists():
             return '#FF0000'
         elif self.animal_set.filter(status='SHELTERED IN PLACE').exists():
-            return '#E9E9A5'
+            return '#E1BF39'
         elif self.animal_set.filter(status='UNABLE TO LOCATE').exists():
             return '#0000FF'
         else:
