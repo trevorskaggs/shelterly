@@ -224,7 +224,7 @@ function Dispatch({ incident, organization }) {
                 >
                 <MapTooltip key={`${index}-${selectedTeam}`} direction={"top"} autoPan={false} closeButton={true}>
                   <span>
-                    <div><span style={{ color: dispatch_assignment.overdue ? "red" : "black" }}>DA#{dispatch_assignment.id_for_incident}</span> -&nbsp;{dispatch_assignment.team_name || ""}</div>
+                    <div><span style={{ color: dispatch_assignment.overdue ? "#ff4c4c" : "black" }}>DA#{dispatch_assignment.id_for_incident}</span> -&nbsp;{dispatch_assignment.team_name || ""}</div>
                     {mapState[dispatch_assignment.id] ?
                       <span>
                         {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).length > 0 ? Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
@@ -258,7 +258,7 @@ function Dispatch({ incident, organization }) {
         <Button variant={"info"} className="border" onClick={() => setShowActive(!showActive)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px"}}>Active {showActive ? <FontAwesomeIcon icon={faChevronCircleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronCircleDown} size="sm" />}</Button>
         {data.dispatch_assignments.filter(da => showActive ? da.team_member_names.length > 0 : null).map(dispatch_assignment => (
           <Button key={dispatch_assignment.id} title={dispatch_assignment.team ? dispatch_assignment.team.name : ""} variant={dispatch_assignment.id === selectedTeam ? "primary" : "secondary"} className="border" onClick={() => setSelectedTeam(selectedTeam === dispatch_assignment.id ? null : dispatch_assignment.id)} style={{maxHeight:"36px", width:"100%", marginTop:"-1px", textAlign:"left", fontSize:"14px", paddingLeft:"8px", paddingRight:"0px"}}>
-            <span style={{ color: dispatch_assignment.overdue ? "red" : "white" }}>DA#{dispatch_assignment.id_for_incident}</span> -&nbsp;
+            <span style={{ color: dispatch_assignment.overdue ? "#ff4c4c" : "white" }}>DA#{dispatch_assignment.id_for_incident}</span> -&nbsp;
             {dispatch_assignment.team ? dispatch_assignment.team_name : "Preplanned"}
             {dispatch_assignment.team_member_names ?
               <OverlayTrigger
