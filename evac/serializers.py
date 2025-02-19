@@ -78,17 +78,18 @@ class SimpleDispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
     visit_notes = serializers.SerializerMethodField()
 
     def get_visit_notes(self, obj):
-        notes = [ar.visit_note for ar in obj.assignedrequest_set.all()]
+        notes = [ar.visit_note for ar in obj.assignedrequest_set.exclude(dispatch_assignment__incident=self.context['request'].parser_context['kwargs'].get('incident'), dispatch_assignment__id_for_incident=self.context['request'].parser_context['kwargs'].get('id_for_incident'))]
         return VisitNoteSerializer(notes, many=True, required=False, read_only=True).data
 
     class Meta:
         model = ServiceRequest
         fields = ['id', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
         'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'owners', 'owner_objects', 'visit_notes']
+        'owners', 'owner_objects', 'visit_notes', 'notes']
 
 class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
     service_request_object = SimpleDispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
+    visit_note = VisitNoteSerializer(required=False, read_only=True)
     # visit_notes = serializers.SerializerMethodField()
 
     # def get_visit_notes(self, obj):

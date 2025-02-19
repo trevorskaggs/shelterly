@@ -645,9 +645,9 @@ function DispatchResolutionForm({ id, incident, organization }) {
                     />
                   </BootstrapForm.Row>
                   <hr/>
-                  {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+                  {assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note.date_completed).length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
                   <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-                  {assigned_request.visit_notes.map(visit_note =>
+                  {assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note.date_completed).map(visit_note =>
                     <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
                       <Moment format="l">{visit_note.date_completed}</Moment>: {visit_note.notes || "No information available."}
                     </ListGroup.Item>
