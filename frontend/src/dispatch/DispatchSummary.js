@@ -398,7 +398,8 @@ function DispatchSummary({ id, incident, organization }) {
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <b>Team: </b>{data.team_object ? data.team_name : "Preplanned"}
+                <Row>
+                  <Col><b>Team: </b>{data.team_object ? data.team_name : "Preplanned"}
                   <OverlayTrigger
                     key={"edit-team-name"}
                     placement="top"
@@ -410,6 +411,9 @@ function DispatchSummary({ id, incident, organization }) {
                   >
                     <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
                   </OverlayTrigger>
+                  </Col>
+                  <Col><b>Dispatch: </b>{data.dispatch_date ? <Moment format="MMM Do YYYY">{data.dispatch_date}</Moment> : "N/A"}</Col>
+                </Row>
                 </ListGroup.Item>
                 {data.team_member_objects.map(team_member => (
                   <ListGroup.Item key={team_member.id}>
