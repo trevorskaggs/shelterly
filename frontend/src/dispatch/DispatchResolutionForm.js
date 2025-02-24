@@ -364,7 +364,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                 function(value) {
                   let required = true;
                   data.sr_updates.filter(sr => sr.id === this.parent.id).forEach(sr_update => {
-                    if (sr_update.unable_to_complete || !saveClose) {
+                    if (sr_update.animals.length || sr_update.unable_to_complete || !saveClose) {
                       required = false;
                     }
                   })
