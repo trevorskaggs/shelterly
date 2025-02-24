@@ -13,7 +13,7 @@ import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import { useMark, useSubmitting, useDateRange } from '../hooks';
-import Map, { countMatches, countDictMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countMatches, countDictMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, operationsMarkerIcon, closedMarkerIcon } from "../components/Map";
 import Moment from "react-moment";
 import moment from 'moment';
 import Header from '../components/Header';
@@ -279,7 +279,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                   <Marker
                     key={assigned_request.service_request_object.id}
                     position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-                    icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : UTLMarkerIcon}
+                    icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : assigned_request.service_request_object.unable_to_locate > 0 ? UTLMarkerIcon : Object.keys(assigned_request.animals).length === 0 ? operationsMarkerIcon : closedMarkerIcon}
                     onClick={() => window.open("/hotline/servicerequest/" + assigned_request.service_request_object.id)}
                   >
                     <MapTooltip autoPan={false} direction={evacuation_assignment.assigned_requests.length > 1 ? "auto" : "top"}>

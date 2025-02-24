@@ -11,7 +11,7 @@ import { faClockRotateLeft, faExclamationSquare, faChevronDoubleDown, faChevronD
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
-import Map, { countDictMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon } from "../components/Map";
+import Map, { countDictMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, operationsMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
@@ -36,6 +36,7 @@ function DispatchSummary({ id, incident, organization }) {
     team: null,
     team_object: {name:''},
     assigned_requests: [],
+    dispatch_date: new Date(),
     start_time: null,
     end_time: null,
     bounds:L.latLngBounds([[0,0]])
@@ -291,8 +292,6 @@ function DispatchSummary({ id, incident, organization }) {
   return (
     <>
     <Header>Dispatch Assignment Summary #{id}</Header>
-    {/* <div style={{fontSize:"18px", marginTop:"10px"}}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>
-    {data.closed && data.end_time ? <span> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div> */}
     <hr/>
     <Row className="mb-2">
       <Col>
@@ -356,16 +355,6 @@ function DispatchSummary({ id, incident, organization }) {
                   disabled={isLoading}
                   noOverlay={true}
                 />
-                {data.end_time ?
-                <LoadingLink
-                  onClick={() => {setShowReopenModal(true)}}
-                  className="text-white d-block py-1 px-3"
-                  isLoading={isLoading}
-                >
-                  <FontAwesomeIcon icon={faClockRotateLeft} className="mr-1"  inverse />
-                  Reopen Dispatch Assignment
-                </LoadingLink>
-                : ''}
                 <LoadingLink
                   onClick={handleGeoJsonDownload}
                   className="text-white d-block py-1 px-3"
@@ -384,6 +373,16 @@ function DispatchSummary({ id, incident, organization }) {
                   Push Dispatch Assignment to CalTopo
                 </LoadingLink>
                 : ''}
+                {data.end_time ?
+                <LoadingLink
+                  onClick={() => {setShowReopenModal(true)}}
+                  className="text-white d-block py-1 px-3"
+                  isLoading={isLoading}
+                >
+                  <FontAwesomeIcon icon={faClockRotateLeft} className="mr-1"  inverse />
+                  Reopen Dispatch Assignment
+                </LoadingLink>
+                : ''}
               </ActionsDropdown>
             )}
             </div>
@@ -398,22 +397,25 @@ function DispatchSummary({ id, incident, organization }) {
                   </Row>
                 </ListGroup.Item>
                 <ListGroup.Item>
-                <Row>
-                  <Col><b>Team: </b>{data.team_object ? data.team_name : "Preplanned"}
-                  <OverlayTrigger
-                    key={"edit-team-name"}
-                    placement="top"
-                    overlay={
-                      <Tooltip id={`tooltip-edit-team-name`}>
-                        Edit team name
-                      </Tooltip>
-                    }
-                  >
-                    <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
-                  </OverlayTrigger>
-                  </Col>
-                  <Col><b>Dispatch: </b>{data.dispatch_date ? <Moment format="MMM Do YYYY">{data.dispatch_date}</Moment> : "N/A"}</Col>
-                </Row>
+                  <Row>
+                    <Col>
+                      <b>Team: </b>{data.team_object ? data.team_name : "Preplanned"}
+                      <OverlayTrigger
+                        key={"edit-team-name"}
+                        placement="top"
+                        overlay={
+                          <Tooltip id={`tooltip-edit-team-name`}>
+                            Edit team name
+                          </Tooltip>
+                        }
+                      >
+                        <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
+                      </OverlayTrigger>
+                    </Col>
+                    <Col>
+                      <b>Dispatched: </b>{<Moment format="MMM Do YYYY">{data.dispatch_date || new Date()}</Moment>}
+                    </Col>
+                  </Row>
                 </ListGroup.Item>
                 {data.team_member_objects.map(team_member => (
                   <ListGroup.Item key={team_member.id}>
@@ -446,7 +448,7 @@ function DispatchSummary({ id, incident, organization }) {
             <Marker
               key={assigned_request.service_request_object.id}
               position={[assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]}
-              icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : UTLMarkerIcon}
+              icon={assigned_request.service_request_object.reported_animals > 0 ? reportedMarkerIcon : assigned_request.service_request_object.reported_evac > 0 ? reportedEvacMarkerIcon : assigned_request.service_request_object.reported_sheltered_in_place > 0 ? reportedSIPMarkerIcon : assigned_request.service_request_object.sheltered_in_place > 0 ? SIPMarkerIcon : Object.keys(assigned_request.animals).length === 0 ? operationsMarkerIcon : UTLMarkerIcon}
             >
               <MapTooltip autoPan={false} direction="top">
                 <span>
@@ -468,7 +470,7 @@ function DispatchSummary({ id, incident, organization }) {
         </Map>
       </Col>
     </Row>
-    {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map(assigned_request => (
+    {data.assigned_requests.map(assigned_request => (
       <Row key={assigned_request.service_request_object.id}>
         <Card className="mb-3 ml-3 mr-3 border rounded" style={{width:"100%"}}>
           <Card.Body style={{marginBottom:"6px"}}>
@@ -568,12 +570,14 @@ function DispatchSummary({ id, incident, organization }) {
             <hr style={{marginBottom:"7px"}}/>
             <ListGroup variant="flush" style={{marginTop:"-5px", marginBottom:"-13px"}}>
               <ListGroup.Item>
-                <b>Status: </b>{Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].includes(animal.status)).length === 0 ? "Completed" : <span style={{textTransform:"capitalize"}}>{assigned_request.service_request_object.status}</span>} {Object.values(assigned_request.animals).filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'].includes(animal.status)).length === 0 ? <Moment format="[ on ]l">{assigned_request.visit_note.date_completed}</Moment> : <Moment format="[ on ]l">{data.dispatch_date}</Moment>}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                <b>Latitude: </b>{assigned_request.service_request_object.latitude}
-                <br />
-                <b>Longitude: </b>{assigned_request.service_request_object.longitude}
+                <Row>
+                  <Col xs={3}>
+                    <b>Latitude: </b>{assigned_request.service_request_object.latitude}
+                  </Col>
+                  <Col xs={3}>
+                    <b>Longitude: </b>{assigned_request.service_request_object.longitude}
+                  </Col>
+                </Row>
               </ListGroup.Item>
               {assigned_request.service_request_object.owner_objects.map(owner => (
                 <ListGroup.Item key={owner.id}>
@@ -619,8 +623,8 @@ function DispatchSummary({ id, incident, organization }) {
               </ListGroup.Item> : ""}
             <ListGroup.Item><b>Instructions for Field Team:</b> {assigned_request.service_request_object.directions||"No instructions available."}</ListGroup.Item>
           </ListGroup>
-          <hr/>
-          <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
+          {assigned_request.service_request_object.animals.length ? <hr/> : ""}
+          {assigned_request.service_request_object.animals.length ? <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
             <h4 className="mt-2" style={{marginBottom:"-2px"}}>Animals</h4>
             {assigned_request.service_request_object.animals.filter(animal => Object.keys(assigned_request.animals).includes(String(animal.id))).map((animal, inception) => (
               <ListGroup.Item key={animal.id}>
@@ -669,7 +673,7 @@ function DispatchSummary({ id, incident, organization }) {
                 &nbsp;- {animal.status}
               </ListGroup.Item>
             ))}
-          </ListGroup>
+          </ListGroup> : ""}
           {assigned_request.service_request_object.notes.filter(note => note.urgent === true).length ? <span>
             <hr/>
             <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>

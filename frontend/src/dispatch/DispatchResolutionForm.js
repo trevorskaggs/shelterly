@@ -213,6 +213,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
               directions: assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : '',
               notes: assigned_request.visit_note ? assigned_request.visit_note.notes : '',
               forced_entry: assigned_request.visit_note ? assigned_request.visit_note.forced_entry : false,
+              status: assigned_request.service_request_object.status ? assigned_request.service_request_object.status : 'open',
               animals: Object.keys(assigned_request.animals).map(animal_id =>{return {
                 id:animal_id,
                 id_for_incident:assigned_request.animals[animal_id].id_for_incident,
@@ -358,6 +359,20 @@ function DispatchResolutionForm({ id, incident, organization }) {
             priority: Yup.number(),
             unable_to_complete: Yup.boolean(),
             directions: Yup.string(),
+            status: Yup.string()
+              .test('required-check', 'Service Request cannot remain assigned.',
+                function(value) {
+                  let required = true;
+                  data.sr_updates.filter(sr => sr.id === this.parent.id).forEach(sr_update => {
+                    if (sr_update.animals.length || sr_update.unable_to_complete || !saveClose) {
+                      required = false;
+                    }
+                  })
+                  if (value && value.includes('assigned') && required) {
+                    return false;
+                  }
+                  return true;
+                }),
             followup_date: Yup.date().nullable().when(['unable_to_complete'], {
               is: false,
               then: Yup.date().test('required-check', 'Follow-up date is required',
@@ -424,9 +439,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
       {props => (
         <>
           <BootstrapForm as={Form}>
-            <Header>Dispatch Assignment and Resolution
-              {/* <div style={{ fontSize: "18px", marginTop: "10px" }}><b>Opened: </b><Moment format="MMMM Do YYYY, HH:mm">{data.start_time}</Moment>{data.closed && data.end_time ? <span style={{ fontSize: "16px", marginTop: "5px" }}> | <b>Closed: </b><Moment format="MMMM Do YYYY, HH:mm">{data.end_time}</Moment></span> : ""}</div> */}
-            </Header>
+            <Header>Dispatch Assignment and Resolution</Header>
             <hr/>
             <Card className="mt-3 border rounded">
               <Card.Body>
@@ -458,7 +471,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                 </ListGroup>
               </Card.Body>
             </Card>
-            {data.assigned_requests.filter(request => request.service_request_object.animals.length > 0).map((assigned_request, index) => (
+            {data.assigned_requests.map((assigned_request, index) => (
               <Card key={assigned_request.service_request_object.id} className="mt-3 border rounded">
                 <Card.Body>
                   <Card.Title style={{marginBottom:"-5px", marginTop:"-5px"}}>
@@ -468,7 +481,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       <Checkbox
                         label={"Unable to Complete:"}
                         name={`sr_updates.${index}.unable_to_complete`}
-                        disabled={data.closed ? true : false}
+                        disabled={data.end_time ? true : false}
                         checked={(props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) || false}
                         onChange={() => {
                           if (props.values.sr_updates[index] && props.values.sr_updates[index].unable_to_complete) {
@@ -501,8 +514,14 @@ function DispatchResolutionForm({ id, incident, organization }) {
                     ))}
                     {assigned_request.service_request_object.owners.length < 1 ? <ListGroup.Item><b>Owner: </b>No Owner</ListGroup.Item> : ""}
                       <ListGroup.Item>
-                        <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"},&nbsp;
-                        <b>Turn Around: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"}
+                        <Row>
+                          <Col xs={2}>
+                            <b>Accessible: </b>{ assigned_request.service_request_object.accessible ? "Yes" : "No"}
+                          </Col>
+                          <Col xs={2}>
+                            <b>Turn Around: </b>{ assigned_request.service_request_object.turn_around ? "Yes" : "No"}
+                          </Col>
+                        </Row>
                       </ListGroup.Item>
                   </ListGroup>
                   <hr />
@@ -516,7 +535,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       label="Visit Notes"
                     />
                   </BootstrapForm.Row>
-                  <hr/>
+                  {assigned_request.visit_notes.length > 0 ? <hr/> : <div style={{marginBottom:"7px"}}></div>}
                   {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
                   <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
                   {assigned_request.visit_notes.map(visit_note =>
@@ -527,8 +546,8 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   </ListGroup>
                   <hr/>
                   <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px" }}>
-                    <h4 className="mt-2" style={{ marginBottom: "-2px" }}>Animals
-                      <OverlayTrigger
+                    <h4 className="mt-2" style={{ marginBottom: data.sr_updates[index].animals.length ? "-2px" : "5px" }}>Animals
+                      {!data.end_time ? <OverlayTrigger
                         key={"add-new-animal"}
                         placement="top"
                         overlay={
@@ -538,13 +557,33 @@ function DispatchResolutionForm({ id, incident, organization }) {
                         }
                       >
                         <FontAwesomeIcon icon={faPlusSquare} onClick={() => {setShowAddNew(true);setSelectedSR(assigned_request.service_request_object.id);setSelectedIndex(index)}} style={{cursor:'pointer'}} className='ml-1' inverse />
-                      </OverlayTrigger>
+                      </OverlayTrigger> : ""}
                     </h4>
                     {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED').map((animal, inception) => (
                       <ListGroup.Item key={inception}>
                         <AnimalStatus formikProps={props} sr_updates={data.sr_updates} setData={setData} setSelectedIndex={setSelectedIndex} setSelectedInception={setSelectedInception} setSelectedAnimal={setSelectedAnimal} setShowSplit={setShowSplit} showAddNew={showAddNew} setShowAddNew={setShowAddNew} index={animal.index ? animal.index : index} inception={inception} animal={animal} service_request_object_id={assigned_request.service_request_object.id} shelters={shelters} species_options={species.options} />
                       </ListGroup.Item>
                     ))}
+                    {data.sr_updates[index].animals.filter(animal => animal.status !== 'CANCELED').length === 0 ?
+                    <ListGroup.Item className="pl-0">
+                      <BootstrapForm.Row style={{marginRight:"-22px", marginTop:"-5px"}}>
+                        <Col xs={"4"}>
+                          <DropDown
+                            label="Operation Status"
+                            id={`sr_updates.${index}.status`}
+                            name={`sr_updates.${index}.status`}
+                            type="text"
+                            key={`my_unique_status_select_key__${props.values.status}`}
+                            options={[{label:"Keep Open", value:"open"}, {label:"Assigned", value:"assigned"}, {label:"Close", value:"closed"}]}
+                            value={props.values.sr_updates[index] ? props.values.sr_updates[index].status : "open"}
+                            isClearable={false}
+                            onChange={(instance) => {
+                              props.setFieldValue(`sr_updates.${index}.status`, instance === null ? '' : instance.value);
+                            }}
+                          />
+                        </Col>
+                      </BootstrapForm.Row>
+                    </ListGroup.Item> : ""}
                   </ListGroup>
                   <hr />
                   <BootstrapForm.Row className="mb-3">
@@ -661,7 +700,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
               <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn btn-block border" type="submit" onClick={() => { setSaveClose(false); setShouldCheckForScroll(true); }}>
                 Save
               </ButtonSpinner>
-              {data.closed ? "" : <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn border col-6" type="submit" onClick={() => { setSaveClose(true); setShouldCheckForScroll(true); }}>
+              {data.end_time ? "" : <ButtonSpinner isSubmitting={props.isSubmitting} isSubmittingText="Saving..." className="btn border col-6" type="submit" onClick={() => { setSaveClose(true); setShouldCheckForScroll(true); }}>
                 Save and Close
               </ButtonSpinner>}
             </ButtonGroup>

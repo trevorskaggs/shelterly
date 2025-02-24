@@ -63,23 +63,24 @@ class ServiceRequest(Location):
         animals = Animal.objects.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE'], request=self).exists()
 
         # Identify proper status based on DAs and Animals.
-        if animals and AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).exists():
-            status = 'assigned'
-        elif Animal.objects.filter(status='CANCELED', request=self).count() == self.animal_set.count():
-            status = 'canceled'
-        elif animals:
-            status = 'open'
+        if animals:
+            if AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).exists():
+                status = 'assigned'
+            elif Animal.objects.filter(status='CANCELED', request=self).count() == self.animal_set.count():
+                status = 'canceled'
+            else:
+                status = 'open'
 
-        # Remove SR from any active DAs if all animals are canceled.
-        if Animal.objects.filter(status__in=['CANCELED'], request=self).count() == self.animal_set.count():
-            AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).delete()
+            # Remove SR from any active DAs if all animals are canceled.
+            if Animal.objects.filter(status__in=['CANCELED'], request=self).count() == self.animal_set.count():
+                AssignedRequest.objects.filter(service_request=self, dispatch_assignment__end_time=None).delete()
 
-        if self.status != status:
-            status_verb = 'opened' if status == 'open' else status
-            action.send(user, verb=f'{status_verb} service request', target=self)
+            if self.status != status:
+                status_verb = 'opened' if status == 'open' else status
+                action.send(user, verb=f'{status_verb} service request', target=self)
 
-        self.status = status
-        self.save()
+            self.status = status
+            self.save()
 
     def update_sip_utl(self):
         from animals.models import Animal
