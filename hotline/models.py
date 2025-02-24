@@ -1,4 +1,5 @@
 import sartopo_python
+from datetime import datetime
 from django.db import models, transaction
 from django.conf import settings
 from actstream import action
@@ -95,6 +96,18 @@ class ServiceRequest(Location):
 
         self.save()
 
+    def get_feature_title(self):
+        from evac.models import EvacAssignment
+        title = ''
+        try:
+            da = EvacAssignment.objects.get(end_time__isnull=True, service_requests=self)
+            title += 'DA#%s - ' % da.id_for_incident
+        except:
+            #No active DA
+            pass
+        title += "SR#" + str(self.id_for_incident)
+        return title
+
     def get_feature_description(self):
         species_counts = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
         for animal in self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
@@ -108,10 +121,32 @@ class ServiceRequest(Location):
                 count+= 1
                 description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species.name != 'sheep' and animal.species.name != 'cattle' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
         description += ")"
+        description += "\nLast Updated: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return description
 
+    def get_marker_color(self):
+        if self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)']).exists():
+            return '#FF0000'
+        elif self.animal_set.filter(status='SHELTERED IN PLACE').exists():
+            return '#E1BF39'
+        elif self.animal_set.filter(status='UNABLE TO LOCATE').exists():
+            return '#0000FF'
+        else:
+            return '#000000'
+
+    def get_marker_symbol(self):
+        if self.animal_set.filter(status='REPORTED').exists():
+            return 't:!'
+        elif self.animal_set.filter(status='REPORTED (EVAC REQUESTED)').exists():
+            return 't:ϟ'
+        elif self.animal_set.filter(status__in=['REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE']).exists():
+            return 'hut$circle'
+        elif self.animal_set.filter(status='UNABLE TO LOCATE').exists():
+            return 'clue'
+        else:
+            return 'c:target3'
+
     def get_feature_json(self):
-        description = self.get_feature_description()
         feature_json = {
           "geometry":{
               "coordinates":[
@@ -125,11 +160,11 @@ class ServiceRequest(Location):
           "id":self.id_for_incident,
           "type":"Feature",
           "properties":{
-              "marker-symbol":"circle-n",
-              "marker-color":"#FF0000",
-              "description":description,
-              "title": "SR#" + str(self.id_for_incident),
-              "class":"Marker",
+              "marker-symbol": self.get_marker_symbol(),
+              "marker-color": self.get_marker_color(),
+              "description": self.get_feature_description(),
+              "title": self.get_feature_title(),
+              "class": "Marker",
           }
         }
         return feature_json
@@ -150,9 +185,9 @@ class ServiceRequest(Location):
             except:
                 pass
         payload = {
-            'title': "SR#" + str(self.id_for_incident),
-            'color': '#FF0000',
-            'symbol': 'circle-n',
+            'title': self.get_feature_title(),
+            'color': self.get_marker_color(),
+            'symbol': self.get_marker_symbol(),
             'description': self.get_feature_description()
         }
         lon = self.longitude
