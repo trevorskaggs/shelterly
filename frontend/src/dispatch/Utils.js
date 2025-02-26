@@ -2,7 +2,7 @@ import moment from 'moment';
 import ShelterlyPDF from '../utils/pdf';
 import { capitalize } from '../utils/formatString';
 import { priorityChoices, DATE_FORMAT } from '../constants';
-import { statusChoices } from '../animals/constants';
+import { statusChoicesNFA } from '../animals/constants';
 import { buildAnimalCountList } from '../animals/Utils';
 
 function buildNoteList(pdf, notes, {
@@ -75,10 +75,10 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawPad(10);
 
       // status
-      pdf.drawWrappedText({
-        text: `Status: ${assigned_request.service_request_object.status.toUpperCase()}`,
-        fontSize: 10
-      });
+      // pdf.drawWrappedText({
+      //   text: `Status: ${assigned_request.service_request_object.status.toUpperCase()}`,
+      //   fontSize: 10
+      // });
 
       // summary address
       pdf.drawSectionHeader({ text: 'Service Request Address:', fontSize: 14 });
@@ -110,8 +110,13 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawSectionHeader({ text: 'Animals', fontSize: 14 });
 
       pdf.setDocumentFontSize({ size: 12 });
-      buildAnimalCountList(pdf, Object.values(assigned_request.animals), { countLabelMarginTop: -12 });
-
+      if (Object.keys(assigned_request.animals).length) {
+        buildAnimalCountList(pdf, Object.values(assigned_request.animals), { countLabelMarginTop: -12 });
+      }
+      else {
+        pdf.drawPad(12);
+        pdf.drawWrappedText({ text: 'N/A' });
+      }
       // reset document font size
       pdf.setDocumentFontSize();
       pdf.drawPad(10);
@@ -210,16 +215,18 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawWrappedText({ text: `Key at Staging: ${assigned_request.service_request_object.key_provided ? 'Yes': 'No'}`})
 
       // animals
-      pdf.drawSectionHeader({
-        text: 'Animals'
-      });
+      if (Object.keys(assigned_request.animals).length) {
+        pdf.drawSectionHeader({
+          text: 'Animals'
+        });
+      }
 
       function drawAnimalHeader({
-        firstLabel = 'ID - Species\nName'
+        firstLabel = 'ID\nSpecies\nName'
       } = {}) {
         const dispatchStatusHeaders = [{
           value: '', label: firstLabel
-        }].concat(statusChoices.filter((choice) => !choice.value.includes('REPORTED')));
+        }].concat(statusChoicesNFA.filter((choice) => !choice.value.includes('REPORTED')));
 
         pdf.drawTextList({
           labels: dispatchStatusHeaders.map((choice) => {
@@ -264,15 +271,15 @@ const buildDispatchResolutionsDoc = (drs = []) => {
           drawAnimalHeader({
             firstLabel: `***A#${
               animal.id_for_incident
-            } - ${species[0].toUpperCase()}${species.slice(1)}\n${
+            }\n${
               animal.name || "Unknown"
             }***`,
           });
         }
 
         const animalRow = [{
-          label: `\n\n${animal.status}`,
-          marginTop: -7
+          label: `\n\n${animal.status.replace('UNABLE TO LOCATE', 'UTL').replace('SHELTERED IN PLACE', 'SIP').replace('No Further Action (NFA)', 'NFA')}`,
+          marginTop: -32
         }].concat(Array(6).fill({
           type: 'checkbox',
           label: '',
@@ -283,24 +290,25 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         pdf.drawList({
           listItems: animalRow,
           listStyle: 'inline',
-          bottomPadding: 5
+          // bottomPadding: 5
         });
 
         pdf.setDocumentFontSize({ size: 10 });
 
         pdf.drawTextList({
           labels: [
-            animal.sex ? `Sex: ${animal.sex || 'N/A'}` : '',
-            animal.fixed  ? `Fixed: ${capitalize(animal.fixed)}` : '',
-            animal.aco_required ? `ACO Required: ${capitalize(animal.aco_required)}` : '',
-            animal.aggressive ? `Aggressive: ${capitalize(animal.aggressive)}` : '',
-            animal.confined ? `Confined: ${capitalize(animal.confined)}` : '',
-            animal.injured ? `Injured: ${capitalize(animal.injured)}` : '',
-            animal.last_seen ? `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'Unknown'}` : '',
-            animal.age ? `Age: ${capitalize(animal.age) || 'N/A'}` : '',
-            animal.size ? `Size: ${capitalize(animal.size) || 'N/A'}` : '',
-            `Primary Color: ${capitalize(animal.pcolor) || 'N/A'}`,
-            `Secondary Color: ${capitalize(animal.scolor) || 'N/A'}`
+            `Species: ${animal.species[0].toUpperCase()}${animal.species.slice(1)}`,
+            `Last Seen: ${animal.last_seen ? moment(animal.last_seen).format('MMMM Do YYYY HH:mm') : 'N/A'}`,
+            `Sex: ${animal.sex || 'N/A'}`,
+            `Fixed: ${animal.fixed ? capitalize(animal.fixed) : 'N/A'}`,
+            `ACO Required: ${animal.aco_required ? capitalize(animal.aco_required) : 'N/A'}`,
+            `Aggressive: ${animal.aggressive ? capitalize(animal.aggressive) : 'N/A'}`,
+            `Confined: ${animal.confined ? capitalize(animal.confined) : 'N/A'}`,
+            `Injured: ${animal.injured ? capitalize(animal.injured) : 'N/A'}`,
+            `Age: ${animal.age ? capitalize(animal.age) : 'N/A'}`,
+            `Size: ${animal.size ? capitalize(animal.size) : 'N/A'}`,
+            `Primary Color: ${animal.pcolor ? capitalize(animal.pcolor) : 'N/A'}`,
+            `Secondary Color: ${animal.scolor ? capitalize(animal.scolor) : 'N/A'}`,
           ],
           listStyle: 'grid',
           labelMarginTop: -4
@@ -311,20 +319,27 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
         pdf.drawPad(13);
 
-        pdf.drawWrappedText({
-          text: `Description: ${animal.color_notes || 'N/A'}`,
-          bottomPadding: 0,
-          fontSize: 10
-        });
-        pdf.drawWrappedText({
-          text: `Animal Notes: ${animal.behavior_notes ? animal.behavior_notes : animal.animal_notes || 'N/A'}`,
-          bottomPadding: 0,
-          fontSize: 10
-        });
-        pdf.drawWrappedText({
-          text: `Medical Notes: ${animal.medical_notes || 'N/A'}`,
-          fontSize: 10
-        });
+        if (animal.color_notes) {
+          pdf.drawWrappedText({
+            text: `Description: ${animal.color_notes || 'N/A'}`,
+            bottomPadding: 0,
+            fontSize: 10
+          });
+        }
+        if (animal.behavior_notes || animal.animal_notes) {
+          pdf.drawWrappedText({
+            text: `Animal Notes: ${animal.behavior_notes ? animal.behavior_notes : animal.animal_notes || 'N/A'}`,
+            bottomPadding: 0,
+            fontSize: 10
+          });
+        }
+        if (animal.medical_notes) {
+          pdf.drawWrappedText({
+            text: `Medical Notes: ${animal.medical_notes || 'N/A'}`,
+            bottomPadding: 0,
+            fontSize: 10
+          });
+        }
       });
 
       pdf.setDocumentFontSize();

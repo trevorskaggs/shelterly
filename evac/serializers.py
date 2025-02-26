@@ -50,6 +50,10 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
     team_name = serializers.StringRelatedField(source='team')
     team_member_names = serializers.SerializerMethodField()
+    overdue = serializers.SerializerMethodField()
+
+    def get_overdue(self, obj):
+        return obj.check_overdue()
 
     def get_team_member_names(self, obj):
         #TODO: use StringRelatedField and EvacTeamMember __str__ method
@@ -61,7 +65,7 @@ class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EvacAssignment
-        fields = ['id', 'id_for_incident', 'dispatch_date', 'start_time', 'end_time', 'team_name', 'team_member_names', 'closed']
+        fields = ['id', 'id_for_incident', 'dispatch_date', 'start_time', 'end_time', 'team_name', 'team_member_names', 'closed', 'overdue']
 
 
 class BarebonesAssignedRequestServiceRequestSerializer(serializers.ModelSerializer):
@@ -140,6 +144,7 @@ class AssignedRequestServiceRequestSerializer(BarebonesAssignedRequestServiceReq
         fields = '__all__'
 
 class DeployEvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
+
     team_object = serializers.SerializerMethodField()
 
     def get_team_object(self, obj):

@@ -401,6 +401,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     sr.followup_date=sr_followup_date
                     sr.priority=service_request['priority']
                     sr.directions=service_request['directions']
+                    sr.status=service_request['status']
                     sr.save()
                     # Only create VisitNote on first update, otherwise update existing VisitNote.
                     if service_request.get('date_completed'):
@@ -426,8 +427,8 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 if service_request.get('unable_to_complete', False):
                     evac_assignment.service_requests.remove(sr)
                     evac_assignment.assigned_requests.remove(assigned_request)
-
-                sr.update_status(self.request.user)
+                if len(sr.animal_set.all()):
+                    sr.update_status(self.request.user)
 
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
 

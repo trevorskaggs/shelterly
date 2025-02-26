@@ -199,7 +199,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
           >
             <MapTooltip autoPan={false}>
               <span>
-                {currentRequest.id ?
+                {currentRequest.id && Object.keys(currentRequest.matches).length > 0?
                   <span>
                     {Object.keys(currentRequest.matches).map((key,i) => (
                       <span key={key} style={{textTransform:"capitalize"}}>
@@ -207,7 +207,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                       </span>
                     ))}
                   </span>
-                :""}
+                :"0 Animals"}
                 <br />
                 SR#{currentRequest.id_for_incident}: {currentRequest.full_address}
                 {currentRequest.followup_date ? <div>Followup Date: <Moment format="L">{currentRequest.followup_date}</Moment></div> : ""}
@@ -236,7 +236,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
             >
               <MapTooltip autoPan={false}>
                 <span>
-                  {mapState[dispatch_assignment.id] ?
+                  {mapState[dispatch_assignment.id] && Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).length ?
                     <span>
                       {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
@@ -244,7 +244,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                         </span>
                       ))}
                     </span>
-                  :""}
+                  :"0 Animals"}
                   <br />
                   SR#{assigned_request.service_request_object.id_for_incident}: {assigned_request.service_request_object.full_address}
                   {assigned_request.service_request_object.followup_date ? <div>Followup Date: <Moment format="L">{assigned_request.service_request_object.followup_date}</Moment></div> : ""}
@@ -271,7 +271,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
               >
                 <MapTooltip autoPan={false}>
                   <span>
-                    {service_request.id ?
+                    {service_request.id && Object.keys(service_request.matches).length ?
                       <span>
                         {Object.keys(service_request.matches).map((key,i) => (
                           <span key={key} style={{textTransform:"capitalize"}}>
@@ -279,7 +279,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                           </span>
                         ))}
                       </span>
-                    :""}
+                    :"0 Animals"}
                     <br />
                     SR#{service_request.id_for_incident}: {service_request.full_address}
                     {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
@@ -358,7 +358,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
               <span>
                 {mapState[dispatch_assignment.id] ?
                 <li className="mt-1 mb-1" style={{marginLeft:"15%", marginRight:"-10px"}}>
-                    {mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id] ?
+                    {mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id] && Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).length ?
                     <span>
                       {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                         <span key={key} style={{textTransform:"capitalize"}}>
@@ -366,7 +366,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                         </span>
                       ))}
                     </span>
-                    :""}
+                    :"0 Animals"}
                     &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id_for_incident} - <Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + assigned_request.service_request_object.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{assigned_request.service_request_object.full_address}</Link>
                 </li>
                 : ""}
@@ -425,7 +425,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                 <span>
                   {mapState[dispatch_assignment.id] ?
                   <li className="mt-1 mb-1" style={{marginLeft:"15%", marginRight:"-10px"}}>
-                      {mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id] ?
+                      {mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id] && Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).length > 0 ?
                       <span>
                         {Object.keys(mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches).map((key,i) => (
                           <span key={key} style={{textTransform:"capitalize"}}>
@@ -433,7 +433,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                           </span>
                         ))}
                       </span>
-                      :""}
+                      :"0 Animals"}
                       &nbsp;|&nbsp;SR#{assigned_request.service_request_object.id_for_incident} - {assigned_request.service_request_object.full_address}
                       <OverlayTrigger
                         key={"request-details"}
