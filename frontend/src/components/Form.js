@@ -168,7 +168,7 @@ const ToggleSwitch = (props) => {
     </>
 )}
 
-const TextInput = React.forwardRef((props, ref) => {
+const TextInput = React.forwardRef(({togglePasswordVisibility, ...props}, ref) => {
   const [field, meta] = useField(props);
   const registeredRef = useRegisteredRef(props.name);
 
@@ -191,7 +191,7 @@ const TextInput = React.forwardRef((props, ref) => {
       :
       <span>
         <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }} {...field} {...props} />
-        {['password', 'password2'].includes(props.id) ? <FontAwesomeIcon icon={props.showPassword ? faEyeSlash : faEye} onClick={() => props.togglePasswordVisibility()} className="float-right" style={{marginRight: meta.error ? "35px" : "15px", marginTop:"-32px", color:"#222"}} size="lg" inverse /> : ""}
+        {['password', 'password2'].includes(props.id) ? <FontAwesomeIcon icon={props.showpassword === 'true' ? faEyeSlash : faEye} onClick={() => togglePasswordVisibility()} className="float-right" style={{marginRight: meta.error ? "35px" : "15px", marginTop:"-32px", color:"#222"}} size="lg" inverse /> : ""}
       </span>
       }
       {/* <Form.Control.Feedback type="invalid" style={props.errstyle ? props.errstyle : props.style}>{meta.error}</Form.Control.Feedback> */}

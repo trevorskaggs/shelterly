@@ -8,6 +8,7 @@ import { useQueryParams } from 'raviger';
 import AnimalForm from '../animals/AnimalForm';
 import PersonForm from '../people/PersonForm';
 import ServiceRequestForm from '../hotline/ServiceRequestForm';
+import AddressForm from '../hotline/AddressForm';
 import PageNotFound from "../components/PageNotFound";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 
@@ -69,16 +70,18 @@ function getSteps(is_intake) {
   if (is_intake) {
     return ['Create Contacts', 'Create Animals'];
   }
-  return ['Create Contacts', 'Create Animals', 'Create Service Request'];
+  return ['Lookup Address', 'Create Contacts', 'Create Animals', 'Create Service Request'];
 }
 
 function getStepContent(incident, organization, step, handleStepSubmit, handleBack, state) {
   switch (step) {
     case 0:
-      return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
+      return <AddressForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />
     case 1:
-      return <AnimalForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
+      return <PersonForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
     case 2:
+      return <AnimalForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
+    case 3:
       return <ServiceRequestForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />;
     default:
       return <PageNotFound/>;
@@ -92,6 +95,13 @@ export const initialWorkflowData = {
   animalIndex: 0,
   shelter: null,
   steps: {
+    initial: {
+      address: '',
+      apartment: '',
+      city: '',
+      state: '',
+      zip_code: '',
+    },
     reporter: {
       id: '',
       first_name: '',
@@ -259,10 +269,10 @@ function StepperWorkflow({ incident, organization }) {
         {steps.map((label, index) => {
           const stepProps = {};
           const labelProps = {};
-          if (index === 0) {
+          if (index === 1) {
             labelProps.optional = <Typography variant="caption" component={'span'}>{contactCount} Contact{contactCount === 1 ? "" : "s"} Created</Typography>;
           }
-          else if (index === 1) {
+          else if (index === 2) {
             labelProps.optional = <Typography variant="caption" component={'span'}>{state.animalCount} Animal{state.animalCount === 1 ? "" : "s"} Created</Typography>;
           }
           return (
