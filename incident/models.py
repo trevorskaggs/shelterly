@@ -47,6 +47,7 @@ class Incident(models.Model):
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True)
     caltopo_map_id = models.CharField(max_length=10, blank=True, null=True)
     watchduty_map_id = models.CharField(max_length=10, blank=True, null=True)
+    default_followup_days = models.IntegerField(default=1, blank=False, null=False)
     hide = models.BooleanField(default=False)
 
     def __str__(self):

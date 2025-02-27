@@ -207,7 +207,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
             })
             response.data.sr_updates.push({
               id: assigned_request.service_request_object.id,
-              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + 2)),
+              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + state.incident.default_followup_days)),
               priority: assigned_request.service_request_object.priority,
               date_completed: assigned_request.visit_note && assigned_request.visit_note.date_completed ? assigned_request.visit_note.date_completed : new Date(),
               directions: assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : '',
@@ -630,7 +630,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date().setDate(new Date().getDate() + 2)}
+                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date().setDate(new Date().getDate() + state.incident.default_followup_days)}
                       disabled={data.end_time !== null && assigned_request.followup_date !== assigned_request.service_request_object.followup_date}
                     />
                   </BootstrapForm.Row>
