@@ -58,7 +58,7 @@ function DispatchSummary({ id, incident, organization }) {
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
   const [error, setError] = useState('');
   const [isPreplanned, setIsPreplanned] = useState(false);
-  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
+  const priorityText = {1:'Urgent', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   const handleTeamNameSubmit = async () => {
     let requestBody;

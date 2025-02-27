@@ -73,7 +73,7 @@ function Deploy({ incident, organization }) {
   const handleCloseAlreadyAssignedTeamModal = () => {setDuplicateSRs([]);setShowAlreadyAssignedTeamModal(false);}
   const [proceed, setProceed] = useState(false);
 
-  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
+  const priorityText = {1:'Urgent', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   // Handle aco_required toggle.
   const handleACO = async event => {

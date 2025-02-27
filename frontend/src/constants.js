@@ -15,11 +15,9 @@ export const STATE_OPTIONS = [
 ]
 
 export const priorityChoices = [
-  { value: 1, label: 'Highest' },
+  { value: 1, label: 'Urgent' },
   { value: 2, label: 'High' },
-  { value: 3, label: 'Medium' },
   { value: 4, label: 'Low' },
-  { value: 5, label: 'Lowest' }
 ];
 
 export const DATE_FORMAT = 'YYYYMMDDHHmm';
