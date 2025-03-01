@@ -101,6 +101,8 @@ export const initialWorkflowData = {
       city: '',
       state: '',
       zip_code: '',
+      latitude: null,
+      longitude: null,
     },
     reporter: {
       id: '',
@@ -184,7 +186,7 @@ function StepperWorkflow({ incident, organization }) {
 
   function handleBack(currentStep, nextStep, data=null) {
     // Lower the active step if going backwards between major steps.
-    if ((currentStep === 'animals' && nextStep !== 'animals') || (currentStep === 'request' && nextStep === 'animals')) {
+    if (nextStep === 'initial' || (currentStep === 'animals' && nextStep !== 'animals') || (currentStep === 'request' && nextStep === 'animals')) {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     }
 
@@ -209,8 +211,25 @@ function StepperWorkflow({ incident, organization }) {
       setContactCount((count) => count + 1);
     }
 
+    // Populate owner and skip contact step if using matching owner.
+    if (currentStep === 'initial' && nextStep === 'animals') {
+      setContactCount((count) => count + 1);
+      setState((prevState) => ({
+        ...prevState,
+        stepIndex: prevState.stepIndex + 2,
+        steps: { ...prevState.steps, ['owner']:data, ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
+      }))
+    }
+    else if (currentStep === 'initial' && nextStep === 'reporter') {
+      setContactCount((count) => count + 1);
+      setState((prevState) => ({
+        ...prevState,
+        stepIndex: prevState.stepIndex + 1,
+        steps: { ...prevState.steps, ['owner']:data, ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
+      }))
+    }
     // Treat animals differently since we need an array of N animals.
-    if (currentStep === 'animals') {
+    else if (currentStep === 'animals') {
       // Only increase animal index on save if we're adding another animal.
       var index = state.animalIndex;
       if (nextStep === 'animals') {
@@ -231,7 +250,7 @@ function StepperWorkflow({ incident, organization }) {
         }))
       }
       // Otherwise add a new animal to the list.
-      else if (Object.keys(data).length) {
+      else if (data && data.get('animal_count')) {
         setState((prevState) => ({
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
@@ -258,8 +277,8 @@ function StepperWorkflow({ incident, organization }) {
     }
 
     // Only bump up the major active step when moving to a new type of object creation.
-    if ((currentStep !== 'animals' && nextStep === 'animals') || (currentStep === 'animals' && nextStep === 'request')){
-      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    if ((currentStep === 'initial') || (currentStep !== 'animals' && nextStep === 'animals') || (currentStep === 'animals' && nextStep === 'request')){
+      setActiveStep((prevActiveStep) => prevActiveStep + (currentStep === 'initial' && nextStep === 'animals' ? 2 : 1));
     }
   }
 

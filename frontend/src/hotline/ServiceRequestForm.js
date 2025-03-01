@@ -49,13 +49,13 @@ function ServiceRequestForm(props) {
     directions: props.state.steps.request.directions || '',
     priority: props.state.steps.request.priority || 2,
     followup_date: props.state.steps.request.followup_date || new Date(),
-    address: props.state.steps.request.address || props.state.steps.owner.address || '',
-    apartment: props.state.steps.request.apartment || props.state.steps.owner.apartment || '',
-    city: props.state.steps.request.city || props.state.steps.owner.city || '',
-    state: props.state.steps.request.state || props.state.steps.owner.state || '',
-    zip_code: props.state.steps.request.zip_code || props.state.steps.owner.zip_code || '',
-    latitude: props.state.steps.request.latitude || props.state.steps.owner.latitude || null,
-    longitude: props.state.steps.request.longitude || props.state.steps.owner.longitude || null,
+    address: props.state.steps.request.address || props.state.steps.initial.address || '',
+    apartment: props.state.steps.request.apartment || props.state.steps.initial.apartment || '',
+    city: props.state.steps.request.city || props.state.steps.initial.city || '',
+    state: props.state.steps.request.state || props.state.steps.initial.state || '',
+    zip_code: props.state.steps.request.zip_code || props.state.steps.initial.zip_code || '',
+    latitude: props.state.steps.request.latitude || props.state.steps.initial.latitude || null,
+    longitude: props.state.steps.request.longitude || props.state.steps.initial.longitude || null,
     verbal_permission: props.state.steps.request.verbal_permission || false,
     key_provided: props.state.steps.request.key_provided || false,
     accessible: props.state.steps.request.accessible || false,
@@ -223,7 +223,7 @@ function ServiceRequestForm(props) {
         </Card.Header>
         <Card.Body>
           <BootstrapForm as={Form}>
-            <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} show_same={props.state.steps.owner.address} incident={props.incident} error="Service Request Address was not selected." />
+            <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} disabled={is_workflow ? true : false} incident={props.incident} error="Service Request Address was not selected." />
             <BootstrapForm.Row className="mb-3">
               <Col xs={"2"}>
                 <DropDown

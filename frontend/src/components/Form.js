@@ -636,13 +636,16 @@ const AddressSearch = (props) => {
   const { setFieldValue } = useFormikContext();
   const [initialLatLon, setInitialLatLon] = useState([0, 0]);
 
+  const [fadeIn, setFadeIn] = useState(props.show_same ? false : true);
+  const [existingOwner, setExistingOwner] = useState(props.formikProps.values.id ? true : false);
+
   const setLatLon = (lat, lon) => {
     setInitialLatLon([lat, lon]);
   }
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={!fadeIn} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={!fadeIn && !existingOwner} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
@@ -663,20 +666,30 @@ const AddressSearch = (props) => {
       }
   }
 
-  const [fadeIn, setFadeIn] = useState(props.show_same ? false : true);
   function handleChange() {
+    // Populate with initial lookup address data if unchecked.
+    if (fadeIn) {
+      setFieldValue("address", props.initialData.address);
+      setFieldValue("city", props.initialData.city);
+      setFieldValue("state", props.initialData.state);
+      setFieldValue("apartment", props.initialData.apartment);
+      setFieldValue("zip_code", props.initialData.zip_code);
+      setFieldValue("latitude", props.initialData.latitude);
+      setFieldValue("longitude", props.initialData.longitude);
+      setExistingOwner(false);
+    }
     setFadeIn(!fadeIn);
     setTimeout(() => {
       mapRef.current.leafletElement.invalidateSize();
-    }, 250)
+    }, 250);
   }
 
   return (
     <>
     {props.show_same ?
-      <span className="form-row mb-2">
-        <Form.Label style={{marginLeft:"5px"}}>Address Same as Owner: </Form.Label>
-        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"-7px"}} />
+      <span className="form-row mb-2" hidden={props.hidden}>
+        <Form.Label style={{marginLeft:"5px"}}>Address Same as Service Request: </Form.Label>
+        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn && !props.existingOwner} onChange={handleChange} style={{marginTop:"-7px"}} />
       </span>
     : ""}
         <Row hidden={props.hidden} style={{fontSize:"15px"}}>
@@ -724,6 +737,8 @@ const AddressSearch = (props) => {
                   id="state"
                   options={STATE_OPTIONS}
                   placeholder=''
+                  clearable={true}
+                  value={props.formikProps.values.state || ''}
                   tooltip="State must be populated using the Address Search."
                   disabled
                 />

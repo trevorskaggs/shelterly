@@ -50,9 +50,9 @@ const PersonForm = (props) => {
 
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
-  const [isOwner, setIsOwner] = useState(props.state.stepIndex > 0 || is_owner);
+  const [isOwner, setIsOwner] = useState(props.state.stepIndex > 1 || is_owner);
 
-  const [existingOwner, setExistingOwner] = useState(false);
+  const [existingOwner, setExistingOwner] = useState(props.state.steps.owner.id ? true : false);
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
@@ -87,7 +87,7 @@ const PersonForm = (props) => {
   }
 
   // Control Agency display.
-  const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
+  const [showAgency, setShowAgency] = useState(props.state.stepIndex === 1 && is_first_responder);
 
   const initialData = {
     has_id: false,
@@ -116,10 +116,10 @@ const PersonForm = (props) => {
   let current_data = initialData;
   if (is_workflow) {
     if (isOwner) {
-      current_data = props.state.steps.owner
+      current_data = props.state.steps.owner.first_name ? props.state.steps.owner : props.state.steps.initial;
     }
     else {
-      current_data = props.state.steps.reporter
+      current_data = props.state.steps.reporter.first_name ? props.state.steps.reporter : props.state.steps.initial;
     }
     current_data['show_agency'] = showAgency;
     current_data['incident'] = state.incident.id;
@@ -327,10 +327,21 @@ const PersonForm = (props) => {
             {id ?
               <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Update {isOwner ? "Owner" : "Reporter"}</Card.Header>
               :
-              <Card.Header as="h5" className="pl-3">{props.state.stepIndex === 0 ?
-                <span style={{cursor:'pointer'}} onClick={() => {window.history.back()}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
-                :
-                <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); setShowAgency(is_first_responder); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+              <Card.Header as="h5" className="pl-3">
+                <span style={{cursor:'pointer'}} onClick={() => {
+                  if (!isOwner) {
+                    props.handleBack('reporter', 'initial')
+                  }
+                  else if (props.state.steps.reporter.first_name) {
+                    setIsOwner(false);
+                    setShowAgency(is_first_responder);
+                    formikProps.resetForm({values:props.state.steps.reporter});
+                    props.handleBack('owner', 'reporter')
+                  }
+                  else {
+                    props.handleBack('owner', 'initial')
+                  }
+                }} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
           </Card.Header>}
           <Card.Body>
@@ -347,7 +358,7 @@ const PersonForm = (props) => {
                     setExistingOwner(true);
                   }
                   else {
-                    setData(initialData);
+                    setData({...initialData, ...props.state.steps.initial});
                     setExistingOwner(false);
                   }
                 }}
@@ -414,7 +425,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} hidden={!isOwner} error="Contact Address was not selected." />
+            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} show_same={true} hidden={!isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={existingOwner} />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"
