@@ -425,7 +425,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} show_same={true} hidden={!isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={existingOwner} />
+            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} show_same={true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={existingOwner} />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"
