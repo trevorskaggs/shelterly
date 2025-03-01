@@ -671,7 +671,7 @@ const AnimalForm = (props) => {
                         type="text"
                         key={`my_unique_requested_service_select_key__${formikProps.values.status}`}
                         options={reportedStatusChoices}
-                        disabled={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) ? false : true}
+                        disabled={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) && !data.active_dispatch ? false : true}
                         value={formikProps.values.status||''}
                         isClearable={false}
                     />
