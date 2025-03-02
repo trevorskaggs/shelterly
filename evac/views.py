@@ -50,7 +50,7 @@ class EvacTeamMemberViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('training'):
             queryset = queryset.filter(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')
         queryset = (queryset
-        .annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None, service_requests__isnull=False))))
+        .annotate(is_assigned=Exists(EvacAssignment.objects.filter(team__team_members__id=OuterRef("id"), end_time=None, service_requests__status='assigned', incident__slug=self.request.GET.get('incident')))))
         return queryset
 
 class DispatchTeamViewSet(viewsets.ModelViewSet):
