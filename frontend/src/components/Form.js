@@ -684,12 +684,19 @@ const AddressSearch = (props) => {
     }, 250);
   }
 
+  useEffect(() => {
+    setExistingOwner(props.existingOwner);
+    if (props.existingOwner) {
+      setFadeIn(true);
+    }
+  }, [props.existingOwner]);
+
   return (
     <>
     {props.show_same ?
       <span className="form-row mb-2" hidden={props.hidden}>
         <Form.Label style={{marginLeft:"5px"}}>Address Same as Service Request: </Form.Label>
-        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn && !props.existingOwner} onChange={handleChange} style={{marginTop:"-7px"}} />
+        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn && !existingOwner} onChange={handleChange} style={{marginTop:"-7px"}} />
       </span>
     : ""}
         <Row hidden={props.hidden} style={{fontSize:"15px"}}>

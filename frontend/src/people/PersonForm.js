@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useNavigationPrompt, useQueryParams } from 'raviger';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
@@ -100,16 +100,16 @@ const PersonForm = (props) => {
     show_agency: showAgency,
     agency: '',
     drivers_license: '',
-    address: '',
-    apartment: '',
-    city: '',
-    state: '',
-    zip_code: '',
+    address: props.state ? props.state.steps.initial.address : '',
+    apartment: props.state ? props.state.steps.initial.apartment : '',
+    city: props.state ? props.state.steps.initial.city : '',
+    state: props.state ? props.state.steps.initial.state : '',
+    zip_code: props.state ? props.state.steps.initial.zip_code : '',
     request: servicerequest_id,
     animal: animal_id,
     owner: owner_id,
-    latitude: null,
-    longitude: null,
+    latitude: props.state ? props.state.steps.initial.latitude : null,
+    longitude: props.state ? props.state.steps.initial.longitude : null,
     change_reason: '',
     incident: state.incident.id
   }
@@ -269,7 +269,12 @@ const PersonForm = (props) => {
                   props.onSubmit('reporter', values, 'owner');
                   setIsOwner(true);
                   setShowAgency(false);
-                  resetForm({values:props.state.steps.owner});
+                  if (props.state.steps.owner.first_name){
+                    resetForm({values:props.state.steps.owner});
+                  }
+                  else {
+                    resetForm({values:initialData});
+                  }
                 }
               }
             })
