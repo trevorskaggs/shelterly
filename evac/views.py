@@ -376,7 +376,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     new_shelter = animal_dict.get('shelter', None)
                     new_room = animal_dict.get('room', None)
                     intake_date = animal.intake_date
-                    if animal.shelter != new_shelter:
+                    if animal.shelter and animal.shelter != new_shelter:
                         action.send(self.request.user, verb='sheltered animal', target=animal)
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
                         intake_date = animal.intake_date if animal.intake_date else datetime.now()
