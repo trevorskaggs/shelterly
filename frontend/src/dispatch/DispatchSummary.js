@@ -58,7 +58,7 @@ function DispatchSummary({ id, incident, organization }) {
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
   const [error, setError] = useState('');
   const [isPreplanned, setIsPreplanned] = useState(false);
-  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
+  const priorityText = {1:'Urgent', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   const handleTeamNameSubmit = async () => {
     let requestBody;
@@ -696,10 +696,10 @@ function DispatchSummary({ id, incident, organization }) {
             </ListGroup>
           </span>
           : ""}
-          {assigned_request.visit_notes.length > 0 ? <hr/> : ""}
-          {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+          {assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note.date_completed).length > 0 ? <hr/> : ""}
+          {assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note.date_completed).length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
           <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-          {assigned_request.visit_notes.map(visit_note =>
+          {assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note.date_completed).map(visit_note =>
             <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
               <Link href={"/" + organization + "/" + incident + "/dispatch/assignment/note/" + visit_note.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
             </ListGroup.Item>

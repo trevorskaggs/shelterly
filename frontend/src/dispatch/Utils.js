@@ -33,7 +33,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     if (i > 0) {
       pdf.drawPageBreak();
       pdf.drawPageHeader({
-        pageTitle: `Dispatch Assignment #${data.id}`,
+        pageTitle: `Dispatch Assignment #${data.id_for_incident}`,
         subtitle: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
       });
     }
@@ -43,9 +43,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     pdf.drawPad(10)
     pdf.setDocumentFontSize({ size: 10 });
     pdf.drawTextList({
-      labels: data.team && data.team_object.team_member_objects.map(team_member => (
-        `${team_member.first_name} ${team_member.last_name} ${team_member.display_phone ? `${team_member.display_phone}` : ''}`
-      )),
+      labels: [data.team_member_names],
       labelMarginTop: -10
     });
 
@@ -391,12 +389,12 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         pdf.drawTextArea({ rows: 4 });
       }
 
-      if (assigned_request.visit_notes.length > 0) {
+      if (assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note ? assigned_request.visit_note.date_completed : null).length > 0) {
         pdf.drawWrappedText({
           text: `Previous Visit Notes`,
           fontSize: 12
         });
-        assigned_request.visit_notes.forEach((visit_note) => {
+        assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note.date_completed).forEach((visit_note) => {
           pdf.drawWrappedText({
             text: `${moment(visit_note.date_completed).format(
               'MMMM Do'
