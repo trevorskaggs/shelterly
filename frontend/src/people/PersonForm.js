@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useNavigationPrompt, useQueryParams } from 'raviger';
 import { Formik, useFormikContext } from 'formik';
@@ -17,6 +17,8 @@ const PersonForm = (props) => {
 
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
+
+  const existingOwnerRef = useRef(null);
 
   const id = props.id;
   const incident = "/" + props.incident
@@ -53,6 +55,7 @@ const PersonForm = (props) => {
   const [isOwner, setIsOwner] = useState(props.state.stepIndex > 1 || is_owner);
 
   const [existingOwner, setExistingOwner] = useState(props.state.steps.owner.id ? true : false);
+  const [existingReporter, setExistingReporter] = useState(props.state.steps.reporter.id ? true : false);
 
   // Track duplicate owner error.
   const [error, setError] = useState({show:false, error:[]});
@@ -90,6 +93,7 @@ const PersonForm = (props) => {
   const [showAgency, setShowAgency] = useState(props.state.stepIndex === 1 && is_first_responder);
 
   const initialData = {
+    existing_owner: '',
     has_id: false,
     first_name: '',
     last_name: '',
@@ -269,10 +273,12 @@ const PersonForm = (props) => {
                   props.onSubmit('reporter', values, 'owner');
                   setIsOwner(true);
                   setShowAgency(false);
+                  setExistingOwner(props.state.steps.owner.id ? true : false);
                   if (props.state.steps.owner.first_name){
                     resetForm({values:props.state.steps.owner});
                   }
                   else {
+                    existingOwnerRef.current.clear();
                     resetForm({values:initialData});
                   }
                 }
@@ -352,19 +358,30 @@ const PersonForm = (props) => {
           <Card.Body>
           <BootstrapForm noValidate>
             {/* Only show existing owner if owner and in a workflow/intake */}
-            <span hidden={!(is_workflow || is_intake) || !isOwner}>
-              <label>Use Existing Owner</label>
+            <span hidden={!(is_workflow || is_intake)}>
+              <label>Use Existing {isOwner ? "Owner" : "Reporter"}</label>
               <Typeahead
                 id="existing_owner"
                 className="mb-3"
+                ref={existingOwnerRef}
                 onChange={(values) => {
                   if (values.length) {
-                    setData(existingOwners.data.filter(owner => owner.id === values[0].id)[0])
-                    setExistingOwner(true);
+                    setData(existingOwners.data.filter(owner => owner.id === values[0].id)[0]);
+                    if (isOwner) {
+                      setExistingOwner(true);
+                    }
+                    else {
+                      setExistingReporter(true);
+                    }
                   }
                   else {
                     setData({...initialData, ...props.state.steps.initial});
-                    setExistingOwner(false);
+                    if (isOwner) {
+                      setExistingOwner(false);
+                    }
+                    else {
+                      setExistingReporter(false);
+                    }
                   }
                 }}
                 options={existingOwners.options}
@@ -430,7 +447,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} show_same={true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={existingOwner} />
+            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} show_same={true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={isOwner ? existingOwner : existingReporter} />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"
