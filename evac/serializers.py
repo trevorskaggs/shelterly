@@ -148,7 +148,7 @@ class DeployEvacAssignmentSerializer(SimpleEvacAssignmentSerializer):
     team_object = serializers.SerializerMethodField()
 
     def get_team_object(self, obj):
-        return DispatchTeamSerializer(DispatchTeam.objects.filter(id=obj.team.id).annotate(is_assigned=Exists(EvacAssignment.objects.filter(end_time=None, service_requests__status='assigned', incident=obj.incident, team__team_members__in=obj.team.team_members.all())))[0], required=False, read_only=True).data
+        return DispatchTeamSerializer(DispatchTeam.objects.filter(id=obj.team.id).annotate(is_assigned=Exists(EvacAssignment.objects.filter(end_time=None, service_requests__status='assigned', incident__slug=self.context['request'].GET['incident'], team__team_members__in=obj.team.team_members.all())))[0], required=False, read_only=True).data
     
     class Meta:
         model = EvacAssignment
