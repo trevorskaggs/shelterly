@@ -131,10 +131,12 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     is_sr_owner=Exists(ServiceRequest.objects.filter(owners__id=OuterRef('id')))).annotate(
                     is_animal_owner=Exists(Animal.objects.filter(owners__id=OuterRef('id'))))))
             .select_related('reporter')
+            .prefetch_related(Prefetch('assignedrequest_set', AssignedRequest.objects.select_related('visit_note')))
             # .prefetch_related('evacuation_assignments')
         )).prefetch_related(Prefetch('team', DispatchTeam.objects.prefetch_related('team_members')
         )).prefetch_related(Prefetch('assigned_requests', AssignedRequest.objects.select_related('service_request', 'owner_contact', 'visit_note').prefetch_related('service_request__owners', 'service_request__ownercontact_set',)
-                               .prefetch_related(Prefetch('service_request__animal_set', queryset=Animal.objects.exclude(status='CANCELED'), to_attr='animals')).order_by('service_request__priority')))
+                               .prefetch_related(Prefetch('service_request__animal_set', queryset=Animal.objects.exclude(status='CANCELED'), to_attr='animals'))
+                               .order_by('service_request__priority')))
 
         # Exclude DAs without SRs when fetching for a map.
         is_map = self.request.query_params.get('map', self.request.query_params.get('deploy_map', ''))

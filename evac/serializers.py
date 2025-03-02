@@ -45,55 +45,6 @@ class DispatchTeamSerializer(serializers.ModelSerializer):
         model = DispatchTeam
         fields = '__all__'
 
-class SimpleDispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
-
-    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
-
-    class Meta:
-        model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
-        'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'owners', 'owner_objects']
-
-class DispatchServiceRequestSerializer(SimpleDispatchServiceRequestSerializer):
-
-    animals = SimpleAnimalSerializer(many=True, read_only=True)
-    notes = ServiceRequestNoteSerializer(many=True, required=False, read_only=True)
-    # owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
-    reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
-    visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
-
-    class Meta:
-        model = ServiceRequest
-        fields = ['id', 'animals', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
-        'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'owners', 'owner_objects', 'reporter_object', 'visit_notes', 'notes']
-
-class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
-    service_request_object = SimpleDispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
-    # visit_notes = serializers.SerializerMethodField()
-
-    def get_visit_notes(self, obj):
-        #TODO: this triggers one request per SR
-        notes = VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj)
-        if notes:
-            return VisitNoteSerializer(notes, many=True).data
-        return []
-
-    class Meta:
-        model = AssignedRequest
-        fields = '__all__'
-
-class AssignedRequestDispatchSerializer(SimpleAssignedRequestDispatchSerializer):
-
-    visit_note = VisitNoteSerializer(required=False, read_only=True)
-    owner_contact = OwnerContactSerializer(required=False, read_only=True)
-    service_request_object = DispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
-    visit_notes = serializers.SerializerMethodField()
-
-    class Meta:
-        model = AssignedRequest
-        fields = '__all__'
 
 class SimpleEvacAssignmentSerializer(serializers.ModelSerializer):
 
@@ -125,7 +76,62 @@ class BarebonesAssignedRequestServiceRequestSerializer(serializers.ModelSerializ
         model = AssignedRequest
         fields = ['id', 'visit_note', 'followup_date', 'timestamp']
 
+class SimpleDispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
 
+    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
+    visit_notes = serializers.SerializerMethodField()
+
+    def get_visit_notes(self, obj):
+        notes = [ar.visit_note for ar in obj.assignedrequest_set.exclude(dispatch_assignment__incident=self.context['request'].parser_context['kwargs'].get('incident'), dispatch_assignment__id_for_incident=self.context['request'].parser_context['kwargs'].get('id_for_incident'))]
+        return VisitNoteSerializer(notes, many=True, required=False, read_only=True).data
+
+    class Meta:
+        model = ServiceRequest
+        fields = ['id', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
+        'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'owners', 'owner_objects', 'visit_notes', 'notes']
+
+class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
+    service_request_object = SimpleDispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
+    visit_note = VisitNoteSerializer(required=False, read_only=True)
+    # visit_notes = serializers.SerializerMethodField()
+
+    # def get_visit_notes(self, obj):
+    #     #TODO: this triggers one request per SR
+    #     notes = VisitNote.objects.filter(assigned_request__service_request=obj.service_request).exclude(assigned_request=obj)
+    #     if notes:
+    #         return VisitNoteSerializer(notes, many=True).data
+    #     return []
+
+    class Meta:
+        model = AssignedRequest
+        fields = '__all__'
+
+
+class DispatchServiceRequestSerializer(SimpleDispatchServiceRequestSerializer):
+
+    animals = SimpleAnimalSerializer(many=True, read_only=True)
+    notes = ServiceRequestNoteSerializer(many=True, required=False, read_only=True)
+    # owner_contacts = OwnerContactSerializer(source='ownercontact_set', many=True, required=False, read_only=True)
+    reporter_object = SimplePersonSerializer(source='reporter', required=False, read_only=True)
+    # visit_notes = VisitNoteSerializer(source='visitnote_set', many=True, required=False, read_only=True)
+
+    class Meta:
+        model = ServiceRequest
+        fields = ['id', 'animals', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
+        'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'owners', 'owner_objects', 'reporter_object', 'visit_notes', 'notes']
+
+
+class AssignedRequestDispatchSerializer(SimpleAssignedRequestDispatchSerializer):
+
+    visit_note = VisitNoteSerializer(required=False, read_only=True)
+    owner_contact = OwnerContactSerializer(required=False, read_only=True)
+    service_request_object = DispatchServiceRequestSerializer(source='service_request', required=False, read_only=True)
+
+    class Meta:
+        model = AssignedRequest
+        fields = '__all__'
 
 class AssignedRequestServiceRequestSerializer(BarebonesAssignedRequestServiceRequestSerializer):
 
