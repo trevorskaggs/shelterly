@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faMedkit, faCut, faEdit, faEnvelope, faLink, faMinusSquare, faTimes, faUserPlus, faFilePdf
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faFolderMedical, faHomeHeart, faPhoneRotary, faRightLeft, faSplit } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faUserDoctorMessage, faClawMarks, faFolderMedical, faHomeHeart, faPhoneRotary, faRightLeft, faSplit, faSkullCrossbones } from '@fortawesome/pro-solid-svg-icons';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import * as Yup from 'yup';
 import { Formik } from "formik";
@@ -68,8 +68,10 @@ function AnimalDetails({ id, incident, organization }) {
     shelter_object: {name: '', full_address: ''}
   });
 
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
+  const [reuniteShow, setReuniteShow] = useState(false);
+  const handleReuniteClose = () => setReuniteShow(false);
+  const [deceasedShow, setDeceasedShow] = useState(false);
+  const handleDeceasedClose = () => setDeceasedShow(false);
   const [showSplit, setShowSplit] = useState(false);
   const handleCloseSplit = () => setShowSplit(false);
   const [showTransfer, setShowTransfer] = useState(false);
@@ -85,12 +87,26 @@ function AnimalDetails({ id, incident, organization }) {
   const roomRef = useRef(null);
 
   // Handle animal reunited submit.
-  const handleSubmit = async () => {
+  const handleReuniteSubmit = async () => {
     setIsLoading(true);
     await axios.patch('/animals/api/animal/' + data.id + '/', {status:'REUNITED', shelter:null, room:null})
     .then(response => {
       setData(prevState => ({ ...prevState, status:'REUNITED', shelter:null, room:null }));
-      handleClose();
+      handleReuniteClose();
+    })
+    .catch(error => {
+      setShowSystemError(true);
+    })
+    .finally(() => setIsLoading(false));
+  }
+
+  // Handle animal deceased submit.
+  const handleDeceasedSubmit = async () => {
+    setIsLoading(true);
+    await axios.patch('/animals/api/animal/' + data.id + '/', {status:'DECEASED', shelter:null, room:null})
+    .then(response => {
+      setData(prevState => ({ ...prevState, status:'DECEASED', shelter:null, room:null }));
+      handleDeceasedClose();
     })
     .catch(error => {
       setShowSystemError(true);
@@ -391,9 +407,15 @@ function AnimalDetails({ id, incident, organization }) {
                     </LoadingLink>
                   : ""}
                   {data.status !== 'REUNITED' ?
-                    <LoadingLink onClick={() => setShow(true)} isLoading={isLoading} className="text-white d-block py-1" style={{marginLeft:"13px"}}>
+                    <LoadingLink onClick={() => setReuniteShow(true)} isLoading={isLoading} className="text-white d-block py-1" style={{marginLeft:"13px"}}>
                       <FontAwesomeIcon icon={faHomeHeart} className="mr-1" style={{cursor:'pointer'}} inverse />
-                      Reunite Animal
+                      Animal Reunited
+                    </LoadingLink>
+                  : ""}
+                  {data.status !== 'DECEASED' ?
+                    <LoadingLink onClick={() => setDeceasedShow(true)} isLoading={isLoading} className="text-white d-block py-1" style={{marginLeft:"13px"}}>
+                      <FontAwesomeIcon icon={faSkullCrossbones} className="mr-1" style={{cursor:'pointer'}} inverse />
+                      Animal Deceased
                     </LoadingLink>
                   : ""}
                   {data.status === 'SHELTERED' ?
@@ -615,7 +637,7 @@ function AnimalDetails({ id, incident, organization }) {
       </Col>
     </div>
     <History action_history={data.action_history} />
-    <Modal show={show} onHide={handleClose}>
+    <Modal show={reuniteShow} onHide={handleReuniteClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm Animal Reunification</Modal.Title>
       </Modal.Header>
@@ -625,8 +647,22 @@ function AnimalDetails({ id, incident, organization }) {
         </p>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="primary" onClick={handleSubmit}>Yes</Button>
-        <Button variant="secondary" onClick={handleClose}>Close</Button>
+        <Button variant="primary" onClick={handleReuniteSubmit}>Yes</Button>
+        <Button variant="secondary" onClick={handleReuniteClose}>Close</Button>
+      </Modal.Footer>
+    </Modal>
+    <Modal show={deceasedShow} onHide={handleDeceasedClose}>
+      <Modal.Header closeButton>
+        <Modal.Title>Confirm Deceased Animal</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <p>
+          This animal is deceased?
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="primary" onClick={handleDeceasedSubmit}>Yes</Button>
+        <Button variant="secondary" onClick={handleDeceasedClose}>Close</Button>
       </Modal.Footer>
     </Modal>
     <Modal show={showOwnerConfirm} onHide={handleOwnerClose}>
