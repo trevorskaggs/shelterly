@@ -37,10 +37,6 @@ function Deploy({ incident, organization }) {
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
 
-  // Determine if this is a preplanning workflow.
-  let preplan = window.location.pathname.includes("preplan");
-
-  const filterRef = useRef(null);
   const openStartRef = useRef(null);
   const openEndRef = useRef(null);
 
@@ -54,7 +50,7 @@ function Deploy({ incident, organization }) {
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
-  const [teamName, setTeamName] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [assignedTeamMembers, setAssignedTeamMembers] = useState([]);
   const handleClose = () => setShow(false);
   const [show, setShow] = useState(false);
@@ -101,9 +97,11 @@ function Deploy({ incident, organization }) {
     let id_list = [];
     let selected_list = [];
     values.forEach(value => {
+      console.log(value)
       id_list = [...id_list, ...value.id];
       // Handle if Team.
       if (value.label.split(':').length > 1) {
+        setSelectedTeam(value.team_id);
         // Parse out the team name.
         team_name = value.label.split(':')[0];
         value.label.split(':')[1].split(',').forEach((name, index) =>  {
@@ -272,17 +270,17 @@ function Deploy({ incident, organization }) {
       .then(response => {
         if (!unmounted) {
           let options = [];
-          let team_names = [];
-          let team_name = '';
+          // let team_names = [];
+          // let team_name = '';
           response.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
-            options.push({id: [teammember.id], label: teammember.display_name, is_assigned:teammember.is_assigned})
+            options.push({id:[teammember.id], team_id:null, label:teammember.display_name, is_assigned:teammember.is_assigned})
           });
           setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
           axios.get('/evac/api/evacassignment/', {
             params: {
               deploy_map: true,
-              status: preplan ? 'preplanned' : '',
+              status: 'active',
               incident,
             },
             cancelToken: source.token,
@@ -291,32 +289,32 @@ function Deploy({ incident, organization }) {
             response.data
               .filter(({ team_object }) => team_object.show === true) 
               .forEach(function({ team_object: team }) {
-                // Only add to option list if team has members and is not already in the list which is sorted by newest.
-                if (team.team_member_objects.length && !team_names.includes(team.name)) {
-                  options.unshift({id: team.team_members, label: team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+                // Only add to option list if team has members.
+                if (team.team_member_objects.length) {
+                  options.unshift({id:team.team_members, team_id:team.id, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
                 }
-                team_names.push(team.name);
+                // team_names.push(team.name);
               });
             // Provide a default "TeamN" team name that hasn't already be used.
-            let i = 1;
-            let name = preplan ? "Preplanned " : "Team "
-            // Sort team_names to ensure we start with the lowest available number for default team name
-            team_names = team_names.filter(n => n.startsWith(name)).sort((a, b) => {
-              let numA = parseInt(a.replace(/^\D+/g, ''), 10);
-              let numB = parseInt(b.replace(/^\D+/g, ''), 10);
-              return numA - numB;
-            });
-            // Find the lowest available number for the new team name
-            while (team_names.includes(name + i)) {
-              i++;
-            }
-            team_name = name + i;
-            setTeamData({teams: response.data, options: options, isFetching: false});
-            setTeamName(team_name);
+            // let i = 1;
+            // let name = preplan ? "Preplanned " : "Team "
+            // // Sort team_names to ensure we start with the lowest available number for default team name
+            // team_names = team_names.filter(n => n.startsWith(name)).sort((a, b) => {
+            //   let numA = parseInt(a.replace(/^\D+/g, ''), 10);
+            //   let numB = parseInt(b.replace(/^\D+/g, ''), 10);
+            //   return numA - numB;
+            // });
+            // // Find the lowest available number for the new team name
+            // while (team_names.includes(name + i)) {
+            //   i++;
+            // }
+            // team_name = name + i;
+            setTeamData({teams:response.data, options:options, isFetching:false});
+            // setTeamName(team_name);
           })
           .catch(error => {
             if (!unmounted) {
-              setTeamData({teams: [], options: [], isFetching: false});
+              setTeamData({teams:[], options:[], isFetching:false});
               setShowSystemError(true);
             }
           });
@@ -419,8 +417,9 @@ function Deploy({ incident, organization }) {
   return (
     <Formik
       initialValues={{
-        team_name: teamName,
-        temp_team_name: teamName,
+        // team_name: teamName,
+        // temp_team_name: teamName,
+        team_id: selectedTeam,
         team_members: [],
         service_requests: [],
         incident: state.incident.id,
@@ -687,9 +686,9 @@ function Deploy({ incident, organization }) {
         </Row>
         <Row className="ml-0 mr-0 border rounded" style={{marginTop:"-1px"}}>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-1px", marginRight:"1px"}}>
-            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
+            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.count === 0}>{props.values.team_members.length > 0 ? "DEPLOY" : selectedCount.count > 0 ? "PREPLAN" : "DEPLOY/PREPLAN"}</Button>
           </Col>
-          <Col className="pl-0 pr-0 ml-1" style={{maxWidth:"170px"}}>
+          {/* <Col className="pl-0 pr-0 ml-1" style={{maxWidth:"170px"}}>
             <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", marginRight:"-11px", paddingTop:"6px", whiteSpace:"nowrap"}}>
               <span style={{marginLeft:"-12px"}}>{props.values.team_name || teamName}
                 {!preplan ? <OverlayTrigger
@@ -705,18 +704,8 @@ function Deploy({ incident, organization }) {
                 </OverlayTrigger> : ""}
               </span>
             </div>
-          </Col>
+          </Col> */}
           <Col style={{marginLeft:"2px", paddingLeft:"2px", paddingRight:"4px"}}>
-            {preplan ?
-              <BootstrapForm.Control
-                id="disabled_team_name"
-                name="disabled_team_name"
-                type="text"
-                placeholder="Cannot choose team members when preplanning..."
-                disabled={true}
-                style={{height:"37px"}}
-              />
-            :
               <Typeahead
                 id="team_members"
                 multiple
@@ -732,7 +721,6 @@ function Deploy({ incident, organization }) {
                   </div>
                 )}
               />
-            }
           </Col>
           <Col className="pr-0" style={{maxWidth:"31px", paddingLeft:"2px"}}>
             <OverlayTrigger
