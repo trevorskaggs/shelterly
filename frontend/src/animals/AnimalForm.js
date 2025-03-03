@@ -591,7 +591,7 @@ const AnimalForm = (props) => {
                   />
                   <Col xs="4" style={{textTransform:'capitalize'}}>
                     <DropDown
-                      label="Species*"
+                      label="Species"
                       id="speciesDropdown"
                       name="species"
                       type="text"
@@ -599,7 +599,7 @@ const AnimalForm = (props) => {
                       ref={speciesRef}
                       options={species.options}
                       value={formikProps.values.species||data.species}
-                      isClearable={false}
+                      isClearable={true}
                       onChange={(instance) => {
                         setPlaceholder("Select...")
                         sizeRef.current.select.clearValue();
@@ -1016,7 +1016,7 @@ const AnimalForm = (props) => {
                   if (formikProps.values.species) {
                     formikProps.submitForm();
                   }
-                  else{
+                  else {
                     props.onSubmit('animals', {}, 'request');
                   }
                   
