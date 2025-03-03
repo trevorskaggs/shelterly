@@ -93,19 +93,21 @@ function Deploy({ incident, organization }) {
 
   // Handle TeamMember selector onChange.
   const handleChange = (values, props) => {
-    let team_name = props.values.team_name;
+    // let team_name = props.values.team_name;
     let id_list = [];
     let selected_list = [];
     values.forEach(value => {
-      console.log(value)
       id_list = [...id_list, ...value.id];
       // Handle if Team.
       if (value.label.split(':').length > 1) {
+        console.log('is team')
+        console.log(value.team_id)
         setSelectedTeam(value.team_id);
         // Parse out the team name.
-        team_name = value.label.split(':')[0];
+        // team_name = value.label.split(':')[0];
         value.label.split(':')[1].split(',').forEach((name, index) =>  {
-          let team_option = {id: [value.id[index]], label:name.replace(' ', ''), is_assigned:value.is_assigned};
+          console.log(value)
+          let team_option = {id: [value.id[index]], team_id:value.team_id, label:name.replace(' ', ''), is_assigned:value.is_assigned};
           // Add to list if not already selected.
           if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
             selected_list.push(team_option);
@@ -114,12 +116,18 @@ function Deploy({ incident, organization }) {
       }
       // Else handle as an individual TeamMember.
       else {
-        selected_list.push({id:value.id, label:value.label, is_assigned:value.is_assigned})
+        setSelectedTeam(null);
+        selected_list.push({id:value.id, team_id:value.team_id, label:value.label, is_assigned:value.is_assigned})
       }
     });
+    console.log('here')
+    console.log(values)
+    console.log(id_list)
     // If deselecting.
     if (selected.length > selected_list.length) {
+      console.log('test')
       let team_options = [];
+      setSelectedTeam(null);
       teamData.teams.filter(team => team.team_object.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
         // Add selectable options back if if not already available.
         if (team.team_object.team_members.length && !teamData.options.some(option => option.label === team.team_object.name + ": " + team.team_object.display_name)) {
@@ -133,9 +141,10 @@ function Deploy({ incident, organization }) {
     else {
       setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
     }
+    console.log(id_list)
     props.setFieldValue('team_members', id_list);
-    props.setFieldValue('team_name', team_name);
-    props.setFieldValue('temp_team_name', team_name);
+    // props.setFieldValue('team_name', team_name);
+    // props.setFieldValue('temp_team_name', team_name);
     setSelected(selected_list);
   }
 
@@ -286,6 +295,7 @@ function Deploy({ incident, organization }) {
             cancelToken: source.token,
           })
           .then(response => {
+            console.log(response.data)
             response.data
               .filter(({ team_object }) => team_object.show === true) 
               .forEach(function({ team_object: team }) {
@@ -334,7 +344,7 @@ function Deploy({ incident, organization }) {
       await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
           status: 'open',
-          when: preplan ? 'today' : 'today',
+          when: 'today',
           landingmap: true
         },
         cancelToken: source.token,
@@ -412,7 +422,7 @@ function Deploy({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [triggerRefresh, preplan, incident]);
+  }, [triggerRefresh, incident]);
 
   return (
     <Formik
@@ -478,7 +488,7 @@ function Deploy({ incident, organization }) {
     {props => (
       <Form>
         <Header>
-          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams "}
+          Deploy Teams&nbsp;
           <OverlayTrigger
             key={"new-data"}
             placement="bottom"
@@ -686,7 +696,7 @@ function Deploy({ incident, organization }) {
         </Row>
         <Row className="ml-0 mr-0 border rounded" style={{marginTop:"-1px"}}>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-1px", marginRight:"1px"}}>
-            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.count === 0}>{props.values.team_members.length > 0 ? "DEPLOY" : selectedCount.count > 0 ? "PREPLAN" : "DEPLOY/PREPLAN"}</Button>
+            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.count === 0}>{selectedTeam ? "ASSIGN" : props.values.team_members.length > 0 ? "DEPLOY" : selectedCount.count > 0 ? "PREPLAN" : "DEPLOY/PREPLAN"}</Button>
           </Col>
           {/* <Col className="pl-0 pr-0 ml-1" style={{maxWidth:"170px"}}>
             <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", marginRight:"-11px", paddingTop:"6px", whiteSpace:"nowrap"}}>
@@ -705,7 +715,7 @@ function Deploy({ incident, organization }) {
               </span>
             </div>
           </Col> */}
-          <Col style={{marginLeft:"2px", paddingLeft:"2px", paddingRight:"4px"}}>
+          <Col style={{marginLeft:"-1px", paddingLeft:"0px", paddingRight:"4px"}}>
               <Typeahead
                 id="team_members"
                 multiple
