@@ -58,7 +58,7 @@ function DispatchSummary({ id, incident, organization }) {
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
   const [error, setError] = useState('');
   const [isPreplanned, setIsPreplanned] = useState(false);
-  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
+  const priorityText = {1:'Urgent', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   const handleTeamNameSubmit = async () => {
     let requestBody;
@@ -387,7 +387,6 @@ function DispatchSummary({ id, incident, organization }) {
             )}
             </div>
             <hr/>
-            {data.team_member_objects && data.team_member_objects.length > 0 ?
             <Scrollbar no_shadow="true" style={{height:"225px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 <ListGroup.Item>
@@ -417,7 +416,7 @@ function DispatchSummary({ id, incident, organization }) {
                     </Col>
                   </Row>
                 </ListGroup.Item>
-                {data.team_member_objects.map(team_member => (
+                {data.team_member_objects && data.team_member_objects.length > 0 && data.team_member_objects.map(team_member => (
                   <ListGroup.Item key={team_member.id}>
                     {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ?
                     <span>&nbsp;({team_member.agency_id})</span> : ""}
@@ -438,7 +437,7 @@ function DispatchSummary({ id, incident, organization }) {
                   </ListGroup.Item>
                 ))}
               </ListGroup>
-            </Scrollbar> : ""}
+            </Scrollbar>
           </Card.Body>
         </Card>
       </Col>
@@ -696,10 +695,10 @@ function DispatchSummary({ id, incident, organization }) {
             </ListGroup>
           </span>
           : ""}
-          {assigned_request.visit_notes.length > 0 ? <hr/> : ""}
-          {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+          {assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note ? assigned_request.visit_note.date_completed : true).length > 0 ? <hr/> : ""}
+          {assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note ? assigned_request.visit_note.date_completed : true).length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
           <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-          {assigned_request.visit_notes.map(visit_note =>
+          {assigned_request.service_request_object.visit_notes.filter(vn => vn.date_completed < assigned_request.visit_note ? assigned_request.visit_note.date_completed : true).map(visit_note =>
             <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
               <Link href={"/" + organization + "/" + incident + "/dispatch/assignment/note/" + visit_note.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{visit_note.date_completed}</Moment></Link>: {visit_note.notes || "No information available."}
             </ListGroup.Item>

@@ -207,7 +207,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
             })
             response.data.sr_updates.push({
               id: assigned_request.service_request_object.id,
-              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + 2)),
+              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + state.incident.default_followup_days)),
               priority: assigned_request.service_request_object.priority,
               date_completed: assigned_request.visit_note && assigned_request.visit_note.date_completed ? assigned_request.visit_note.date_completed : new Date(),
               directions: assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : '',
@@ -535,10 +535,10 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       label="Visit Notes"
                     />
                   </BootstrapForm.Row>
-                  {assigned_request.visit_notes.length > 0 ? <hr/> : <div style={{marginBottom:"7px"}}></div>}
-                  {assigned_request.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
+                  {assigned_request.service_request_object.visit_notes.length > 0 ? <hr/> : <div style={{marginBottom:"7px"}}></div>}
+                  {assigned_request.service_request_object.visit_notes.length > 0 ? <h4 className="mt-2" style={{marginBottom:"-2px"}}>Previous Visit Notes</h4> : ""}
                   <ListGroup variant="flush" style={{marginBottom:"-13px"}}>
-                  {assigned_request.visit_notes.map(visit_note =>
+                  {assigned_request.service_request_object.visit_notes.map(visit_note =>
                     <ListGroup.Item key={visit_note.id} style={{whiteSpace:"pre-line"}}>
                       <Moment format="l">{visit_note.date_completed}</Moment>: {visit_note.notes || "No information available."}
                     </ListGroup.Item>
@@ -630,7 +630,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date().setDate(new Date().getDate() + 2)}
+                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date().setDate(new Date().getDate() + state.incident.default_followup_days)}
                       disabled={data.end_time !== null && assigned_request.followup_date !== assigned_request.service_request_object.followup_date}
                     />
                   </BootstrapForm.Row>

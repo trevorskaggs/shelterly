@@ -42,7 +42,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const openCalendar = () => {
     setTimeout(() => datetime.current.flatpickr.open(), 0);
   }
-  const priorityText = {1:'Highest', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
+  const priorityText = {1:'Urgent', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
   const cancelServiceRequest = () => {
     setIsLoading(true);
