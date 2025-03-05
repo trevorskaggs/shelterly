@@ -13,7 +13,7 @@ function Reports({ incident, organization }) {
   // Initial state.
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report':[], 'sr_followup_date_report':[]});
+  const [data, setData] = useState({'isFetching':true, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report':[], 'sr_followup_date_report':[], 'animal_care_information_report':[]});
   const [selection, setSelection] = useState({value:'daily', label:"Daily Report", key:"daily_report"});
 
   const [storeDate, setStoreDate] = useState('');
@@ -72,6 +72,7 @@ function Reports({ incident, organization }) {
         if (!unmounted) {
           response.data['isFetching'] = false;
           setData(response.data);
+
           // Hide Shelter Report species columns if there are 0 animals.
           let columns=[...shelterColumns];
           columns.forEach(col => {
@@ -88,7 +89,7 @@ function Reports({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report':[], 'sr_followup_date_report':[]});
+          setData({'isFetching':false, 'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report':[], 'sr_followup_date_report':[], 'animal_care_information_report':[]});
           setShowSystemError(true);
         }
       });
@@ -509,6 +510,29 @@ function Reports({ incident, organization }) {
     },
   ];
 
+  const animal_care_columns = [
+    {
+      name: 'Species Category',
+      selector: row => row.species_category
+    },
+    {
+      name: 'Evacuated',
+      selector: row => row.evacuated
+    },
+    {
+      name: 'Sheltered in Place',
+      selector: row => row.sip
+    },
+    {
+      name: 'Sheltered',
+      selector: row => row.sheltered
+    },
+    {
+      name: 'Vet Requests',
+      selector: row => row.vet_requests
+    },
+  ]
+
   const reportChoices = [
     {value:'daily', label:"Daily Report", key:"daily_report"},
     {value:'worked', label:"Service Requests Worked Report", key:"sr_worked_report"},
@@ -518,7 +542,8 @@ function Reports({ incident, organization }) {
     {value:'animal_deceased', label:"Deceased Animal Report", key:"animal_deceased_report"},
     {value:'animal_status', label:"Total Animals By Status Report", key:"animal_status_report"},
     {value:'animal_owner', label:"Total Animals By Ownership Report", key:"animal_owner_report"},
-    {value:'duplicate_sr', label: "Duplicate SR Report", key:"duplicate_sr_report"}
+    {value:'duplicate_sr', label: "Duplicate SR Report", key:"duplicate_sr_report"},
+    {value:'animal_care_information', label: "Animal Care", key:"animal_care_information_report"}
   ]
 
   const customStyles = {
@@ -673,6 +698,16 @@ function Reports({ incident, organization }) {
           pagination
           striped
           noDataComponent={data && data.animal_deceased_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
+      />
+      : selection.value === 'animal_care_information' ?
+      <DataTable
+          columns={animal_care_columns}
+          data={data.animal_care_information_report}
+          actions={actionsMemo}
+          title={selection.label}
+          pagination
+          striped
+          noDataComponent={data && data.animal_care_information_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
       :
       <span/>

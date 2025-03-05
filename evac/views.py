@@ -375,15 +375,21 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     new_status = animal_dict.get('status')
                     if animal.status != new_status:
                         action.send(self.request.user, verb=f'changed animal status to {new_status}', target=animal)
+                    ## Add SIP date if newly SIP'd, otherwise keep previous date.
+                    sip_date = animal.sip_date
+                    if new_status == 'SHELTERED IN PLACE':
+                        sip_date = animal.sip_date if animal.sip_date else datetime.now()
                     new_shelter = animal_dict.get('shelter', None)
                     new_room = animal_dict.get('room', None)
+                    
+                    # Add Intake date if newly Intaken, otherwise keep previous date.
                     intake_date = animal.intake_date
                     if animal.shelter and animal.shelter != new_shelter:
                         action.send(self.request.user, verb='sheltered animal', target=animal)
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
                         intake_date = animal.intake_date if animal.intake_date else datetime.now()
                     # Update shelter, room, and intake_date info.
-                    Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date)
+                    Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date, sip_date=sip_date)
                     # Update animal found location with SR location if blank.
                     if not animal.address:
                         Animal.objects.filter(id=id).update(address=sr.address, city=sr.city, state=sr.state, zip_code=sr.zip_code, latitude=sr.latitude, longitude=sr.longitude)
