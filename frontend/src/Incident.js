@@ -19,7 +19,7 @@ function Incident() {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [incident, setIncident] = useState({id: '', slug: '', name: '', description: '', training:false, caltopo_map_id: ''});
+  const [incident, setIncident] = useState({id: '', slug: '', name: '', description: '', training:false, caltopo_map_id: '', watchduty_map_id: ''});
   const [options, setOptions] = useState([]);
   const [cookies, , removeCookie] = useCookies(['token']);
 
