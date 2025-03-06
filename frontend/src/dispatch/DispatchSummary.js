@@ -412,7 +412,7 @@ function DispatchSummary({ id, incident, organization }) {
                       </OverlayTrigger>
                     </Col>
                     <Col>
-                      <b>Dispatched: </b>{<Moment format="MMM Do YYYY">{data.dispatch_date || new Date()}</Moment>}
+                      <b>Dispatch Date: </b>{<Moment format="MMM Do YYYY">{data.dispatch_date || new Date()}</Moment>}
                     </Col>
                   </Row>
                 </ListGroup.Item>

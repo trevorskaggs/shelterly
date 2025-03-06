@@ -267,7 +267,7 @@ function ServiceRequestForm(props) {
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-              <span hidden={is_first_responder}><BootstrapForm.Label htmlFor="verbal_permission" className="ml-1">Forced Entry Permission</BootstrapForm.Label>
+              <span hidden={is_first_responder}><BootstrapForm.Label htmlFor="verbal_permission" className="ml-1">Verbal Liability Release</BootstrapForm.Label>
               <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
 
               <BootstrapForm.Label htmlFor="key_provided">Key at Staging</BootstrapForm.Label>

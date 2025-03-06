@@ -13,7 +13,7 @@ import {
   faBan, faCar, faClipboardCheck, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faHammerCrash, faHomeHeart, faRightLeft, faPhoneRotary, faMessagePlus } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faCheckCircle, faHomeHeart, faRightLeft, faPhoneRotary, faMessagePlus } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import { Checkbox, TextInput } from '../components/Form';
@@ -267,11 +267,11 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-verbal`}>
-                        Forced entry permission granted
+                        Verbal Liability Release
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faHammerCrash} size="sm" className="fa-move-up" transform={'shrink-2'} />
+                    <FontAwesomeIcon icon={faCheckCircle} size="sm" className="fa-move-up" transform={'shrink-2'} />
                   </OverlayTrigger> : ""
                   }
                   {data.key_provided ?

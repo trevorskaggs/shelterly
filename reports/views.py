@@ -7,6 +7,7 @@ from animals.models import Animal, SpeciesCategory
 from hotline.models import ServiceRequest
 from evac.models import DispatchTeam
 from shelter.models import Shelter
+from vet.models import VetRequest
 import datetime
 from actstream.models import Action
 from django.utils import timezone
@@ -126,6 +127,33 @@ class ReportViewSet(viewsets.ViewSet):
           sr_followup_date_report.insert(0, followup_data)
           followup_end_date -= delta
 
-        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True), 'duplicate_sr_report':duplicate_sr_report, 'sr_followup_date_report':sr_followup_date_report}
+        animal_care_information_report = []
+        animals_species_categories = [
+          ('cat', 'Cats'),
+          ('dog', 'Dogs'),
+          ('avian', 'Avians'),
+          ('reptile/amphibian', 'Reptiles/Amphibians'),
+          ('small_mammals', 'Small Mammals'),
+          ('equine', 'Equines'),
+          ('ruminant', 'Ruminants'),
+          ('camelid', 'Camelids'),
+          ('swine', 'Swine'),
+          ('other', 'Other')
+        ]
+        evac_total, sip_total, shelt_total, vet_request_total = 0, 0, 0, 0
+        for asc, asc_label in animals_species_categories:
+          category_animals = Animal.objects.filter(incident__slug=incident_slug, species__category__name=asc)
+          evacuated = category_animals.filter(request__isnull=False, intake_date__isnull=False).count()
+          evac_total += evacuated
+          sip = category_animals.filter(sip_date__isnull=False).count()
+          sip_total += sip
+          sheltered = category_animals.filter(intake_date__isnull=False).count()
+          shelt_total += sheltered
+          vet_requests = VetRequest.objects.filter(medical_record__patient__in=category_animals).count()
+          vet_request_total += vet_requests
+          animal_care_information_report.append({'species_category': asc_label, 'evacuated': evacuated, 'sip': sip, 'sheltered': sheltered, 'vet_requests': vet_requests})
+        animal_care_information_report.append({'species_category': 'Total', 'evacuated': evac_total, 'sip': sip_total, 'sheltered': shelt_total, 'vet_requests': vet_request_total})
+
+        data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelters, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animals_status, 'animal_owner_report':animals_ownership, 'animal_deceased_report':sorted(animals_deceased, key=itemgetter('date'), reverse=True), 'duplicate_sr_report':duplicate_sr_report, 'sr_followup_date_report':sr_followup_date_report, 'animal_care_information_report': animal_care_information_report}
         return Response(data)
-    return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report': []})
+    return Response({'daily_report':[], 'sr_worked_report':[], 'shelter_report':[], 'shelter_intake_report': [], 'animal_status_report':[], 'animal_owner_report':[], 'animal_deceased_report':[], 'duplicate_sr_report': [],'sr_followup_date_report':[], 'animal_care_information_report':[]})
