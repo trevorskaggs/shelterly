@@ -705,7 +705,6 @@ function Reports({ incident, organization }) {
           data={data.animal_care_information_report}
           actions={actionsMemo}
           title={selection.label}
-          pagination
           striped
           noDataComponent={data && data.animal_care_information_report.length === 0 && !data.isFetching ? <div style={{padding:"24px"}}>There are no records to display</div> : <div style={{padding:"24px"}}>Fetching report data...</div>}
       />
