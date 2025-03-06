@@ -6,7 +6,7 @@ import { Collapse, ListGroup, Nav, OverlayTrigger, Tooltip } from 'react-bootstr
 import { faHome, faBullhorn, faChevronDown, faChevronUp, faPhone, faSearch, faSignOutAlt, faUserCog } from '@fortawesome/free-solid-svg-icons';
 import { faFileChartColumn, faHouseMedical } from '@fortawesome/pro-solid-svg-icons';
 import {
-  faCircleT,
+  faCircleT, faCircleC
 } from '@fortawesome/pro-solid-svg-icons';
 import { logoutUser } from ".././accounts/AccountsUtils";
 import { titleCase } from '.././components/Utils';
@@ -91,6 +91,17 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
           }
         >
           <FontAwesomeIcon icon={faCircleT} className="mr-1" />
+        </OverlayTrigger> : ""}
+        {state.incident.caltopo_map_id ? <OverlayTrigger
+          key={"incident-caltopo"}
+          placement="top"
+          overlay={
+            <Tooltip id={`tooltip-incident-caltopo`}>
+              This incident has a CalTopo map assigned.
+            </Tooltip>
+          }
+        >
+          <FontAwesomeIcon icon={faCircleC} className="mr-1" />
         </OverlayTrigger> : ""}
         <span style={{cursor:"pointer"}} className="incident" onClick={() => navigate('/' + path.split('/')[1])}>{state.incident.name}</span>
         </span>

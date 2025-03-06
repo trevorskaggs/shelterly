@@ -8,7 +8,7 @@ import { Link, navigate } from "raviger";
 import moment from 'moment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCircleT,
+  faCircleT, faCircleC, faCircleW
 } from '@fortawesome/pro-solid-svg-icons';
 import { loadUser } from "./accounts/AccountsUtils";
 import { AuthContext } from "./accounts/AccountsReducer";
@@ -19,15 +19,15 @@ function Incident() {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [incident, setIncident] = useState({id: '', slug: '', name: '', description: '', training:false});
+  const [incident, setIncident] = useState({id: '', slug: '', name: '', description: '', training:false, caltopo_map_id: '', watchduty_map_id: ''});
   const [options, setOptions] = useState([]);
   const [cookies, , removeCookie] = useCookies(['token']);
 
   const path = window.location.pathname;
   const org_slug = path.split('/')[1];
 
-  const handleSubmit = (incident_id, incident_name, incident_description, incident_training) => {
-    dispatch({type: "SET_INCIDENT", data: {id:incident_id, name:incident_name, description:incident_description, training:incident_training}});
+  const handleSubmit = (incident_id, incident_name, incident_description, incident_training, incident_caltopo_map_id, incident_watchduty_map_id) => {
+    dispatch({type: "SET_INCIDENT", data: {id:incident_id, name:incident_name, description:incident_description, training:incident_training, caltopo_map_id: incident_caltopo_map_id, watchduty_map_id: incident_watchduty_map_id}});
     navigate(window.location.pathname + "/" + incident.slug);
   }
 
@@ -81,7 +81,7 @@ function Incident() {
             response.data.forEach(incident => {
               // Build incident option list.
               if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
-                options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, description:incident.description, training:incident.training, end_time:incident.end_time});
+                options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, description:incident.description, training:incident.training, end_time:incident.end_time, caltopo_map_id: incident.caltopo_map_id, watchduty_map_id: incident.watchduty_map_id});
               }
             });
             setOptions(options)
@@ -113,18 +113,20 @@ function Incident() {
     </Row>
     <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{minWidth:"572px"}}>
       <SimpleValue options={options}>
-        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, description:instance.description, training:instance.training})}
+        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, description:instance.description, training:instance.training, caltopo_map_id:instance.caltopo_map_id, watchduty_map_id: instance.watchduty_map_id})}
         getOptionLabel={(props) => {
           return (
             <div tw="flex items-center gap-2">
               {props.training ? <FontAwesomeIcon icon={faCircleT} className="mr-1" /> : ""}
+              {props.caltopo_map_id ? <FontAwesomeIcon icon={faCircleC} className="mr-1" /> : ""}
+              {props.watchduty_map_id ? <FontAwesomeIcon icon={faCircleW} className="mr-1" /> : ""}
               <span>{props.label}</span>
             </div>
           );
         }}
                 />}
       </SimpleValue>
-      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.description, incident.training)} disabled={incident.id ? false : true} block>Select Incident</Button>
+      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.description, incident.training, incident.caltopo_map_id, incident.watchduty_map_id)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
         <Row>
           {state.user.is_superuser || state.user.incident_perms ? <Col style={{marginRight:"-23px"}}>
