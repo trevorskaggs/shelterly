@@ -50,7 +50,7 @@ class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'full_address']
+        fields = ['id', 'id_for_incident', 'address', 'city', 'state', 'full_address']
 
     # Custom field for the full address.
     def get_full_address(self, obj):
