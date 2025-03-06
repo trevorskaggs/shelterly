@@ -16,6 +16,7 @@ import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
+import MaterialRadio from '@material-ui/core/Radio';
 import { useRegisteredRef } from "react-register-nodes";
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
@@ -29,6 +30,9 @@ const useStyles = makeStyles({
     '&:hover': {
       backgroundColor: 'transparent',
     },
+  },
+  radio: {
+    color: 'white',
   },
   icon: {
     borderRadius: 3,
@@ -216,6 +220,29 @@ const Checkbox = (props) => {
       checkedIcon={<span className={clsx(classes.icon, classes.checkedIcon)} />}
       icon={<span className={classes.icon} />}
       inputProps={{ 'aria-label': 'decorative checkbox' }}
+      {...props}
+    />
+    {/* {meta.touched && meta.error ? (
+      <div className="error">{meta.error}</div>
+    ) : null} */}
+    </>
+  );
+};
+
+const Radio = (props) => {
+
+  const classes = useStyles();
+  // const [field, meta] = useField({...props, type: 'checkbox'});
+
+  return (
+    <>
+    {props.label}
+    <MaterialRadio
+    type="checkbox"
+      className={classes.radio}
+      disableRipple
+      color="white"
+      inputProps={{ 'aria-label': 'decorative radio' }}
       {...props}
     />
     {/* {meta.touched && meta.error ? (
@@ -645,7 +672,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={!fadeIn && !existingOwner} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={(!fadeIn && !existingOwner) || props.disabled} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
@@ -723,7 +750,7 @@ const AddressSearch = (props) => {
                   label="Apartment"
                   name="apartment"
                   value={props.formikProps.values.apartment || ''}
-                  disabled={!fadeIn}
+                  disabled={!fadeIn || props.disabled}
                 />
               : ""}
             </Form.Row>
@@ -804,6 +831,7 @@ export {
   DropDown,
   FileUploader,
   ImageUploader,
+  Radio,
   TextInput,
   ToggleSwitch,
 };

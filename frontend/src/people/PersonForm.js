@@ -57,38 +57,6 @@ const PersonForm = (props) => {
   const [existingOwner, setExistingOwner] = useState(props.state.steps.owner.id ? true : false);
   const [existingReporter, setExistingReporter] = useState(props.state.steps.reporter.id ? true : false);
 
-  // Track duplicate owner error.
-  const [error, setError] = useState({show:false, error:[]});
-  const [dupeOwner, setDupeOwner] = useState(false);
-  const handleErrorClose = () => {setError({show:false, error:[]}); setDupeOwner(null);}
-
-  const handleDuplicateOwner = (dupe_id, formikProps) => {
-    if (is_workflow) {
-      setDupeOwner(true);
-      formikProps.submitForm();
-    }
-    else {
-      axios.patch('/people/api/person/' + dupe_id + '/', formikProps.values)
-      .then(response => {
-        // If SR already exists, redirect to the SR details.
-        if (servicerequest_id) {
-          navigate('/' + props.organization + incident + '/hotline/servicerequest/' + response.data.requests.filter(request => request.id === servicerequest_id)[0].id_for_incident);
-        }
-        // If adding from an animal, redirect to the Animal details.
-        else if (animal_id) {
-          navigate('/' + props.organization + incident + '/animals/' + animal_id);
-        }
-        // Otherise redirect to the duplicate Owner details.
-        else {
-          navigate('/' + props.organization + incident + '/people/owner/' + response.data.id);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    }
-  }
-
   // Control Agency display.
   const [showAgency, setShowAgency] = useState(props.state.stepIndex === 1 && is_first_responder);
 
@@ -244,28 +212,26 @@ const PersonForm = (props) => {
             axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, "")  + '&incident=' + props.incident + '&organization=' + props.organization +'&training=' + (state && state.incident.training))
             .then(response => {
               // If we have a dupe owner then use it.
-              if (!existingOwner && dupeOwner) {
-                values['id'] = response.data[0].id;
-              }
-              if (response.data.length > 0 && !existingOwner && !dupeOwner) {
-                // Throw error if duplicate owner found.
-                if (isOwner) {
-                  setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
-                  setSubmitting(false);
-                }
-                // Use existing person object if duplicate reporter found.
-                else {
-                  values['id'] = response.data[0].id;
-                }
-              }
+              // if (!existingOwner && dupeOwner) {
+              //   values['id'] = response.data[0].id;
+              // }
+              // if (response.data.length > 0 && !existingOwner && !dupeOwner) {
+              //   // Throw error if duplicate owner found.
+              //   if (isOwner) {
+              //     setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
+              //     setSubmitting(false);
+              //   }
+              //   // Use existing person object if duplicate reporter found.
+              //   else {
+              //     values['id'] = response.data[0].id;
+              //   }
+              // }
               // Only continue on from owner if there are no errors.
-              else if (isOwner) {
-                setDupeOwner(false);
+              if (isOwner) {
                 props.onSubmit('owner', values, 'animals');
               }
               // Always continue on if reporter.
-              if (!isOwner) {
-                setDupeOwner(false);
+              else {
                 if (skipOwner) {
                   props.onSubmit('reporter', values, 'animals');
                 }
@@ -322,12 +288,7 @@ const PersonForm = (props) => {
               }
             })
             .catch(error => {
-              if (error.response.data && error.response.data[0].includes('duplicate owner')) {
-                setError({show:true, error:error.response.data});
-              }
-              else {
-                setShowSystemError(true);
-              }
+              setShowSystemError(true);
               setSubmitting(false);
             });
           }
@@ -474,22 +435,6 @@ const PersonForm = (props) => {
                   Next Step
                 </ButtonSpinner> : ""}
             </ButtonGroup>
-            <Modal show={error.show} onHide={handleErrorClose}>
-              <Modal.Header closeButton>
-                <Modal.Title>Duplicate Owner Found</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <div>
-                  <span>This person cannot be created because</span> {error && error.error[0]}
-                  <div className="mt-1 mb-1">Click <Link target="_blank" rel="noreferrer" href={"/" + props.organization + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
-                  <div>Would you like to use the existing owner instead?</div>
-                </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps)}}>Yes</Button>
-                <Button variant="secondary" onClick={handleErrorClose}>Close</Button>
-              </Modal.Footer>
-            </Modal>
           </Card>
         )}
       </Formik>

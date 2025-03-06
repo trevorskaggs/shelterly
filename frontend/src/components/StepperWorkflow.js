@@ -206,22 +206,8 @@ function StepperWorkflow({ incident, organization }) {
 
   function handleStepSubmit(currentStep, data, nextStep) {
 
-    // Only count contacts the first time.
-    if ((currentStep === 'reporter' && state.steps.reporter.first_name === '') || (currentStep === 'owner' && state.steps.owner.first_name === '')) {
-      setContactCount((count) => count + 1);
-    }
-
-    // Populate owner and skip contact step if using matching owner.
-    if (currentStep === 'initial' && nextStep === 'animals') {
-      setContactCount((count) => count + 1);
-      setState((prevState) => ({
-        ...prevState,
-        stepIndex: prevState.stepIndex + 2,
-        steps: { ...prevState.steps, ['owner']:data, ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
-      }))
-    }
-    else if (currentStep === 'initial' && nextStep === 'reporter') {
-      setContactCount((count) => count + 1);
+    // Populate owner if selected.
+    if (currentStep === 'initial' && nextStep === 'reporter') {
       setState((prevState) => ({
         ...prevState,
         stepIndex: prevState.stepIndex + 1,
@@ -276,9 +262,12 @@ function StepperWorkflow({ incident, organization }) {
       }))
     }
 
+    // Calculate number of contacts.
+    setContactCount((((currentStep === 'owner' && data.first_name) || state.steps.owner.first_name) ? 1 : 0) + (((currentStep === 'reporter' && data.first_name) || state.steps.reporter.first_name) ? 1 : 0));
+
     // Only bump up the major active step when moving to a new type of object creation.
     if ((currentStep === 'initial') || (currentStep !== 'animals' && nextStep === 'animals') || (currentStep === 'animals' && nextStep === 'request')){
-      setActiveStep((prevActiveStep) => prevActiveStep + (currentStep === 'initial' && nextStep === 'animals' ? 2 : 1));
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
     }
   }
 

@@ -6,12 +6,13 @@ import { Form as BootstrapForm, Button, ButtonGroup, Card, Col, Modal, OverlayTr
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import Scrollbar from '../components/Scrollbars';
-import { AddressSearch, Checkbox, TextInput } from '../components/Form';
+import { AddressSearch, Checkbox, Radio, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowAltCircleLeft, faUserAlt, faUserAltSlash } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
+import { capitalize } from '../utils/formatString';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
@@ -29,6 +30,7 @@ const AddressForm = (props) => {
 
   const [data, setData] = useState(props.state.steps.initial);
   const [existingOwner, setExistingOwner] = useState({id:''});
+  const [existingRequest, setExistingRequest] = useState({id:''});
   const [existingOwners, setExistingOwners] = useState([]);
   const [existingRequests, setExistingRequests] = useState([]);
 
@@ -77,6 +79,10 @@ const AddressForm = (props) => {
     };
   }, []);
 
+  useEffect(() => {
+    setExistingOwner(props.state.steps.initial.id ? props.state.steps.initial : {id:''})
+  }, []);
+
   return (
     <>
       <Formik
@@ -114,51 +120,83 @@ const AddressForm = (props) => {
               <BootstrapForm noValidate>
                 <AddressSearch formikProps={formikProps} initialData={props.state.steps.initial} label="Search for Service Request Address" incident={props.incident} show_apt={true} error="Address was not selected." />
               </BootstrapForm>
-              <h4>Matching Service Requests</h4>
+              <h4>Use Matching Service Request</h4>
               <Col xs={9} className="border rounded" style={{marginLeft:"1px", height:existingRequests.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "59px" : "169px", overflowY:"auto", paddingRight:"-1px"}}>
                 <Scrollbar no_shadow="true" style={{height:existingRequests.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "57px" : "167px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   {existingRequests.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).map(service_request => (
-                    <span key={service_request.id}>
-                    <div className="mt-1 mb-1">
-                      <div className="card-header rounded pl-2">
-                        <OverlayTrigger
-                          key={"request-details"}
-                          placement="top"
-                          overlay={
-                            <Tooltip id={`tooltip-request-details`}>
-                              Service request details
-                            </Tooltip>
-                          }
-                        >
-                          <Link href={"/" + props.organization +"/" + props.incident + "/hotline/servicerequest/" + service_request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}><FontAwesomeIcon icon={faDotCircle} className="mr-2" size="lg" inverse />SR#{service_request.id_for_incident} - {service_request.full_address}</Link>
-                        </OverlayTrigger>
+                    <div key={service_request.id} className="mt-1 mb-1" style={{height:"50px"}}>
+                      <div className="card-header rounded" style={{paddingLeft:"12px", height:"50px"}}>
+                        <Radio
+                          id={String(service_request.id)}
+                          name={String(service_request.id)}
+                          checked={existingRequest.id === service_request.id}
+                          style={{
+                            transform: "scale(1.25)",
+                            marginLeft: "-14px",
+                            marginTop: "-7px",
+                            marginBottom: "-5px"
+                          }}
+                          onChange={(e) => {
+                            setExistingRequest(existingRequest.id ? {id:''} : service_request);
+                            setExistingOwner({id:''})}}
+                        />
+                        SR#{service_request.id_for_incident} - {capitalize(service_request.status)} - {service_request.full_address}
+                        {service_request.owner_names.length === 0 ?
+                          <OverlayTrigger
+                            key={"stray"}
+                            placement="top"
+                            overlay={
+                              <Tooltip id={`tooltip-stray`}>
+                                Animal is stray
+                              </Tooltip>
+                            }
+                          >
+                            <FontAwesomeIcon icon={faUserAltSlash} className="ml-1 mr-1" size="sm" />
+                          </OverlayTrigger> :
+                          <OverlayTrigger
+                            key={"owners"}
+                            placement="top"
+                            overlay={
+                              <Tooltip id={`tooltip-owners`}>
+                                Owners:
+                                {service_request.owner_names.map(owner_name => (
+                                  <div key={owner_name}>{owner_name}</div>
+                                ))}
+                              </Tooltip>
+                            }
+                          >
+                            <FontAwesomeIcon icon={faUserAlt} className="ml-1 mr-1" size="sm" />
+                          </OverlayTrigger>
+                        }
+                        ({service_request.animal_count} Animal{service_request.animal_count === 1 ? '' : 's'})
                       </div>
                     </div>
-                    </span>
                   ))}
                   {!formikProps.values.address || existingRequests.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? <div className="card-header mt-1 mb-1 rounded">
                     No matching Service Requests found.
                   </div> : ""}
                 </Scrollbar>
               </Col>
-              <h4 className="mt-3">Matching Owners</h4>
+              <h4 className="mt-3">Use Matching Owner</h4>
               <Col xs={9} className="border rounded" style={{marginLeft:"1px", height:existingOwners.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "59px" : "169px", overflowY:"auto", paddingRight:"-1px"}}>
                 <Scrollbar no_shadow="true" style={{height:existingOwners.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "57px" : "167px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   {existingOwners.filter(owner => formikProps.values.address && owner.address === formikProps.values.address && owner.city === formikProps.values.city && owner.state === formikProps.values.state).map(owner => (
                     <span key={owner.id}>
                     <div className="mt-1 mb-1">
-                      <div className="card-header rounded pl-3">
-                        <Checkbox
+                      <div className="card-header rounded" style={{paddingLeft:"12px", height:"50px"}}>
+                        <Radio
                           id={String(owner.id)}
                           name={String(owner.id)}
-                          checked={existingOwner.id === owner.id}
+                          checked={Number(existingOwner.id) === owner.id}
                           style={{
                             transform: "scale(1.25)",
                             marginLeft: "-14px",
-                            marginTop: "-5px",
+                            marginTop: "-7px",
                             marginBottom: "-5px"
                           }}
-                          onChange={() => setExistingOwner(owner)}
+                          onChange={() => {
+                            setExistingOwner(existingOwner.id ? {id:''} : owner);
+                            setExistingRequest({id:''})}}
                         />
                         <Link href={"/" + props.organization +"/" + props.incident + "/hotline/servicerequest/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name} - {owner.display_phone}</Link>
                       </div>
@@ -172,18 +210,9 @@ const AddressForm = (props) => {
               </Col>
             </Card.Body>
             <ButtonGroup size="lg" >
-              {/* form save buttons */}
-              {/* {!is_first_responder && !is_workflow ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !skipOwner} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm() }}>
-                  {!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}
-                </ButtonSpinner> : ""}
-              {is_workflow && !isOwner ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting && !skipOwner} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>
-                  {props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}
-                </ButtonSpinner> : ""} */}
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting} disabled={!formikProps.values.address} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { formikProps.submitForm(); }}>
-                  Next Step
-                </ButtonSpinner>
+              <ButtonSpinner isSubmitting={formikProps.isSubmitting} disabled={!formikProps.values.address} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { formikProps.submitForm(); }}>
+                Next Step
+              </ButtonSpinner>
             </ButtonGroup>
           </Card>
         )}
