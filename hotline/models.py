@@ -7,6 +7,7 @@ from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
 from django.contrib.sites.models import Site
 from django.db.models.signals import post_save
+from django.db.models import Sum
 from django.contrib.auth import get_user_model
 from accounts.models import ShelterlyUser
 from location.models import Location
@@ -110,17 +111,27 @@ class ServiceRequest(Location):
         return title
 
     def get_feature_description(self):
+        from animals.models import Species
         species_counts = {'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}}
-        for animal in self.animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']):
-            species_counts[animal.status][animal.species.name] = species_counts[animal.status].get(animal.species.name, 0) + 1
+        all_species = self.animal_set.all().values_list('species__name', flat=True)
+        for status in species_counts.keys():
+            for species in all_species:
+                a_count = self.animal_set.filter(species__name=species, status=status).aggregate(Sum('animal_count'))['animal_count__sum']
+                if a_count:
+                    species_counts[status][species] = a_count
         description = self.location_output.rsplit(',', 1)[0]  + " ("
-        count = 0
-        for status in [('Reported','REPORTED'), ('Reported (Evac Requested)','REPORTED (EVAC REQUESTED)'), ('Reported (SIP Requested)','REPORTED (SIP REQUESTED)'), ('SIP','SHELTERED IN PLACE'), ('UTL', 'UNABLE TO LOCATE')]:
-            if len(species_counts[status[1]].items()) > 0:
-                if count > 0:
-                    description += '; ' 
-                count+= 1
-                description += status[0] + ': ' + ', '.join(f'{value} {key}' + ('s' if value != 1 and animal.species.name != 'sheep' and animal.species.name != 'cattle' else '') for key, value in species_counts[status[1]].items()) #123 Ranch Rd, Napa CA (1 cat, 2 dogs)
+        status_description = ''
+        for status, status_key in [('Reported','REPORTED'), ('Reported (Evac Requested)','REPORTED (EVAC REQUESTED)'), ('Reported (SIP Requested)','REPORTED (SIP REQUESTED)'), ('SIP','SHELTERED IN PLACE'), ('UTL', 'UNABLE TO LOCATE')]:
+            species_string = ''
+            status_species = species_counts[status_key].keys()
+            if status_species:
+                for species in status_species:
+                    species_count = species_counts[status_key][species]
+                    sp = Species.objects.get(name=species)
+                    sp_name = sp.name if species_count <= 1 else sp.plural_name
+                    species_string += '%s %s' % (species_count, sp_name)
+                status_description += '%s: %s, ' % (status, species_string)
+        description += status_description[:-2]
         description += ")"
         description += "\nLast Updated: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         return description

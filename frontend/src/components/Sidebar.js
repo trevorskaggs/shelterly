@@ -97,7 +97,7 @@ const Menu = ({ state, dispatch, removeCookie, ...props }) => {
           placement="top"
           overlay={
             <Tooltip id={`tooltip-incident-caltopo`}>
-              This incident has a CalTopo map assigned.
+              This incident has a CalTopo map ({state.incident.caltopo_map_id}) assigned.
             </Tooltip>
           }
         >
