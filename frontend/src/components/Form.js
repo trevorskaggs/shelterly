@@ -69,7 +69,13 @@ const useStyles = makeStyles({
 });
 
 const DateRangePicker = React.forwardRef((props, ref) => {
-  const options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
+  let options = {};
+  if (props["data-enable-time"] === false) {
+    options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
+  }
+  else {
+    options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0, altFormat: "F j, Y H:i", dateFormat: "Y-m-d H:i"}
+  }
   const styles = {
     ...props.style,
     display: 'flex'
@@ -134,7 +140,7 @@ const DateTimePicker = ({ label, xs, clearable, ...props }) => {
   // Flatpickr options
   let options = {};
   if (props["data-enable-time"] === false) {
-    options = {allowInput:true, altInput: true, altFormat: "F j, Y", dateFormat: "Y-m-d H:i"}
+    options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
   }
   else {
     options = {allowInput:true, altInput: true, altFormat: "F j, Y H:i", dateFormat: "Y-m-d H:i"}
