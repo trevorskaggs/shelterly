@@ -375,7 +375,7 @@ function ServiceRequestSearch({ incident, organization }) {
                         id={`start_date_range_picker`}
                         placeholder={"Opened Start Date"}
                         mode="single"
-                        data-enable-time={true}
+                        data-enable-time={false}
                         clearable={"true"}
                         hour={0}
                         style={{height:"36px"}}
@@ -395,7 +395,7 @@ function ServiceRequestSearch({ incident, organization }) {
                         id={`end_date_range_picker`}
                         placeholder={"Opened End Date"}
                         mode="single"
-                        data-enable-time={true}
+                        data-enable-time={false}
                         clearable={"true"}
                         hour={23}
                         minute={59}

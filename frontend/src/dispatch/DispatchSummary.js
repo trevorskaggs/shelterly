@@ -81,7 +81,7 @@ function DispatchSummary({ id, incident, organization }) {
     setIsLoading(true);
     await axios.patch('/evac/api/dispatchteam/' + data.team + '/', requestBody)
     .then(response => {
-      setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
+      setData(prevState => ({ ...prevState, "team_name":teamName }));
       handleTeamNameClose();
       setError('');
     })
@@ -718,7 +718,7 @@ function DispatchSummary({ id, incident, organization }) {
           id="team_name"
           name="team_name"
           type="text"
-          onChange={(event) => {setTeamName(event.target.value)}}
+          onChange={(event) => {setTeamName(event.target.value);}}
           value={teamName}
           disabled={defaultTeamName}
         />
