@@ -76,7 +76,7 @@ const ResetPassword = () => {
               size="lg"
               formgroupclasses="mt-3 mb-0"
               togglePasswordVisibility={togglePasswordVisibility}
-              showPassword={showPassword}
+              showpassword={showPassword.toString()}
             />
             <TextInput
               type={showSecondPassword ? "text" : "password"}
@@ -86,7 +86,7 @@ const ResetPassword = () => {
               size="lg"
               formgroupclasses="mt-3 mb-4"
               togglePasswordVisibility={toggleSecondPasswordVisibility}
-              showPassword={showSecondPassword}
+              showpassword={showSecondPassword.toString()}
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" disabled={isSubmitting} block>Save New Password</Button>
