@@ -46,11 +46,16 @@ class VisitNoteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
+    from people.serializers import SimplePersonSerializer
+
     full_address = serializers.SerializerMethodField()
+    animal_count = serializers.IntegerField(read_only=True)
+    owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
+    owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'address', 'city', 'state', 'full_address']
+        fields = ['id', 'id_for_incident', 'address', 'city', 'state', 'full_address', 'status', 'owner_names', 'owner_objects', 'animal_count']
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -156,8 +161,8 @@ class MapServiceRequestSerializer(BarebonesServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'pending', 'owner_objects',
-        'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'pending', 'owner_objects', 'owner_names',
+        'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'animal_count', 'status', 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
 
 class SimpleServiceRequestSerializer(MapServiceRequestSerializer):
@@ -180,8 +185,8 @@ class SimpleServiceRequestSerializer(MapServiceRequestSerializer):
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'evacuation_assignments', 'pending',
-        'images', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'status', 'reported_animals', 'reported_evac', 'reporter_object', 'owner_objects', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
+        fields = ['id', 'id_for_incident', 'timestamp', 'latitude', 'longitude', 'full_address', 'followup_date', 'owners', 'owner_names', 'reporter', 'address', 'city', 'state', 'zip_code', 'apartment', 'directions', 'priority', 'evacuation_assignments', 'pending',
+        'images', 'key_provided', 'verbal_permission', 'injured', 'accessible', 'turn_around', 'animals', 'animal_count', 'status', 'reported_animals', 'reported_evac', 'reporter_object', 'owner_objects', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required']
 
     def get_evacuation_assignments(self, obj):
         from evac.serializers import SimpleEvacAssignmentSerializer
@@ -235,8 +240,8 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'id_for_incident', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
-        'injured', 'accessible', 'turn_around', 'animals', 'reporter', 'reported_animals', 'reported_evac', 'sheltered_in_place', 'reported_sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_objects', 'reporter_object', 'assigned_requests', 'notes']
+        'injured', 'accessible', 'turn_around', 'animals', 'animal_count', 'reporter', 'reported_animals', 'reported_evac', 'sheltered_in_place', 'reported_sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_names', 'owner_objects', 'reporter_object', 'assigned_requests', 'notes']
 
     # Custom field for ordering animals.
     def get_animals(self, obj):

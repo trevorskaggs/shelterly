@@ -30,9 +30,10 @@ const useStyles = makeStyles({
     '&:hover': {
       backgroundColor: 'transparent',
     },
+    color: 'white',
   },
   radio: {
-    color: 'white',
+    color: 'inherit',
   },
   icon: {
     borderRadius: 3,

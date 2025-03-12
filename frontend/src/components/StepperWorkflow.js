@@ -124,6 +124,7 @@ export const initialWorkflowData = {
       incident_slug: '',
       change_reason: '',},
     owner: {
+      id: '',
       first_name: '',
       last_name: '',
       phone: '',
@@ -143,6 +144,7 @@ export const initialWorkflowData = {
       change_reason: '',},
     animals: [],
     request: {
+      id: '',
       address: '',
       apartment: '',
       city: '',
@@ -195,19 +197,38 @@ function StepperWorkflow({ incident, organization }) {
     if (nextStep === 'animals' && currentStep === 'animals') {
       track_index = state.animalIndex -1;
     }
-    setState((prevState) => ({
-      ...prevState,
-      hasOwner: nextStep === 'owner',
-      stepIndex: prevState.stepIndex - 1,
-      animalIndex: track_index,
-      steps: { ...prevState.steps, 'request':data ? data : prevState.steps.request } // Only set SR data if present.
-    }))
+    // Reset state if going back to address lookup.
+    if (nextStep === 'initial') {
+      setState(initialWorkflowData);
+    }
+    else {
+      setState((prevState) => ({
+        ...prevState,
+        hasOwner: nextStep === 'owner',
+        stepIndex: prevState.stepIndex - 1,
+        animalIndex: track_index,
+        steps: { ...prevState.steps, 'request':data ? data : prevState.steps.request } // Only set SR data if present.
+      }))
+    }
   };
 
-  function handleStepSubmit(currentStep, data, nextStep) {
+  function handleStepSubmit(currentStep, data, nextStep, allData={}) {
 
-    // Populate owner if selected.
-    if (currentStep === 'initial' && nextStep === 'reporter') {
+    // Calculate number of contacts.
+    console.log(allData)
+    setContactCount((((allData.existing_owner_id) || (currentStep === 'owner' && data.first_name) || (currentStep !== 'initial' && state.steps.owner.first_name)) ? 1 : 0) + (((currentStep === 'reporter' && data.first_name) || state.steps.reporter.first_name) ? 1 : 0));
+
+    // Populate data if existing SR was picked.
+    if (currentStep === 'initial' && Object.keys(allData).length) {
+      setState((prevState) => ({
+        ...prevState,
+        stepIndex: prevState.stepIndex + 1,
+        animalCount: allData.animal_count,
+        steps: { ...prevState.steps, ['owner']:allData.existing_owner_id ? allData.owner_objects.filter(owner => owner.id === allData.existing_owner_id)[0] : {id:''}, ['animals']:allData.animals, ['request']:allData, ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
+      }))
+    }
+    // Otherwise proceed without SR data.
+    else if (currentStep === 'initial') {
       setState((prevState) => ({
         ...prevState,
         stepIndex: prevState.stepIndex + 1,
@@ -224,7 +245,13 @@ function StepperWorkflow({ incident, organization }) {
       // If we're not on the last animal, update the current animal based on the index.
       if (state.animalIndex !== state.steps.animals.length) {
         const animalList = [...state.steps.animals];
-        let animal_count = animalList[state.animalIndex].get('animal_count');
+        let animal_count = 0;
+        if (animalList[state.animalIndex] instanceof FormData) {
+          animal_count = animalList[state.animalIndex].get('animal_count');
+        }
+        else {
+          animal_count = animalList[state.animalIndex].animal_count
+        }
 
         animalList[state.animalIndex] = data;
         setState((prevState) => ({
@@ -261,9 +288,6 @@ function StepperWorkflow({ incident, organization }) {
         steps: { ...prevState.steps, [currentStep]:data }
       }))
     }
-
-    // Calculate number of contacts.
-    setContactCount((((currentStep === 'owner' && data.first_name) || state.steps.owner.first_name) ? 1 : 0) + (((currentStep === 'reporter' && data.first_name) || state.steps.reporter.first_name) ? 1 : 0));
 
     // Only bump up the major active step when moving to a new type of object creation.
     if ((currentStep === 'initial') || (currentStep !== 'animals' && nextStep === 'animals') || (currentStep === 'animals' && nextStep === 'request')){

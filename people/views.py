@@ -76,9 +76,9 @@ class PersonViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if serializer.is_valid():
-            # Check for duplicate owners.
-            for owner in Person.objects.filter(first_name=serializer.validated_data['first_name'], last_name=serializer.validated_data['last_name'], phone=serializer.validated_data['phone'], incident__slug=self.request.data.get('incident_slug')):
-                raise serializers.ValidationError(['a duplicate owner with the same name and phone number already exists.', owner.id])
+            # Check for duplicate owners. Obsolete.
+            # for owner in Person.objects.filter(first_name=serializer.validated_data['first_name'], last_name=serializer.validated_data['last_name'], phone=serializer.validated_data['phone'], incident__slug=self.request.data.get('incident_slug')):
+            #     raise serializers.ValidationError(['a duplicate owner with the same name and phone number already exists.', owner.id])
             # Clean phone fields.
             serializer.validated_data['phone'] = ''.join(char for char in serializer.validated_data.get('phone', '') if char.isdigit())
             serializer.validated_data['alt_phone'] = ''.join(char for char in serializer.validated_data.get('alt_phone', '') if char.isdigit())

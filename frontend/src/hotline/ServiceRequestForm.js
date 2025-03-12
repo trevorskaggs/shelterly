@@ -30,11 +30,6 @@ function ServiceRequestForm(props) {
   // Determine if this is from a first responder when creating a SR.
   var is_first_responder = window.location.pathname.includes("first_responder");
 
-  const [skip, setSkip] = useState(false);
-  const [SRs, setSRs] = useState([]);
-  const [dupeSRs, setDupeSRs] = useState([]);
-  const handleClose = () => setDupeSRs([]);
-
   // Check user navigating away when in workflow.
   const [redirectCheck, setRedirectCheck] = useState(is_workflow);
   useNavigationPrompt(redirectCheck, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
@@ -87,17 +82,6 @@ function ServiceRequestForm(props) {
       fetchServiceRequestData();
     }
 
-    axios.get('/hotline/api/servicerequests/?incident=' + incident + '&map=true')
-    .then(response => {
-      if (!unmounted) {
-        setSRs(response.data);
-      }
-    })
-    .catch(error => {
-      if (!unmounted) {
-        setShowSystemError(true);
-      }
-    });
     // Cleanup.
     return () => {
       unmounted = true;
@@ -135,66 +119,88 @@ function ServiceRequestForm(props) {
       onSubmit={ async (values, { setSubmitting }) => {
         setIsButtonSubmitting(true);
         if (is_workflow) {
-          if (SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)).length > 0 && !skip) {
-            setDupeSRs(SRs.filter(sr => (sr.address === values.address && sr.city === values.city && sr.state === values.state)));
-            setIsButtonSubmitting(false);
+          setRedirectCheck(false);
+          // Create Reporter
+          let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
+          if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
+            reporterResponse = await Promise.all([
+              axios.post('/people/api/person/', props.state.steps.reporter)
+            ]);
+          }
+          else if (props.state.steps.reporter.first_name && props.state.steps.reporter.id) {
+            reporterResponse = await Promise.all([
+              axios.put('/people/api/person/' + props.state.steps.reporter.id + '/', props.state.steps.reporter)
+            ]);
+          }
+          // Create Owner
+          let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
+          if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
+            ownerResponse = await Promise.all([
+              axios.post('/people/api/person/', props.state.steps.owner)
+            ]);
+          }
+          else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
+            ownerResponse = await Promise.all([
+              axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
+            ]);
+          }
+          values['reporter'] = reporterResponse[0].data.id
+          if (ownerResponse[0].data.id) {
+            values['owners'] = [ownerResponse[0].data.id]
+          }
+
+          // Set status to open if it was closed.
+          values['status'] = props.state.steps.request.status === 'closed' ? 'open' : props.state.steps.request.status;
+          let requestResponse = [{data:{id:props.state.steps.request.id}}];
+          // Update Service Request if it already exists.
+          if (props.state.steps.request.id) {
+            requestResponse = await Promise.all([
+              axios.put('/hotline/api/servicerequests/' + props.state.steps.request.id + '/', values)
+              .catch(error => {
+                setIsButtonSubmitting(false);
+                setRedirectCheck(true);
+                setShowSystemError(true);
+              })
+            ])
           }
           else {
-            setRedirectCheck(false);
-            // Create Reporter
-            let reporterResponse = [{data:{id:props.state.steps.reporter.id}}];
-            if (props.state.steps.reporter.first_name && !props.state.steps.reporter.id) {
-              reporterResponse = await Promise.all([
-                axios.post('/people/api/person/', props.state.steps.reporter)
-              ]);
-            }
-            else if (props.state.steps.reporter.first_name && props.state.steps.reporter.id) {
-              reporterResponse = await Promise.all([
-                axios.put('/people/api/person/' + props.state.steps.reporter.id + '/', props.state.steps.reporter)
-              ]);
-            }
-            // Create Owner
-            let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
-            if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
-              ownerResponse = await Promise.all([
-                axios.post('/people/api/person/', props.state.steps.owner)
-              ]);
-            }
-            else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
-              ownerResponse = await Promise.all([
-                axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
-              ]);
-            }
             // Create Service Request
-            values['reporter'] = reporterResponse[0].data.id
-            if (ownerResponse[0].data.id) {
-              values['owners'] = [ownerResponse[0].data.id]
-            }
-            axios.post('/hotline/api/servicerequests/?incident=' + incident, values)
-            .then(response => {
-              // Create Animals
-              let promises = props.state.steps.animals.map(async (animal) => {
-                // Add owner and reporter to animal data.
-                if (reporterResponse[0].data.id) {
-                  animal.append('reporter', reporterResponse[0].data.id);
-                }
-                if (ownerResponse[0].data.id) {
-                  animal.append('new_owner', ownerResponse[0].data.id);
-                }
-                animal.append('request', response.data.id);
-                return axios.post('/animals/api/animal/', animal)
-              });
-              Promise.all(promises)
-              .then((results) => {
-                navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id_for_incident);
+            requestResponse = await Promise.all([
+              axios.post('/hotline/api/servicerequests/?incident=' + incident, values)
+              .catch(error => {
+                setIsButtonSubmitting(false);
+                setRedirectCheck(true);
+                setShowSystemError(true);
               })
-            })
-            .catch(error => {
-              setIsButtonSubmitting(false);
-              setRedirectCheck(true);
-              setShowSystemError(true);
-            });
+            ])
           }
+          // Create Animals
+          let promises = props.state.steps.animals.map(async (animal) => {
+            // Add owner and reporter to animal data.
+            if (reporterResponse[0].data.id) {
+              animal.append('reporter', reporterResponse[0].data.id);
+            }
+            if (ownerResponse[0].data.id) {
+              animal.append('new_owner', ownerResponse[0].data.id);
+            }
+            animal.append('request', requestResponse[0].data.id);
+            let animal_id = animal instanceof FormData ? animal.get('id') : animal.id
+            if (animal_id) {
+              return axios.put('/animals/api/animal/' + animal_id + '/', animal)
+            }
+            else {
+              return axios.post('/animals/api/animal/', animal)
+            }
+          });
+          Promise.all(promises)
+          .then((results) => {
+            navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + requestResponse[0].data.id_for_incident);
+          })
+          .catch(error => {
+            setIsButtonSubmitting(false);
+            setRedirectCheck(true);
+            setShowSystemError(true);
+          });
         }
         else if (id) {
           axios.put('/hotline/api/servicerequests/' + data.id + '/?incident=' + incident, values)
@@ -290,24 +296,6 @@ function ServiceRequestForm(props) {
           }
         </ButtonGroup>
       </Card>
-      <Modal show={dupeSRs.length > 0} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Duplicate Service Request Address Found</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>
-            The following Service Requests have a duplicate address:
-            {dupeSRs.map(sr =>
-              <li key={sr.id} style={{marginLeft:"10px"}}><span style={{position:"relative", left:"-5px"}}>SR#{sr.id_for_incident} - Click <Link target="_blank" href={"/" + props.organization + "/" + incident + "/hotline/servicerequest/" + sr.id_for_incident} style={{color:"#8d99d4"}}>here</Link> to view this Service Request.</span></li>
-            )}
-            <br/>Proceed with creating a new Service Request?
-          </p>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={() => {setSkip(true);formikProps.submitForm()}}>Yes</Button>
-          <Button variant="secondary" onClick={handleClose}>Close</Button>
-        </Modal.Footer>
-      </Modal>
       </>
       )}
     </Formik>

@@ -40,7 +40,7 @@ const AddressForm = (props) => {
     let source = axios.CancelToken.source();
 
     const fetchExistingServiceRequestData = async () => {
-      axios.get('/hotline/api/servicerequests/?incident=' + props.incident + '&light=true')
+      axios.get('/hotline/api/servicerequests/?incident=' + props.incident + '&exclude_status=canceled&light=true')
       .then(existingRequestsResponse => {
         if (!unmounted) {
           setExistingRequests(existingRequestsResponse.data);
@@ -79,9 +79,10 @@ const AddressForm = (props) => {
     };
   }, []);
 
-  useEffect(() => {
-    setExistingOwner(props.state.steps.initial.id ? props.state.steps.initial : {id:''})
-  }, []);
+  // useEffect(() => {
+  //   setExistingOwner(props.state.steps.owner.id ? props.state.steps.owner : {id:''});
+  //   setExistingRequest(props.state.steps.request.id ? props.state.steps.request : {id:''})
+  // }, []);
 
   return (
     <>
@@ -102,11 +103,19 @@ const AddressForm = (props) => {
             .nullable(),
         })}
         onSubmit={(values, { setSubmitting, resetForm }) => {
-          if (existingOwner.id && is_owner) {
-            props.onSubmit('initial', existingOwner, 'animals');
+          if (existingRequest.id) {
+            axios.get('/hotline/api/incident/' + state.incident.id + '/servicerequests/' + existingRequest.id_for_incident + '/', {
+            })
+            .then(response => {
+              response.data['existing_owner_id'] = existingOwner.id ? existingOwner.id : null;
+              props.onSubmit('initial', values, is_owner ? 'owner' : 'reporter', response.data);
+            })
+            .catch(error => {
+              setShowSystemError(true);
+            });
           }
-          else if (existingOwner.id && !is_owner) {
-            props.onSubmit('initial', existingOwner, 'reporter');
+          else if (existingOwner.id) {
+            props.onSubmit('initial', existingOwner, is_owner ? 'owner' : 'reporter');
           }
           else {
             props.onSubmit('initial', values, is_owner ? 'owner' : 'reporter');
@@ -137,8 +146,9 @@ const AddressForm = (props) => {
                             marginBottom: "-5px"
                           }}
                           onChange={(e) => {
-                            setExistingRequest(existingRequest.id ? {id:''} : service_request);
-                            setExistingOwner({id:''})}}
+                            setExistingRequest(existingRequest.id === service_request.id ? {id:''} : service_request);
+                            setExistingOwner({id:''});
+                          }}
                         />
                         SR#{service_request.id_for_incident} - {capitalize(service_request.status)} - {service_request.full_address}
                         {service_request.owner_names.length === 0 ?
@@ -177,7 +187,37 @@ const AddressForm = (props) => {
                   </div> : ""}
                 </Scrollbar>
               </Col>
-              <h4 className="mt-3">Use Matching Owner</h4>
+              <h4 className="mt-3">Use {existingRequest.id ? "Existing Service Request" : "Matching"} Owner</h4>
+              {existingRequest.id ?
+              <Col xs={9} className="border rounded" style={{marginLeft:"1px", height:existingRequest.owner_names.length === 0 ? "59px" : "169px", overflowY:"auto", paddingRight:"-1px"}}>
+                <Scrollbar no_shadow="true" style={{height:existingRequest.owner_names.length === 0 ? "57px" : "167px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                  {existingRequest.owner_objects.map(owner => (
+                    <span key={owner.id}>
+                    <div className="mt-1 mb-1">
+                      <div className="card-header rounded" style={{paddingLeft:"12px", height:"50px"}}>
+                        <Radio
+                          id={String(owner.id)}
+                          name={String(owner.id)}
+                          checked={Number(existingOwner.id) === owner.id}
+                          style={{
+                            transform: "scale(1.25)",
+                            marginLeft: "-14px",
+                            marginTop: "-7px",
+                            marginBottom: "-5px"
+                          }}
+                          onChange={() => {setExistingOwner(existingOwner.id === owner.id ? {id:''} : owner);}}
+                        />
+                        {owner.first_name} {owner.last_name} - {owner.display_phone}
+                      </div>
+                    </div>
+                    </span>
+                  ))}
+                  {existingRequest.owner_names.length === 0 ?<div className="card-header mt-1 mb-1 rounded">
+                    Service Request does not have any Owners.
+                  </div> : ""}
+                </Scrollbar>
+              </Col>
+              :
               <Col xs={9} className="border rounded" style={{marginLeft:"1px", height:existingOwners.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "59px" : "169px", overflowY:"auto", paddingRight:"-1px"}}>
                 <Scrollbar no_shadow="true" style={{height:existingOwners.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "57px" : "167px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   {existingOwners.filter(owner => formikProps.values.address && owner.address === formikProps.values.address && owner.city === formikProps.values.city && owner.state === formikProps.values.state).map(owner => (
@@ -195,10 +235,10 @@ const AddressForm = (props) => {
                             marginBottom: "-5px"
                           }}
                           onChange={() => {
-                            setExistingOwner(existingOwner.id ? {id:''} : owner);
+                            setExistingOwner(existingOwner.id === owner.id ? {id:''} : owner);
                             setExistingRequest({id:''})}}
                         />
-                        <Link href={"/" + props.organization +"/" + props.incident + "/hotline/servicerequest/" + owner.id} className="text-link" style={{textDecoration:"none", color:"white"}}>{owner.first_name} {owner.last_name} - {owner.display_phone}</Link>
+                        {owner.first_name} {owner.last_name} - {owner.display_phone}
                       </div>
                     </div>
                     </span>
@@ -208,6 +248,7 @@ const AddressForm = (props) => {
                   </div> : ""}
                 </Scrollbar>
               </Col>
+              }
             </Card.Body>
             <ButtonGroup size="lg" >
               <ButtonSpinner isSubmitting={formikProps.isSubmitting} disabled={!formikProps.values.address} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { formikProps.submitForm(); }}>

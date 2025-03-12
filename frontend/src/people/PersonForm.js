@@ -60,6 +60,9 @@ const PersonForm = (props) => {
   // Control Agency display.
   const [showAgency, setShowAgency] = useState(props.state.stepIndex === 1 && is_first_responder);
 
+  const [showStartOverModal, setShowStartOverModal] = useState(false);
+  const handleCloseStartOverModal = () => setShowStartOverModal(false);
+
   const initialData = {
     existing_owner: '',
     has_id: false,
@@ -301,17 +304,14 @@ const PersonForm = (props) => {
               :
               <Card.Header as="h5" className="pl-3">
                 <span style={{cursor:'pointer'}} onClick={() => {
-                  if (!isOwner) {
-                    props.handleBack('reporter', 'initial')
-                  }
-                  else if (props.state.steps.reporter.first_name) {
+                  if (isOwner && props.state.steps.reporter.first_name) {
                     setIsOwner(false);
                     setShowAgency(is_first_responder);
                     formikProps.resetForm({values:props.state.steps.reporter});
                     props.handleBack('owner', 'reporter')
                   }
                   else {
-                    props.handleBack('owner', 'initial')
+                    setShowStartOverModal(true);
                   }
                 }} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
@@ -438,6 +438,26 @@ const PersonForm = (props) => {
           </Card>
         )}
       </Formik>
+      <Modal show={showStartOverModal} onHide={handleCloseStartOverModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Start Over</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Going back to the address lookup form will reset all current data. Are you sure you want to start over?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary"
+            onClick={() => {
+              if (!isOwner) {
+                props.handleBack('reporter', 'initial')
+              }
+              else {
+                props.handleBack('owner', 'initial')
+              }}}>Yes
+          </Button>
+          <Button variant="secondary" onClick={handleCloseStartOverModal}>No</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };
