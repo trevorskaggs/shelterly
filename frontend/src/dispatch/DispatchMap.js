@@ -48,7 +48,7 @@ function Deploy({ incident, organization }) {
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, hide_pending: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
-  const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
+  const [teamData, setTeamData] = useState({teams: [], members:[], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [assignedTeamMembers, setAssignedTeamMembers] = useState([]);
@@ -100,51 +100,49 @@ function Deploy({ incident, organization }) {
       id_list = [...id_list, ...value.id];
       // Handle if Team.
       if (value.label.split(':').length > 1) {
-        console.log('is team')
-        console.log(value.team_id)
         setSelectedTeam(value.team_id);
-        // Parse out the team name.
-        // team_name = value.label.split(':')[0];
-        value.label.split(':')[1].split(',').forEach((name, index) =>  {
-          console.log(value)
-          let team_option = {id: [value.id[index]], team_id:value.team_id, label:name.replace(' ', ''), is_assigned:value.is_assigned};
-          // Add to list if not already selected.
-          if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
-            selected_list.push(team_option);
-          }
-        });
+        selected_list.push({id:value.id, team_id:value.team_id, label:value.label, is_assigned:value.is_assigned});
       }
       // Else handle as an individual TeamMember.
       else {
         setSelectedTeam(null);
-        selected_list.push({id:value.id, team_id:value.team_id, label:value.label, is_assigned:value.is_assigned})
+        selected_list.push({id:value.id, team_id:value.team_id, label:value.label, is_assigned:value.is_assigned});
       }
     });
-    console.log('here')
-    console.log(values)
-    console.log(id_list)
+
     // If deselecting.
     if (selected.length > selected_list.length) {
-      console.log('test')
       let team_options = [];
       setSelectedTeam(null);
-      teamData.teams.filter(team => team.team_object.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+      // Add back teams if the select list is empty.
+      if (selected_list.length === 0) {
+        let team_names = [];
+        teamData.teams.forEach(function(team) {
+          // Add selectable options back if if not already available.
+          if (team.team_object.team_members.length && !team_names.includes(team.team_name) && !teamData.options.some(option => option.team_id === team.id)) {
+            team_options.push({id:team.team_object.team_members, team_id:team.id, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
+            team_names.push(team.team_name);
+          }
+        });
+      }
+      teamData.members.forEach(function(member) {
         // Add selectable options back if if not already available.
-        if (team.team_object.team_members.length && !teamData.options.some(option => option.label === team.team_object.name + ": " + team.team_object.display_name)) {
-          team_options.push({id:team.team_object.team_members, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
-        }
+        team_options.push({id:[member.id], team_id:null, label:member.display_name, is_assigned:member.is_assigned});
       });
-      setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
+      setTeamData(prevState => ({ ...prevState, "options":team_options }));
       setSelectedCount((prevState) => ({...prevState, disabled: (prevState.count > 0 ? false : true)}));
     }
     // Else we're selecting. Remove selection from option list.
     else {
-      setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
+      // Remove other options if we've selected a team.
+      if (values.filter(value => value.label.includes(':')).length) {
+        setTeamData(prevState => ({ ...prevState, "options":[] }));
+      }
+      else {
+        setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => (!id_list.includes(option.id[0])) && (option.team_id === null)) }));
+      }
     }
-    console.log(id_list)
     props.setFieldValue('team_members', id_list);
-    // props.setFieldValue('team_name', team_name);
-    // props.setFieldValue('temp_team_name', team_name);
     setSelected(selected_list);
   }
 
@@ -276,15 +274,15 @@ function Deploy({ incident, organization }) {
       await axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
-      .then(response => {
+      .then(memberResponse => {
         if (!unmounted) {
           let options = [];
-          // let team_names = [];
+          let team_names = [];
           // let team_name = '';
-          response.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
+          memberResponse.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
             options.push({id:[teammember.id], team_id:null, label:teammember.display_name, is_assigned:teammember.is_assigned})
           });
-          setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
+          setAssignedTeamMembers(memberResponse.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
           axios.get('/evac/api/evacassignment/', {
             params: {
@@ -295,15 +293,14 @@ function Deploy({ incident, organization }) {
             cancelToken: source.token,
           })
           .then(response => {
-            console.log(response.data)
             response.data
               .filter(({ team_object }) => team_object.show === true) 
               .forEach(function({ team_object: team }) {
-                // Only add to option list if team has members.
-                if (team.team_member_objects.length) {
+                // Only add to option list if team has members and team name isn't already in the list.
+                if (team.team_member_objects.length && !team_names.includes(team.name)) {
                   options.unshift({id:team.team_members, team_id:team.id, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+                  team_names.push(team.name);
                 }
-                // team_names.push(team.name);
               });
             // Provide a default "TeamN" team name that hasn't already be used.
             // let i = 1;
@@ -319,12 +316,12 @@ function Deploy({ incident, organization }) {
             //   i++;
             // }
             // team_name = name + i;
-            setTeamData({teams:response.data, options:options, isFetching:false});
+            setTeamData({teams:response.data, members:memberResponse.data, options:options, isFetching:false});
             // setTeamName(team_name);
           })
           .catch(error => {
             if (!unmounted) {
-              setTeamData({teams:[], options:[], isFetching:false});
+              setTeamData({teams:[], members:[], options:[], isFetching:false});
               setShowSystemError(true);
             }
           });
@@ -332,7 +329,7 @@ function Deploy({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setTeamData({teams: [], options: [], isFetching: false});
+          setTeamData({teams: [], members:[], options: [], isFetching: false});
           setShowSystemError(true);
         }
       });
