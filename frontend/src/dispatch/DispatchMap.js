@@ -730,7 +730,19 @@ function Deploy({ incident, organization }) {
               />
           </Col>
           <Col className="pr-0" style={{maxWidth:"31px", paddingLeft:"2px"}}>
+            {selectedTeam ?
             <OverlayTrigger
+              key={"add-team-member-disabled"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-add-team-member-disabled`}>
+                  Cannot add new team members when a team is selected.
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" style={{cursor:"not-allowed", color:'#b4b4b4'}} inverse />
+            </OverlayTrigger>
+            : <OverlayTrigger
               key={"add-team-member"}
               placement="top"
               overlay={
@@ -740,7 +752,7 @@ function Deploy({ incident, organization }) {
               }
             >
               <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" onClick={() => setShowAddTeamMember(true)} style={{cursor:"pointer"}} inverse />
-            </OverlayTrigger>
+            </OverlayTrigger>}
           </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"-23px", marginLeft:"6px", minHeight:"36vh", paddingRight:"14px"}}>
