@@ -37,10 +37,6 @@ function Deploy({ incident, organization }) {
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
 
-  // Determine if this is a preplanning workflow.
-  let preplan = window.location.pathname.includes("preplan");
-
-  const filterRef = useRef(null);
   const openStartRef = useRef(null);
   const openEndRef = useRef(null);
 
@@ -52,9 +48,9 @@ function Deploy({ incident, organization }) {
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, hide_pending: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
-  const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
+  const [teamData, setTeamData] = useState({teams: [], members:[], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
-  const [teamName, setTeamName] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [assignedTeamMembers, setAssignedTeamMembers] = useState([]);
   const handleClose = () => setShow(false);
   const [show, setShow] = useState(false);
@@ -97,47 +93,56 @@ function Deploy({ incident, organization }) {
 
   // Handle TeamMember selector onChange.
   const handleChange = (values, props) => {
-    let team_name = props.values.team_name;
+    // let team_name = props.values.team_name;
     let id_list = [];
     let selected_list = [];
     values.forEach(value => {
       id_list = [...id_list, ...value.id];
       // Handle if Team.
       if (value.label.split(':').length > 1) {
-        // Parse out the team name.
-        team_name = value.label.split(':')[0];
-        value.label.split(':')[1].split(',').forEach((name, index) =>  {
-          let team_option = {id: [value.id[index]], label:name.replace(' ', ''), is_assigned:value.is_assigned};
-          // Add to list if not already selected.
-          if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
-            selected_list.push(team_option);
-          }
-        });
+        setSelectedTeam(value.team_id);
+        selected_list.push({id:value.id, team_id:value.team_id, label:value.label, is_assigned:value.is_assigned});
       }
       // Else handle as an individual TeamMember.
       else {
-        selected_list.push({id:value.id, label:value.label, is_assigned:value.is_assigned})
+        setSelectedTeam(null);
+        selected_list.push({id:value.id, team_id:value.team_id, label:value.label, is_assigned:value.is_assigned});
       }
     });
+
     // If deselecting.
     if (selected.length > selected_list.length) {
       let team_options = [];
-      teamData.teams.filter(team => team.team_object.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+      setSelectedTeam(null);
+      // Add back teams if the select list is empty.
+      if (selected_list.length === 0) {
+        let team_names = [];
+        teamData.teams.forEach(function(team) {
+          // Add selectable options back if if not already available.
+          if (team.team_object.team_members.length && !team_names.includes(team.team_name) && !teamData.options.some(option => option.team_id === team.id)) {
+            team_options.push({id:team.team_object.team_members, team_id:team.id, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
+            team_names.push(team.team_name);
+          }
+        });
+      }
+      teamData.members.forEach(function(member) {
         // Add selectable options back if if not already available.
-        if (team.team_object.team_members.length && !teamData.options.some(option => option.label === team.team_object.name + ": " + team.team_object.display_name)) {
-          team_options.push({id:team.team_object.team_members, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
-        }
+        team_options.push({id:[member.id], team_id:null, label:member.display_name, is_assigned:member.is_assigned});
       });
-      setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
+      setTeamData(prevState => ({ ...prevState, "options":team_options }));
       setSelectedCount((prevState) => ({...prevState, disabled: (prevState.count > 0 ? false : true)}));
     }
     // Else we're selecting. Remove selection from option list.
     else {
-      setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
+      // Remove other options if we've selected a team.
+      if (values.filter(value => value.label.includes(':')).length) {
+        setTeamData(prevState => ({ ...prevState, "options":[] }));
+      }
+      else {
+        setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => (!id_list.includes(option.id[0])) && (option.team_id === null)) }));
+      }
     }
     props.setFieldValue('team_members', id_list);
-    props.setFieldValue('team_name', team_name);
-    props.setFieldValue('temp_team_name', team_name);
     setSelected(selected_list);
   }
 
@@ -269,20 +274,20 @@ function Deploy({ incident, organization }) {
       await axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
-      .then(response => {
+      .then(memberResponse => {
         if (!unmounted) {
           let options = [];
           let team_names = [];
-          let team_name = '';
-          response.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
-            options.push({id: [teammember.id], label: teammember.display_name, is_assigned:teammember.is_assigned})
+          // let team_name = '';
+          memberResponse.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
+            options.push({id:[teammember.id], team_id:null, label:teammember.display_name, is_assigned:teammember.is_assigned})
           });
-          setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
+          setAssignedTeamMembers(memberResponse.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
           axios.get('/evac/api/evacassignment/', {
             params: {
               deploy_map: true,
-              status: preplan ? 'preplanned' : '',
+              status: 'active',
               incident,
             },
             cancelToken: source.token,
@@ -291,32 +296,32 @@ function Deploy({ incident, organization }) {
             response.data
               .filter(({ team_object }) => team_object.show === true) 
               .forEach(function({ team_object: team }) {
-                // Only add to option list if team has members and is not already in the list which is sorted by newest.
+                // Only add to option list if team has members and team name isn't already in the list.
                 if (team.team_member_objects.length && !team_names.includes(team.name)) {
-                  options.unshift({id: team.team_members, label: team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+                  options.unshift({id:team.team_members, team_id:team.id, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+                  team_names.push(team.name);
                 }
-                team_names.push(team.name);
               });
             // Provide a default "TeamN" team name that hasn't already be used.
-            let i = 1;
-            let name = preplan ? "Preplanned " : "Team "
-            // Sort team_names to ensure we start with the lowest available number for default team name
-            team_names = team_names.filter(n => n.startsWith(name)).sort((a, b) => {
-              let numA = parseInt(a.replace(/^\D+/g, ''), 10);
-              let numB = parseInt(b.replace(/^\D+/g, ''), 10);
-              return numA - numB;
-            });
-            // Find the lowest available number for the new team name
-            while (team_names.includes(name + i)) {
-              i++;
-            }
-            team_name = name + i;
-            setTeamData({teams: response.data, options: options, isFetching: false});
-            setTeamName(team_name);
+            // let i = 1;
+            // let name = preplan ? "Preplanned " : "Team "
+            // // Sort team_names to ensure we start with the lowest available number for default team name
+            // team_names = team_names.filter(n => n.startsWith(name)).sort((a, b) => {
+            //   let numA = parseInt(a.replace(/^\D+/g, ''), 10);
+            //   let numB = parseInt(b.replace(/^\D+/g, ''), 10);
+            //   return numA - numB;
+            // });
+            // // Find the lowest available number for the new team name
+            // while (team_names.includes(name + i)) {
+            //   i++;
+            // }
+            // team_name = name + i;
+            setTeamData({teams:response.data, members:memberResponse.data, options:options, isFetching:false});
+            // setTeamName(team_name);
           })
           .catch(error => {
             if (!unmounted) {
-              setTeamData({teams: [], options: [], isFetching: false});
+              setTeamData({teams:[], members:[], options:[], isFetching:false});
               setShowSystemError(true);
             }
           });
@@ -324,7 +329,7 @@ function Deploy({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setTeamData({teams: [], options: [], isFetching: false});
+          setTeamData({teams: [], members:[], options: [], isFetching: false});
           setShowSystemError(true);
         }
       });
@@ -336,7 +341,7 @@ function Deploy({ incident, organization }) {
       await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
         params: {
           status: 'open',
-          when: preplan ? 'today' : 'today',
+          when: 'today',
           landingmap: true
         },
         cancelToken: source.token,
@@ -414,13 +419,14 @@ function Deploy({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [triggerRefresh, preplan, incident]);
+  }, [triggerRefresh, incident]);
 
   return (
     <Formik
       initialValues={{
-        team_name: teamName,
-        temp_team_name: teamName,
+        // team_name: teamName,
+        // temp_team_name: teamName,
+        team_id: selectedTeam,
         team_members: [],
         service_requests: [],
         incident: state.incident.id,
@@ -479,7 +485,7 @@ function Deploy({ incident, organization }) {
     {props => (
       <Form>
         <Header>
-          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams "}
+          Deploy Teams&nbsp;
           <OverlayTrigger
             key={"new-data"}
             placement="bottom"
@@ -687,9 +693,9 @@ function Deploy({ incident, organization }) {
         </Row>
         <Row className="ml-0 mr-0 border rounded" style={{marginTop:"-1px"}}>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-1px", marginRight:"1px"}}>
-            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
+            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.count === 0}>{selectedTeam ? "ASSIGN" : props.values.team_members.length > 0 ? "DEPLOY" : selectedCount.count > 0 ? "PREPLAN" : "DEPLOY/PREPLAN"}</Button>
           </Col>
-          <Col className="pl-0 pr-0 ml-1" style={{maxWidth:"170px"}}>
+          {/* <Col className="pl-0 pr-0 ml-1" style={{maxWidth:"170px"}}>
             <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", marginRight:"-11px", paddingTop:"6px", whiteSpace:"nowrap"}}>
               <span style={{marginLeft:"-12px"}}>{props.values.team_name || teamName}
                 {!preplan ? <OverlayTrigger
@@ -705,18 +711,8 @@ function Deploy({ incident, organization }) {
                 </OverlayTrigger> : ""}
               </span>
             </div>
-          </Col>
-          <Col style={{marginLeft:"2px", paddingLeft:"2px", paddingRight:"4px"}}>
-            {preplan ?
-              <BootstrapForm.Control
-                id="disabled_team_name"
-                name="disabled_team_name"
-                type="text"
-                placeholder="Cannot choose team members when preplanning..."
-                disabled={true}
-                style={{height:"37px"}}
-              />
-            :
+          </Col> */}
+          <Col style={{marginLeft:"-1px", paddingLeft:"0px", paddingRight:"4px"}}>
               <Typeahead
                 id="team_members"
                 multiple
@@ -732,10 +728,21 @@ function Deploy({ incident, organization }) {
                   </div>
                 )}
               />
-            }
           </Col>
           <Col className="pr-0" style={{maxWidth:"31px", paddingLeft:"2px"}}>
+            {selectedTeam ?
             <OverlayTrigger
+              key={"add-team-member-disabled"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-add-team-member-disabled`}>
+                  Cannot add new team members when a team is selected.
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" style={{cursor:"not-allowed", color:'#b4b4b4'}} inverse />
+            </OverlayTrigger>
+            : <OverlayTrigger
               key={"add-team-member"}
               placement="top"
               overlay={
@@ -745,7 +752,7 @@ function Deploy({ incident, organization }) {
               }
             >
               <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" onClick={() => setShowAddTeamMember(true)} style={{cursor:"pointer"}} inverse />
-            </OverlayTrigger>
+            </OverlayTrigger>}
           </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"-23px", marginLeft:"6px", minHeight:"36vh", paddingRight:"14px"}}>
