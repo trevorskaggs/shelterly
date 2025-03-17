@@ -24,6 +24,7 @@ import Scrollbar from '../components/Scrollbars';
 import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
+import { capitalize } from '../utils/formatString';
 import { priorityChoices } from '../constants';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
@@ -52,12 +53,9 @@ function Deploy({ incident, organization }) {
   const [selected, setSelected] = useState([]);
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [assignedTeamMembers, setAssignedTeamMembers] = useState([]);
-  const handleClose = () => setShow(false);
-  const [show, setShow] = useState(false);
-  const [error, setError] = useState('');
   const [showAddTeamMember, setShowAddTeamMember] = useState(false);
   const handleCloseShowAddTeamMember = () => setShowAddTeamMember(false);
-  const [filterData, setFilterData] = useState({priority:[], followup_date_start:null, followup_date_end:null});
+  const [filterData, setFilterData] = useState({priority:[], species:[], followup_date_start:null, followup_date_end:null});
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -68,6 +66,7 @@ function Deploy({ incident, organization }) {
   const [showAlreadyAssignedTeamModal, setShowAlreadyAssignedTeamModal] = useState(false);
   const handleCloseAlreadyAssignedTeamModal = () => {setDuplicateSRs([]);setShowAlreadyAssignedTeamModal(false);}
   const [proceed, setProceed] = useState(false);
+  const [speciesChoices, setSpeciesChoices] = useState([]);
 
   const priorityText = {1:'Urgent', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
@@ -251,6 +250,30 @@ function Deploy({ incident, organization }) {
   useEffect(() => {
     let unmounted = false;
     let source = axios.CancelToken.source();
+
+    const fetchSpecies = () => {
+      setSpeciesChoices([]);
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.name, label: capitalize(result.name)});
+          });
+          setSpeciesChoices(species_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
 
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
@@ -797,6 +820,7 @@ function Deploy({ incident, organization }) {
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
+              .filter(service_request => filterData.species.length ? filterData.species.some(species => new Set(service_request.animals.filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'UNABLE TO LOCATE' , 'SHELTERED IN PLACE'].includes(animal.status)).map(animal => animal.species_string)).has(species)) : true)
               .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
               .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .sort((a, b) => {
@@ -1170,6 +1194,16 @@ function Deploy({ incident, organization }) {
               placeholder="Choose priorities..."
               className="priority-typeahead mb-3"
               selected={priorityChoices.filter(choice => filterData.priority.includes(choice.value))}
+            />
+            <label>Species</label>
+            <Typeahead
+              id="species"
+              multiple
+              onChange={(values) => {setFilterData((prevState) => ({...prevState, species:values.map(option => option.value)}))}}
+              options={speciesChoices}
+              placeholder="Choose species..."
+              className="species-typeahead mb-3"
+              selected={speciesChoices.filter(choice => filterData.species.includes(choice.value))}
             />
             <label>Followup Date</label>
             <Row>
