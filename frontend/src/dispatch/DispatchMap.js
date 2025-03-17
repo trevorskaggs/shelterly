@@ -465,7 +465,7 @@ function Deploy({ incident, organization }) {
               axios.post('/evac/api/evacassignment/', values)
               .then(response => {
                 // Stay on map and remove selected SRs if in Preplanning mode.
-                if (props.values.team_members.length === 0 && selectedCount.count > 0) {
+                if (values.team_members.length === 0 && selectedCount.count > 0) {
                   setSelectedCount({count:0, disabled:true});
                   const newState = {...mapState};
                   values.service_requests.forEach(sr => {
