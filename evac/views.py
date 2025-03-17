@@ -230,9 +230,10 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 service_requests = ServiceRequest.objects.filter(pk=self.request.data.get('new_service_request'))
                 service_requests.update(status="assigned")
                 # Remove SR from any existing open DA if applicable.
-                old_da = EvacAssignment.objects.filter(service_requests=service_requests[0], end_time=None).first()
-                if old_da:
-                    old_da.service_requests.remove(service_requests[0])
+                if self.request.data.get('reassign', 'false') == 'true':
+                    old_da = EvacAssignment.objects.filter(service_requests=service_requests[0], end_time=None).first()
+                    if old_da:
+                        old_da.service_requests.remove(service_requests[0])
                 # Add SR to selected DA.
                 animals_dict = {}
                 full_animal_set = AnimalSerializer(service_requests[0].animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']), many=True, required=False, read_only=True).data

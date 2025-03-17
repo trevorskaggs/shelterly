@@ -93,20 +93,19 @@ function Deploy({ incident, organization }) {
 
   // Handle TeamMember selector onChange.
   const handleChange = (values, props) => {
-    // let team_name = props.values.team_name;
     let id_list = [];
     let selected_list = [];
     values.forEach(value => {
       id_list = [...id_list, ...value.id];
       // Handle if Team.
       if (value.label.split(':').length > 1) {
-        setSelectedTeam(value.team_id);
-        selected_list.push({id:value.id, team_id:value.team_id, label:value.label, is_assigned:value.is_assigned});
+        setSelectedTeam(value.da_id);
+        selected_list.push({id:value.id, da_id:value.da_id, label:value.label, is_assigned:value.is_assigned});
       }
       // Else handle as an individual TeamMember.
       else {
         setSelectedTeam(null);
-        selected_list.push({id:value.id, team_id:value.team_id, label:value.label, is_assigned:value.is_assigned});
+        selected_list.push({id:value.id, da_id:value.da_id, label:value.label, is_assigned:value.is_assigned});
       }
     });
 
@@ -119,15 +118,15 @@ function Deploy({ incident, organization }) {
         let team_names = [];
         teamData.teams.forEach(function(team) {
           // Add selectable options back if if not already available.
-          if (team.team_object.team_members.length && !team_names.includes(team.team_name) && !teamData.options.some(option => option.team_id === team.id)) {
-            team_options.push({id:team.team_object.team_members, team_id:team.id, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
+          if (team.team_object.team_members.length && !team_names.includes(team.team_name) && !teamData.options.some(option => option.da_id === team.id)) {
+            team_options.push({id:team.team_object.team_members, da_id:team.id, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
             team_names.push(team.team_name);
           }
         });
       }
       teamData.members.forEach(function(member) {
         // Add selectable options back if if not already available.
-        team_options.push({id:[member.id], team_id:null, label:member.display_name, is_assigned:member.is_assigned});
+        team_options.push({id:[member.id], da_id:null, label:member.display_name, is_assigned:member.is_assigned});
       });
       setTeamData(prevState => ({ ...prevState, "options":team_options }));
       setSelectedCount((prevState) => ({...prevState, disabled: (prevState.count > 0 ? false : true)}));
@@ -139,26 +138,11 @@ function Deploy({ incident, organization }) {
         setTeamData(prevState => ({ ...prevState, "options":[] }));
       }
       else {
-        setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => (!id_list.includes(option.id[0])) && (option.team_id === null)) }));
+        setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => (!id_list.includes(option.id[0])) && (option.da_id === null)) }));
       }
     }
     props.setFieldValue('team_members', id_list);
     setSelected(selected_list);
-  }
-
-  // Handle Team Name updating to reject names already in use.
-  const handleSubmit = (props) => {
-    if (props.values.temp_team_name.length === 0) {
-      setError("Team name cannot be blank.");
-    }
-    else if (props.values.temp_team_name.length > 18) {
-      // Do nothing.
-    }
-    else {
-      setError('');
-      setShow(false);
-      props.setFieldValue("team_name", props.values.temp_team_name);
-    }
   }
 
   // Handle reselecting after hitting dupe assigned SR error.
@@ -280,7 +264,7 @@ function Deploy({ incident, organization }) {
           let team_names = [];
           // let team_name = '';
           memberResponse.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
-            options.push({id:[teammember.id], team_id:null, label:teammember.display_name, is_assigned:teammember.is_assigned})
+            options.push({id:[teammember.id], da_id:null, label:teammember.display_name, is_assigned:teammember.is_assigned})
           });
           setAssignedTeamMembers(memberResponse.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
@@ -295,11 +279,11 @@ function Deploy({ incident, organization }) {
           .then(response => {
             response.data
               .filter(({ team_object }) => team_object.show === true) 
-              .forEach(function({ team_object: team }) {
+              .forEach(function(da) {
                 // Only add to option list if team has members and team name isn't already in the list.
-                if (team.team_member_objects.length && !team_names.includes(team.name)) {
-                  options.unshift({id:team.team_members, team_id:team.id, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
-                  team_names.push(team.name);
+                if (da.team_object.team_member_objects.length && !team_names.includes(da.team_object.name)) {
+                  options.unshift({id:da.team_object.team_members, da_id:da.id, label:da.team_object.name + ": " + da.team_object.display_name, is_assigned:da.team_object.is_assigned});
+                  team_names.push(da.team_object.name);
                 }
               });
             // Provide a default "TeamN" team name that hasn't already be used.
@@ -424,18 +408,11 @@ function Deploy({ incident, organization }) {
   return (
     <Formik
       initialValues={{
-        // team_name: teamName,
-        // temp_team_name: teamName,
-        team_id: selectedTeam,
+        da_id: selectedTeam,
         team_members: [],
         service_requests: [],
         incident: state.incident.id,
       }}
-      validationSchema={Yup.object({
-        temp_team_name: Yup.string()
-          .max(18, 'Must be 18 characters or less')
-          .required('Required'),
-      })}
       enableReinitialize={true}
       onSubmit={(values, { setSubmitting, resetForm }) => {
         // Check if assigned team members have been submitted.
@@ -448,35 +425,48 @@ function Deploy({ incident, organization }) {
           if (duplicateSRs.length > 0) {
             values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
           }
-
           setTimeout(() => {
-            axios.post('/evac/api/evacassignment/', values)
-            .then(response => {
-              // Stay on map and remove selected SRs if in Preplanning mode.
-              if (preplan) {
-                setSelectedCount({count:0, disabled:true});
-                const newState = {...mapState};
-                values.service_requests.forEach(sr => {
-                  delete newState[sr];
-                })
-                setMapState(newState);
-                resetForm();
-                setTriggerRefresh(!triggerRefresh);
-              }
-              // Otherwise navigate to the DA Summary page.
-              else {
-                navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id_for_incident);
-              }
-            })
-            .catch(error => {
-              if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
-                setDuplicateSRs(error.response.data[1]);
-                setShowDispatchDuplicateSRModal(true);
-              }
-              else {
+            if (selectedTeam) {
+              let promises = [];
+              values.service_requests.forEach((sr_id) => {
+                promises.push(axios.patch('/evac/api/evacassignment/' + selectedTeam + '/', {new_service_request:sr_id}));
+              });
+              Promise.all(promises).then(async (results) => {
+                navigate('/' + organization + '/' + incident + '/dispatch/summary/' + results[0].data.id_for_incident);
+              })
+              .catch(error => {
                 setShowSystemError(true);
-              }
-            });
+              });
+            }
+            else {
+              axios.post('/evac/api/evacassignment/', values)
+              .then(response => {
+                // Stay on map and remove selected SRs if in Preplanning mode.
+                if (props.values.team_members.length === 0 && selectedCount.count > 0) {
+                  setSelectedCount({count:0, disabled:true});
+                  const newState = {...mapState};
+                  values.service_requests.forEach(sr => {
+                    delete newState[sr];
+                  })
+                  setMapState(newState);
+                  resetForm();
+                  setTriggerRefresh(!triggerRefresh);
+                }
+                // Otherwise navigate to the DA Summary page.
+                else {
+                  navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id_for_incident);
+                }
+              })
+              .catch(error => {
+                if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
+                  setDuplicateSRs(error.response.data[1]);
+                  setShowDispatchDuplicateSRModal(true);
+                }
+                else {
+                  setShowSystemError(true);
+                }
+              });
+            }
             setSubmitting(false);
           }, 500);
         }
@@ -1166,24 +1156,6 @@ function Deploy({ incident, organization }) {
         </Row>
         <DispatchDuplicateSRModal dupe_list={data.service_requests.filter(sr => duplicateSRs.includes(String(sr.id)))} sr_list={data.service_requests.filter(sr => mapState[sr.id] && mapState[sr.id].checked === true)} show={showDispatchDuplicateSRModal} handleClose={handleCloseDispatchDuplicateSRModal} handleSubmit={props.handleSubmit} handleReselect={handleReselect} />
         <DispatchAlreadyAssignedTeamModal team_members={props.values.team_members} team_options={selected} setProceed={setProceed} show={showAlreadyAssignedTeamModal} handleClose={handleCloseAlreadyAssignedTeamModal} handleSubmit={props.handleSubmit} />
-        <Modal show={show} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Update Team Name</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <TextInput
-              label="Team Name"
-              id="temp_team_name"
-              name="temp_team_name"
-              type="text"
-            />
-            {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="primary" onClick={() => handleSubmit(props)}>Save</Button>
-            <Button variant="secondary" onClick={handleClose}>Close</Button>
-          </Modal.Footer>
-        </Modal>
         <Modal show={showFilterModal} onHide={handleCloseFilterModal}>
           <Modal.Header closeButton>
             <Modal.Title>Filter Options</Modal.Title>
