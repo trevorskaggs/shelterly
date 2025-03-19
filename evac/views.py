@@ -208,6 +208,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         'fixed':animal["fixed"],
                         'confined':animal["confined"],
                         'last_seen':animal["last_seen"],
+                        'is_new':False,
                     }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
@@ -260,6 +261,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         'injured':animal["injured"],
                         "fixed": animal["fixed"],
                         "confined": animal["confined"],
+                        'is_new':False,
                     }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
@@ -271,7 +273,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 for animal_dict in service_request['animals']:
                     id = animal_dict.get("id", None)
                     if id:
-                      Animal.objects.filter(id=id).update(animal_count=animal_dict.get("animal_count", 1))
+                      # Animal.objects.filter(id=id).update(animal_count=animal_dict.get("animal_count", 1))
                       animals_dict[id] = {
                           "id_for_incident": animal_dict.get("id_for_incident"),
                           'animal_count':animal_dict.get("animal_count", 1),
@@ -294,6 +296,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                           'injured':animal_dict.get("injured"),
                           "fixed": animal_dict.get("fixed"),
                           "confined": animal_dict.get("confined"),
+                          "is_new": animal_dict.get("is_new"),
                       }
                     elif animal_dict.get("original_id", None):
                         with transaction.atomic():
@@ -327,6 +330,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                                 'injured':animal_dict.get("injured"),
                                 "fixed": animal_dict.get("fixed"),
                                 "confined": animal_dict.get("confined"),
+                                "is_new": animal_dict.get("is_new"),
                             }
                     else:
                         sr = ServiceRequest.objects.get(id=animal_dict.get("request"))
@@ -344,6 +348,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         new_animal_dict.pop("concern", None)
                         new_animal_dict.pop("caution", None)
                         new_animal_dict.pop("new", None)
+                        new_animal_dict.pop("is_new", None)
                         new_animal = Animal.objects.create(**new_animal_dict)
                         new_animal.owners.set(sr.owners.all())
                         id = new_animal.id
@@ -370,10 +375,11 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                           'injured':animal_dict.get("injured"),
                           "fixed": animal_dict.get("fixed"),
                           "confined": animal_dict.get("confined"),
+                          "is_new": animal_dict.get("is_new"),
                         }
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=id)
-                    new_status = animal_dict.get('status')
+                    new_status = animal_dict.get('status') if animal_dict.get('status') != 'DID NOT SEARCH FOR' else animal.status
                     if animal.status != new_status:
                         action.send(self.request.user, verb=f'changed animal status to {new_status}', target=animal)
                     new_shelter = animal_dict.get('shelter', None)
@@ -384,7 +390,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
                         intake_date = animal.intake_date if animal.intake_date else datetime.now()
                     # Update shelter, room, and intake_date info.
-                    Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date)
+                    Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date, animal_count=animal_dict.get("animal_count", 1))
                     # Update animal found location with SR location if blank.
                     if not animal.address:
                         Animal.objects.filter(id=id).update(address=sr.address, city=sr.city, state=sr.state, zip_code=sr.zip_code, latitude=sr.latitude, longitude=sr.longitude)

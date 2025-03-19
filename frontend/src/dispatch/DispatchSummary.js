@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCalendarDay, faClipboardCheck, faClipboardList,  faChevronDown, faChevronUp, faEquals, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faClockRotateLeft, faExclamationSquare, faChevronDoubleDown, faChevronDoubleUp } from '@fortawesome/pro-solid-svg-icons';
+import { faClockRotateLeft, faExclamationSquare, faChevronDoubleDown, faChevronDoubleUp, faSparkles } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
@@ -666,6 +666,19 @@ function DispatchSummary({ id, incident, organization }) {
                     }
                   >
                     <FontAwesomeIcon icon={faBriefcaseMedical} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                : ""}
+                {assigned_request.animals[animal.id].is_new ?
+                  <OverlayTrigger
+                    key={"animal-is-new"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-is-new`}>
+                        This animal was added to the Service Request while it was already assigned to this active Dispatch Assignment.
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faSparkles} className="ml-1" size="sm" inverse />
                   </OverlayTrigger>
                 : ""}
                 {animal.pcolor || animal.scolor ? <span className="ml-1" style={{textTransform:"capitalize"}}>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>/</span> : ""}{animal.scolor}</span> : ""})</span>: ""}
