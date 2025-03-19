@@ -305,7 +305,7 @@ function Deploy({ incident, organization }) {
               .forEach(function(da) {
                 // Only add to option list if team has members and team name isn't already in the list.
                 if (da.team_object.team_member_objects.length && !team_names.includes(da.team_object.name)) {
-                  options.unshift({id:da.team_object.team_members, da_id:da.id, label:da.team_object.name + ": " + da.team_object.display_name, is_assigned:da.team_object.is_assigned});
+                  options.unshift({id:da.team_object.team_members, da_id:da.id, label:"DA#" + da.id_for_incident + " (" + da.team_object.name + "): " + da.team_object.display_name, is_assigned:da.team_object.is_assigned});
                   team_names.push(da.team_object.name);
                 }
               });
@@ -662,6 +662,7 @@ function Deploy({ incident, organization }) {
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
+              .filter(service_request => filterData.species.length ? filterData.species.some(species => new Set(service_request.animals.filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'UNABLE TO LOCATE' , 'SHELTERED IN PLACE'].includes(animal.status)).map(animal => animal.species_string)).has(species)) : true)
               .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
               .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .map(service_request => (
@@ -772,7 +773,7 @@ function Deploy({ incident, organization }) {
           <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"-2px", height:"277px"}}>
             <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
               <h5 className="mb-0 text-center">Options
-              {filterData.priority.length > 0 || filterData.followup_date_start || filterData.followup_date_end ?
+              {filterData.species.length > 0 || filterData.priority.length > 0 || filterData.followup_date_start || filterData.followup_date_end ?
                 <OverlayTrigger
                   key={"filtered"}
                   placement="top"
