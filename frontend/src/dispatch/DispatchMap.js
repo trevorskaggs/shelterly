@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faBandAid, faBullseye, faCalendarDay, faCar, faCheckCircle, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash, faExclamation, faFilter
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faLocationCrosshairs, faRotate } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faBarsSort, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faLocationCrosshairs, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
@@ -18,7 +18,7 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import useWebSocket from 'react-use-websocket';
 import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon, operationsMarkerIcon } from "../components/Map";
-import { Checkbox, DateRangePicker, TextInput } from "../components/Form";
+import { Checkbox, DateRangePicker, Radio, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
 import Header from '../components/Header';
@@ -28,7 +28,6 @@ import { capitalize } from '../utils/formatString';
 import { priorityChoices } from '../constants';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
-// import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
 
 function Deploy({ incident, organization }) {
 
@@ -55,11 +54,14 @@ function Deploy({ incident, organization }) {
   const [assignedTeamMembers, setAssignedTeamMembers] = useState([]);
   const [showAddTeamMember, setShowAddTeamMember] = useState(false);
   const handleCloseShowAddTeamMember = () => setShowAddTeamMember(false);
+  const [sortChoice, setSortChoice] = useState('followup_date');
   const [filterData, setFilterData] = useState({priority:[], species:[], followup_date_start:null, followup_date_end:null});
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const handleCloseFilterModal = () => setShowFilterModal(false);
+  const [showSortModal, setShowSortModal] = useState(false);
+  const handleCloseSortModal = () => setShowSortModal(false);
   const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
   const [duplicateSRs, setDuplicateSRs] = useState([]);
   const handleCloseDispatchDuplicateSRModal = () => {setDuplicateSRs([]);setShowDispatchDuplicateSRModal(false);}
@@ -801,6 +803,17 @@ function Deploy({ incident, organization }) {
                   <FontAwesomeIcon icon={faFilter} className="ml-1" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer"}} />
                 </OverlayTrigger>
               }
+              <OverlayTrigger
+                key={"sort"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-sort`}>
+                    Sort options
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faBarsSort} className="ml-2" onClick={() => {setShowSortModal(true)}} style={{cursor:"pointer"}} transform={'grow-3'} />
+              </OverlayTrigger>
               </h5>
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
@@ -826,19 +839,36 @@ function Deploy({ incident, organization }) {
               .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .sort((a, b) => {
                 // Sort by followup_date
-                if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom
-                if (a.followup_date && !b.followup_date) return -1; // `b` is null, move it to the bottom
-                if (a.followup_date && b.followup_date) {
-                  const dateA = new Date(a.followup_date);
-                  const dateB = new Date(b.followup_date);
-                  if (dateA - dateB !== 0) return dateA - dateB;
+                if (sortChoice === 'followup_date') {
+                  if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom
+                  if (a.followup_date && !b.followup_date) return -1; // `b` is null, move it to the bottom
+                  if (a.followup_date && b.followup_date) {
+                    const dateA = new Date(a.followup_date);
+                    const dateB = new Date(b.followup_date);
+                    if (dateA - dateB !== 0) return dateA - dateB;
+                  }
+
+                  // Compare priority (ascending order)
+                  if ((a.priority || 0) - (b.priority || 0) !== 0) return (a.priority || 0) - (b.priority || 0);
+
+                  // Compare pk (ascending order)
+                  return (a.id || 0) - (b.id || 0);
                 }
+                else {
+                  // Compare priority (ascending order)
+                  if ((a.priority || 0) - (b.priority || 0) !== 0) return (a.priority || 0) - (b.priority || 0);
 
-                // Compare priority (ascending order)
-                if ((a.priority || 0) - (b.priority || 0) !== 0) return (a.priority || 0) - (b.priority || 0);
+                  if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom
+                  if (a.followup_date && !b.followup_date) return -1; // `b` is null, move it to the bottom
+                  if (a.followup_date && b.followup_date) {
+                    const dateA = new Date(a.followup_date);
+                    const dateB = new Date(b.followup_date);
+                    if (dateA - dateB !== 0) return dateA - dateB;
+                  }
 
-                // Compare pk (ascending order)
-                return (a.id || 0) - (b.id || 0);
+                  // Compare pk (ascending order)
+                  return (a.id || 0) - (b.id || 0);
+                }
               })
               .map(service_request => (
                 <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
@@ -1266,6 +1296,31 @@ function Deploy({ incident, organization }) {
           <Modal.Footer>
             {/* <Button variant="primary" onClick={() => applyFilters()}>Save</Button> */}
             <Button variant="secondary" onClick={handleCloseFilterModal}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal show={showSortModal} onHide={handleCloseSortModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Sort Options</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div><label>Primary Sort Method</label></div>
+            <Radio
+              inline
+              id="primary-sort-followup-date"
+              label="Followup Date"
+              onClick={() => {setSortChoice('followup_date')}}
+              checked={sortChoice === 'followup_date' ? true : false}
+            />
+            <Radio
+              inline
+              id="primary-sort-priority"
+              label="Priority"
+              onClick={() => {setSortChoice('priority')}}
+              checked={sortChoice === 'priority' ? true : false}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseSortModal}>Close</Button>
           </Modal.Footer>
         </Modal>
         <Formik
