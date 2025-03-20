@@ -221,7 +221,7 @@ function StepperWorkflow({ incident, organization }) {
         }))
       }
       // Otherwise add a new animal to the list.
-      else if (data && data.get('animal_count')) {
+      else if (data instanceof FormData) {
         setState((prevState) => ({
           ...prevState,
           stepIndex: prevState.stepIndex + 1,
