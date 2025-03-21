@@ -16,6 +16,7 @@ import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
+import MaterialRadio from '@material-ui/core/Radio';
 import { useRegisteredRef } from "react-register-nodes";
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
@@ -65,6 +66,9 @@ const useStyles = makeStyles({
     'input:hover ~ &': {
       backgroundColor: '#106ba3',
     },
+  },
+  radio: {
+    color: 'inherit',
   },
 });
 
@@ -224,6 +228,29 @@ const Checkbox = (props) => {
       inputProps={{ 'aria-label': 'decorative checkbox' }}
       {...props}
     />
+    {/* {meta.touched && meta.error ? (
+      <div className="error">{meta.error}</div>
+    ) : null} */}
+    </>
+  );
+};
+
+const Radio = (props) => {
+
+  const classes = useStyles();
+  // const [field, meta] = useField({...props, type: 'checkbox'});
+
+  return (
+    <>
+    <MaterialRadio
+      type="checkbox"
+      className={classes.radio}
+      disableRipple
+      color="white"
+      inputProps={{ 'aria-label': 'decorative radio' }}
+      {...props}
+    />
+    {props.label}
     {/* {meta.touched && meta.error ? (
       <div className="error">{meta.error}</div>
     ) : null} */}
@@ -788,6 +815,7 @@ export {
   DropDown,
   FileUploader,
   ImageUploader,
+  Radio,
   TextInput,
   ToggleSwitch,
 };
