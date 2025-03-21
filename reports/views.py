@@ -156,33 +156,33 @@ class ReportViewSet(viewsets.ViewSet):
       followup_start_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').earliest('date')['date']
       followup_end_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').latest('date')['date']
       while followup_end_date >= followup_start_date:
-        srs = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).filter(incident__slug=incident_slug, followup_date__date=followup_end_date).exclude(status__in=['closed', 'canceled']).distinct()
-        test = srs.count()
-        followup_data = {
-          'date': followup_end_date.strftime('%m/%d/%Y'),
-          'new': len(srs.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'])),
-          # 'new': ServiceRequest.objects.filter(incident__slug=incident_slug, followup_date__date=end_date, animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)']).count(),
-          'sip': len(srs.filter(animal__status__in=['SHELTERED IN PLACE'])),
-          'utl': len(srs.filter(animal__status__in=['UNABLE TO LOCATE'])),
-          'total': test,
-        }
-        sr_followup_date_report.insert(0, followup_data)
-        followup_end_date -= delta
+          srs = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).filter(incident__slug=incident_slug, followup_date__date=followup_end_date).exclude(status__in=['closed', 'canceled']).distinct()
+          test = srs.count()
+          followup_data = {
+            'date': followup_end_date.strftime('%m/%d/%Y'),
+            'new': len(srs.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'])),
+            # 'new': ServiceRequest.objects.filter(incident__slug=incident_slug, followup_date__date=end_date, animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)']).count(),
+            'sip': len(srs.filter(animal__status__in=['SHELTERED IN PLACE'])),
+            'utl': len(srs.filter(animal__status__in=['UNABLE TO LOCATE'])),
+            'total': test,
+          }
+          sr_followup_date_report.insert(0, followup_data)
+          followup_end_date -= delta
 
       #Animal Care Report
       animal_care_information_report = []
       evac_total, sip_total, shelt_total, vet_request_total = 0, 0, 0, 0
       for asc, asc_label in animals_species_categories:
-        category_animals = Animal.objects.filter(incident__slug=incident_slug, species__category__name=asc)
-        evacuated = category_animals.filter(request__isnull=False, intake_date__isnull=False).count()
-        evac_total += evacuated
-        sip = category_animals.filter(sip_date__isnull=False).count()
-        sip_total += sip
-        sheltered = category_animals.filter(intake_date__isnull=False).count()
-        shelt_total += sheltered
-        vet_requests = VetRequest.objects.filter(medical_record__patient__in=category_animals).count()
-        vet_request_total += vet_requests
-        animal_care_information_report.append({'species_category': asc_label, 'evacuated': evacuated, 'sip': sip, 'sheltered': sheltered, 'vet_requests': vet_requests})
+          category_animals = Animal.objects.filter(incident__slug=incident_slug, species__category__name=asc)
+          evacuated = category_animals.filter(request__isnull=False, intake_date__isnull=False).count()
+          evac_total += evacuated
+          sip = category_animals.filter(sip_date__isnull=False).count()
+          sip_total += sip
+          sheltered = category_animals.filter(intake_date__isnull=False).count()
+          shelt_total += sheltered
+          vet_requests = VetRequest.objects.filter(medical_record__patient__in=category_animals).count()
+          vet_request_total += vet_requests
+          animal_care_information_report.append({'species_category': asc_label, 'evacuated': evacuated, 'sip': sip, 'sheltered': sheltered, 'vet_requests': vet_requests})
       animal_care_information_report.append({'species_category': 'Total', 'evacuated': evac_total, 'sip': sip_total, 'sheltered': shelt_total, 'vet_requests': vet_request_total})
 
       data = {'daily_report':daily_report, 'sr_worked_report':sr_worked_report, 'shelter_report':shelter_report, 'shelter_intake_report': shelter_intake_report, 'animal_status_report':animal_status_report, 'animal_owner_report':animals_ownership, 'animal_deceased_report':animals_deceased, 'duplicate_sr_report':duplicate_sr_report, 'sr_followup_date_report':sr_followup_date_report, 'animal_care_information_report': animal_care_information_report}
