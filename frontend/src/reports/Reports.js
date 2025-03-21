@@ -74,17 +74,17 @@ function Reports({ incident, organization }) {
           setData(response.data);
 
           // Hide Shelter Report species columns if there are 0 animals.
-          let columns=[...shelterColumns];
-          columns.forEach(col => {
-            let count = 0;
-            response.data['shelter_report'].forEach(shelter => {
-              count = count + shelter[col.name.toLowerCase()]
-            })
-            if (count === 0) {
-              col.omit = true;
-            }
-          })
-          setShelterColumns(columns);
+          // let columns=[...shelterColumns];
+          // columns.forEach(col => {
+          //   let count = 0;
+          //   response.data['shelter_report'].forEach(shelter => {
+          //     count = count + shelter[col.name.toLowerCase()]
+          //   })
+          //   if (count === 0) {
+          //     col.omit = true;
+          //   }
+          // })
+          // setShelterColumns(columns);
         }
       })
       .catch(error => {
@@ -662,7 +662,7 @@ function Reports({ incident, organization }) {
       />
       : selection.value === 'shelter' ?
       <DataTable
-          columns={shelterColumns}
+          columns={shelter_columns}
           data={data.shelter_report}
           actions={actionsMemo}
           title={selection.label}
