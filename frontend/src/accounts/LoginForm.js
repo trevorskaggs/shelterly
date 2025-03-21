@@ -100,7 +100,7 @@ const Login = () => {
               label="Password"
               formgroupclasses="mt-0 mb-4 mt-3"
               togglePasswordVisibility={togglePasswordVisibility}
-              showPassword={showPassword}
+              showpassword={showPassword.toString()}
             />
             <BootstrapForm.Group as={Col}>
               <Button type="submit" size="lg" className="btn-primary" block>Login{state.isLoading ? <FontAwesomeIcon icon={faSpinner} className="ml-1" spin inverse /> : ""}</Button>

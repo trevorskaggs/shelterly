@@ -66,7 +66,7 @@ function AnimalCards(props) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faClipboardMedical} className="" />
+                  <FontAwesomeIcon icon={faClipboardMedical} className="mr-1" />
                 </OverlayTrigger> : ""}
                 {props.show_status ?
                 <span>
