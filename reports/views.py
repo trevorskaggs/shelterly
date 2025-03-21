@@ -37,7 +37,7 @@ class ReportViewSet(viewsets.ViewSet):
       ]
 
       #Set Initial Daily Report States
-      daily_report, sr_worked_report, sr_followup_date_report = [], [], []
+      daily_report, sr_worked_report = [], []
 
       if ServiceRequest.objects.filter(incident=incident).exists():
           start_date = ServiceRequest.objects.select_related('incident').filter(incident=incident).annotate(date=TruncDay('timestamp')).values('date').earliest('date')['date']
@@ -136,6 +136,7 @@ class ReportViewSet(viewsets.ViewSet):
               animals_deceased.append(animal)
       animals_deceased = sorted(animals_deceased, key=itemgetter('date'), reverse=True)
 
+      #Duplicate SR Report
       duplicate_sr_report = []
       active_incident_srs = ServiceRequest.objects.filter(incident__slug=incident_slug).exclude(status='canceled')
       for dupe_sr in active_incident_srs.values('address', 'city', 'state', 'zip_code').order_by('address', 'city', 'state', 'zip_code').annotate(Count('pk')).filter(pk__count__gt=1):
@@ -150,6 +151,8 @@ class ReportViewSet(viewsets.ViewSet):
               'sr_ids': dupe_sr_ids
             })
 
+      #Followup Date Report
+      sr_followup_date_report = []
       followup_start_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').earliest('date')['date']
       followup_end_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').latest('date')['date']
       while followup_end_date >= followup_start_date:
@@ -166,6 +169,7 @@ class ReportViewSet(viewsets.ViewSet):
         sr_followup_date_report.insert(0, followup_data)
         followup_end_date -= delta
 
+      #Animal Care Report
       animal_care_information_report = []
       evac_total, sip_total, shelt_total, vet_request_total = 0, 0, 0, 0
       for asc, asc_label in animals_species_categories:
