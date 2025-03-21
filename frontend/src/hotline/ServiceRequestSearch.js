@@ -354,11 +354,9 @@ function ServiceRequestSearch({ incident, organization }) {
                     name="priority"
                     type="text"
                     placeholder="Select Priority"
-                    options={[{ value: 1, label: 'Highest' },
+                    options={[{ value: 1, label: 'Urgent' },
                     { value: 2, label: 'High' },
-                    { value: 3, label: 'Medium' },
-                    { value: 4, label: 'Low' },
-                    { value: 5, label: 'Lowest' }]}
+                    { value: 4, label: 'Low' }]}
                     styles={customStyles}
                     isClearable={true}
                     ref={priorityRef}
