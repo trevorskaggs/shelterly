@@ -50,14 +50,14 @@ class MedicalRecordViewSet(viewsets.ModelViewSet):
                 diagnostic = Diagnostic.objects.get(id=id)
                 # Use submitted name for Other option.
                 name = self.request.data.get('diagnostics_other', '') if diagnostic.name == 'Other' else ''
-                DiagnosticResult.objects.create(diagnostic=diagnostic, medical_record=med_record, other_name=name)
+                DiagnosticResult.objects.create(open=datetime.now(), diagnostic=diagnostic, medical_record=med_record, other_name=name)
 
             # Create ProcedureResults if we receive procedure data.
             for id in self.request.data.get('procedures', []):
                 procedure = Procedure.objects.get(id=id)
                 # Use submitted name for Other option.
                 name = self.request.data.get('procedure_other', '') if procedure.name == 'Other' else ''
-                ProcedureResult.objects.create(procedure=procedure, medical_record=med_record, other_name=name)
+                ProcedureResult.objects.create(open=datetime.now(), procedure=procedure, medical_record=med_record, other_name=name)
 
 
 class ExamViewSet(viewsets.ModelViewSet):
