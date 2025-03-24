@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.http import HttpResponse, JsonResponse
 import json
 import io
@@ -122,6 +122,9 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         queryset = EvacAssignment.objects.filter(service_requests__isnull=False, assigned_requests__isnull=False).distinct().order_by('-start_time').select_related('team').prefetch_related(Prefetch('service_requests',
                     ServiceRequest.objects
             .exclude(status='CANCELED')
+            .annotate(
+                animal_count=Sum("animal__animal_count")
+            )
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             ).prefetch_related(Prefetch(

@@ -120,7 +120,7 @@ function Deploy({ incident, organization }) {
         teamData.teams.forEach(function(team) {
           // Add selectable options back if if not already available.
           if (team.team_object.team_members.length && !team_names.includes(team.team_name) && !teamData.options.some(option => option.da_id === team.id)) {
-            team_options.push({id:team.team_object.team_members, da_id:team.id, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
+            team_options.unshift({id:team.team_object.team_members, da_id:team.id, label:"DA#" + team.id_for_incident + " (" + team.team_object.name + "): " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
             team_names.push(team.team_name);
           }
         });
@@ -660,6 +660,40 @@ function Deploy({ incident, organization }) {
           </Col>
           <Col xs={10} className="border rounded pl-0 pr-0">
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
+              {teamData.teams.filter(evac => evac.id === selectedTeam).length && teamData.teams.filter(evac => evac.id === selectedTeam)[0].service_request_objects.map(service_request => (
+                <Marker
+                  key={service_request.id}
+                  position={[service_request.latitude, service_request.longitude]}
+                  icon={checkMarkerIcon}
+                  // onClick={() => handleMapState(service_request.id)}
+                  zIndexOffset={1000}
+                >
+                  <MapTooltip autoPan={false}>
+                    <span>
+                      SR#{service_request.id_for_incident}: {service_request.full_address}
+                      {/* {mapState[service_request.id] ?
+                        <span>
+                          <br />
+                          {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                            <span key={key} style={{textTransform:"capitalize"}}>
+                              {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[service_request.id].matches[key])}
+                            </span>
+                          ))}
+                          {Object.keys(mapState[service_request.id].matches).length === 0 ? "0 Animals" : ""}
+                        </span>
+                      :""} */}
+                      <div>{service_request.animal_count || 0} Animal{service_request.animal_count === 1 ? "" : "s"}</div>
+                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                      <div>
+                      {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
+                      {service_request.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}
+                      {service_request.accessible ? <img width={16} height={16} src="/static/images/car-solid.png" alt="Accessible" className="mr-1" /> : <img width={16} height={16} src="/static/images/car-ban-solid.png" alt="Not Acessible" className="mr-1" />}
+                      {service_request.turn_around ? <img width={16} height={16} src="/static/images/trailer-solid.png" alt="Turn Around" className="mr-1" /> : <img width={16} height={16} src="/static/images/trailer-ban-solid.png" alt="No Turn Around" className="mr-1" />}
+                      </div>
+                    </span>
+                  </MapTooltip>
+                </Marker>
+              ))}
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
