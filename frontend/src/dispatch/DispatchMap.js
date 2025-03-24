@@ -787,7 +787,7 @@ function Deploy({ incident, organization }) {
                 >
                   <span className="fa-layers" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer"}}>
                     <FontAwesomeIcon icon={faFilter} className="ml-1" />
-                    <FontAwesomeIcon icon={faCheckCircle} size="sm" className="fa-inverse" transform={'shrink-4 down-3 right-10'} inverse />
+                    <FontAwesomeIcon icon={faCheckCircle} size="sm" className="fa-inverse" transform={'shrink-4 down-3 right-9'} inverse />
                   </span>
                 </OverlayTrigger>
               :
@@ -800,7 +800,7 @@ function Deploy({ incident, organization }) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faFilter} className="ml-1" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer"}} />
+                  <FontAwesomeIcon icon={faFilter} className="ml-1" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer", marginRight:"-4px"}} />
                 </OverlayTrigger>
               }
               <OverlayTrigger
@@ -812,7 +812,7 @@ function Deploy({ incident, organization }) {
                   </Tooltip>
                 }
               >
-                <FontAwesomeIcon icon={faBarsSort} className="ml-2" onClick={() => {setShowSortModal(true)}} style={{cursor:"pointer"}} transform={'grow-3'} />
+                <FontAwesomeIcon icon={faBarsSort} onClick={() => {setShowSortModal(true)}} style={{cursor:"pointer", marginLeft:"11px"}} transform={'grow-3'} />
               </OverlayTrigger>
               </h5>
               <hr/>
@@ -1315,6 +1315,7 @@ function Deploy({ incident, organization }) {
               inline
               id="primary-sort-priority"
               label="Priority"
+              style={{marginLeft:"50px"}}
               onClick={() => {setSortChoice('priority')}}
               checked={sortChoice === 'priority' ? true : false}
             />
