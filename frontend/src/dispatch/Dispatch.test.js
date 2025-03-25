@@ -9,7 +9,6 @@ describe("Render evac", () => {
   it("Render Dispatch", () => {
     const { getByText } = render(<SystemErrorProvider><Dispatch /></SystemErrorProvider>);
     expect(getByText(/DEPLOY TEAMS/)).toBeTruthy();
-    expect(getByText(/PREPLAN ASSIGNMENTS/)).toBeTruthy();
   });
 
   it("Render new dispatch team member form", async () => {

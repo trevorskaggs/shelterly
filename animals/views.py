@@ -45,65 +45,93 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
     # @transaction.atomic
     def perform_create(self, serializer):
+        from evac.models import AssignedRequest
 
-            if serializer.is_valid():
+        if serializer.is_valid():
 
-                total_animals = Animal.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug')).values_list('id', flat=True)
-                with transaction.atomic():
-                    count = len(total_animals)
-                    serializer.validated_data['id_for_incident'] = count + 1
+            total_animals = Animal.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug')).values_list('id', flat=True)
+            with transaction.atomic():
+                count = len(total_animals)
+                serializer.validated_data['id_for_incident'] = count + 1
 
-                    # Set status to SHELTERED if a shelter is added.
-                    if serializer.validated_data.get('shelter'):
-                        serializer.validated_data['status'] = 'SHELTERED'
-                        serializer.validated_data['intake_date'] = datetime.now()
+                # Set status to SHELTERED if a shelter is added.
+                if serializer.validated_data.get('shelter'):
+                    serializer.validated_data['status'] = 'SHELTERED'
+                    serializer.validated_data['intake_date'] = datetime.now()
 
-                    if self.request.data.get('incident_slug'):
-                        serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
+                if self.request.data.get('incident_slug'):
+                    serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
 
-                    animal = serializer.save()
-                    animals = [animal]
-                    action.send(self.request.user, verb='created animal', target=animal)
+                animal = serializer.save()
+                animals = [animal]
+                action.send(self.request.user, verb='created animal', target=animal)
 
-                    # Add Owner to new animals if included.
-                    if self.request.data.get('new_owner', 'undefined') != 'undefined':
-                        animal.owners.add(self.request.data['new_owner'])
+                # Add Owner to new animals if included.
+                if self.request.data.get('new_owner', 'undefined') != 'undefined':
+                    animal.owners.add(self.request.data['new_owner'])
 
-                    # Add ServiceRequest Owner to new animals being added to an SR.
-                    if serializer.validated_data.get('request'):
-                        animal.owners.add(*animal.request.owners.all())
+                # Add ServiceRequest Owners and update AssignedRequest if new animals are being added to an SR.
+                if serializer.validated_data.get('request'):
+                    animal.owners.add(*animal.request.owners.all())
+                    animal_dict = {
+                      "id_for_incident":animal.id_for_incident,
+                      'animal_count':animal.animal_count,
+                      "name": animal.name,
+                      "age": animal.age,
+                      "sex": animal.sex,
+                      "size": animal.size,
+                      "species": animal.species.name,
+                      "status": animal.status,
+                      "color_notes": animal.color_notes,
+                      "pcolor": animal.pcolor,
+                      "scolor": animal.scolor,
+                      "last_seen": animal.last_seen,
+                      "shelter": animal.shelter,
+                      "room": animal.room,
+                      'animal_notes':animal.behavior_notes,
+                      "medical_notes": animal.medical_notes,
+                      'aggressive':animal.aggressive,
+                      'aco_required':animal.aco_required,
+                      'injured':animal.injured,
+                      "fixed": animal.fixed,
+                      "confined": animal.confined,
+                      "is_new": True,
+                    }
+                    for assigned_request in AssignedRequest.objects.filter(service_request=serializer.validated_data.get('request'), dispatch_assignment__end_time=None):
+                        assigned_request.animals[str(serializer.instance.id)] = animal_dict
+                        assigned_request.save()
 
-                    # Create VR data if Triage is yellow or red.
-                    if self.request.data.get('priority', 'green') in ['when_available', 'urgent']:
-                        med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
-                        animal.medical_record=med_record
-                        animal.save()
-                        vet_request = VetRequest.objects.create(open=datetime.now(), priority=self.request.data.get('priority'), requested_by=self.request.user, caution=self.request.data.get('caution', 'false') == 'true', complaints_other=self.request.data.get('complaints_other'), concern=self.request.data.get('concern'), medical_record=med_record)
-                        vet_request.presenting_complaints.add(*self.request.data.get('presenting_complaints').split(','))
+                # Create VR data if Triage is yellow or red.
+                if self.request.data.get('priority', 'green') in ['when_available', 'urgent']:
+                    med_record, _ = MedicalRecord.objects.get_or_create(patient=animal)
+                    animal.medical_record=med_record
+                    animal.save()
+                    vet_request = VetRequest.objects.create(open=datetime.now(), priority=self.request.data.get('priority'), requested_by=self.request.user, caution=self.request.data.get('caution', 'false') == 'true', complaints_other=self.request.data.get('complaints_other'), concern=self.request.data.get('concern'), medical_record=med_record)
+                    vet_request.presenting_complaints.add(*self.request.data.get('presenting_complaints').split(','))
 
-                    if animal.shelter:
-                        action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
-                        action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
+                if animal.shelter:
+                    action.send(self.request.user, verb='sheltered animal in', target=animal, action_object=animal.shelter)
+                    action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
 
-                    if animal.room:
-                        action.send(self.request.user, verb='roomed animal in', target=animal, action_object=animal.room)
-                        action.send(self.request.user, verb='roomed animal', target=animal.room, action_object=animal)
-                        action.send(self.request.user, verb='roomed animal', target=animal.room.building, action_object=animal)
+                if animal.room:
+                    action.send(self.request.user, verb='roomed animal in', target=animal, action_object=animal.room)
+                    action.send(self.request.user, verb='roomed animal', target=animal.room, action_object=animal)
+                    action.send(self.request.user, verb='roomed animal', target=animal.room.building, action_object=animal)
 
-                    images_data = self.request.FILES
-                    for key, image_data in images_data.items():
-                        # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
-                        category = key.translate({ord(num): None for num in '0123456789'})
-                        # Create image object.
-                        AnimalImage.objects.create(image=image_data, animal=animal, category=category)
+                images_data = self.request.FILES
+                for key, image_data in images_data.items():
+                    # Strip out extra numbers from the key (e.g. "extra1" -> "extra")
+                    category = key.translate({ord(num): None for num in '0123456789'})
+                    # Create image object.
+                    AnimalImage.objects.create(image=image_data, animal=animal, category=category)
 
-                    # Check to see if there is an intake summary
-                    if self.request.data.get('intake_summary', False):
-                        IntakeSummary.objects.get(pk=self.request.data.get('intake_summary')).animals.add(*animals)
+                # Check to see if there is an intake summary
+                if self.request.data.get('intake_summary', False):
+                    IntakeSummary.objects.get(pk=self.request.data.get('intake_summary')).animals.add(*animals)
 
-                    # Check to see if animal SR status should be changed.
-                    if animal.request:
-                        animal.request.update_status(self.request.user)
+                # Check to see if animal SR status should be changed.
+                if animal.request:
+                    animal.request.update_status(self.request.user)
 
     def perform_update(self, serializer):
         from evac.models import AssignedRequest
