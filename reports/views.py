@@ -133,7 +133,7 @@ class ReportViewSet(viewsets.ViewSet):
       for animal in list(animals.filter(status='DECEASED').values('id', 'id_for_incident', 'animal_count', 'name', 'species__category__name', 'status', 'address', 'city', 'state', 'zip_code')):
           for action in Action.objects.filter(target_object_id=str(animal['id']), verb="changed animal status to DECEASED"):
               animal['date'] = action.timestamp
-              animals_deceased.append(animal)
+          animals_deceased.append(animal)
       animals_deceased = sorted(animals_deceased, key=itemgetter('date'), reverse=True)
 
       #Duplicate SR Report
@@ -157,14 +157,13 @@ class ReportViewSet(viewsets.ViewSet):
       followup_end_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').latest('date')['date']
       while followup_end_date >= followup_start_date:
           srs = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).filter(incident__slug=incident_slug, followup_date__date=followup_end_date).exclude(status__in=['closed', 'canceled']).distinct()
-          test = srs.count()
+          total = srs.count()
           followup_data = {
             'date': followup_end_date.strftime('%m/%d/%Y'),
             'new': len(srs.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'])),
-            # 'new': ServiceRequest.objects.filter(incident__slug=incident_slug, followup_date__date=end_date, animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)']).count(),
-            'sip': len(srs.filter(animal__status__in=['SHELTERED IN PLACE'])),
-            'utl': len(srs.filter(animal__status__in=['UNABLE TO LOCATE'])),
-            'total': test,
+            'sip': len(srs.exclude(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)']).filter(animal__status__in=['SHELTERED IN PLACE'])),
+            'utl': len(srs.exclude(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE']).filter(animal__status__in=['UNABLE TO LOCATE'])),
+            'total': total,
           }
           sr_followup_date_report.insert(0, followup_data)
           followup_end_date -= delta
