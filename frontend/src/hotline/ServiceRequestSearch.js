@@ -354,11 +354,9 @@ function ServiceRequestSearch({ incident, organization }) {
                     name="priority"
                     type="text"
                     placeholder="Select Priority"
-                    options={[{ value: 1, label: 'Highest' },
+                    options={[{ value: 1, label: 'Urgent' },
                     { value: 2, label: 'High' },
-                    { value: 3, label: 'Medium' },
-                    { value: 4, label: 'Low' },
-                    { value: 5, label: 'Lowest' }]}
+                    { value: 4, label: 'Low' }]}
                     styles={customStyles}
                     isClearable={true}
                     ref={priorityRef}
@@ -389,7 +387,7 @@ function ServiceRequestSearch({ incident, organization }) {
                     </Col>
                   </Row>
                   <Row className="mt-3" style={{maxHeight:"37px"}}>
-                    <Col style={{marginLeft:"-15px", paddingRight:"0px"}}>
+                    <Col style={{marginLeft:"-15px", paddingRight:"0px", marginTop:"-2px"}}>
                       <DateRangePicker
                         name={`end_date_range_picker`}
                         id={`end_date_range_picker`}

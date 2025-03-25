@@ -25,7 +25,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
     addFooterHandler: ShelterlyPDF.HandlerTypes.DEFAULT,
     pageTitle: `Dispatch Assignment ${drs.length ? `#${drs[0].id_for_incident}` : ''}`,
     pageSubtitle: drs.length
-      ? `Opened: ${new Date(drs[0].start_time).toLocaleDateString()}`
+      ? `Created: ${new Date(drs[0].start_time).toLocaleDateString()}`
       : ''
   });
 
@@ -34,7 +34,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
       pdf.drawPageBreak();
       pdf.drawPageHeader({
         pageTitle: `Dispatch Assignment #${data.id_for_incident}`,
-        subtitle: `Opened: ${new Date(data.start_time).toLocaleDateString()}`
+        subtitle: `Created: ${new Date(data.start_time).toLocaleDateString()}`
       });
     }
 

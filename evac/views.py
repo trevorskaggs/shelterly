@@ -176,7 +176,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 team.team_members.set(self.request.data.get('team_members'))
                 timestamp = datetime.now()
             serializer.validated_data['team'] = team
-            serializer.validated_data['dispatch_date'] = datetime.now()
+            serializer.validated_data['dispatch_date'] = datetime.now().date()
             evac_assignment = serializer.save()
             service_requests = ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'])
             service_requests.update(status="assigned")
