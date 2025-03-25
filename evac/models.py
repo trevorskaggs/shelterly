@@ -48,7 +48,7 @@ class EvacAssignment(models.Model):
     service_requests = models.ManyToManyField(ServiceRequest, through='AssignedRequest', related_name='evacuation_assignments')
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(blank=True, null=True)
-    dispatch_date = models.DateTimeField(blank=True, null=True)
+    dispatch_date = models.DateField(blank=True, null=True)
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
     closed = models.BooleanField(default=False)
 

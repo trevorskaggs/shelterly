@@ -347,7 +347,7 @@ function DispatchSummary({ id, incident, organization }) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 <ListGroup.Item>
                   <Row>
-                    <Col><b>Opened: </b>{<Moment format="MMM Do YYYY, HH:mm">{data.start_time}</Moment>}</Col>
+                    <Col><b>Created: </b>{<Moment format="MMM Do YYYY, HH:mm">{data.start_time}</Moment>}</Col>
                     <Col><b>Closed: </b>{data.end_time ? <Moment format="MMM Do YYYY, HH:mm">{data.end_time}</Moment> : "N/A"}</Col>
                   </Row>
                 </ListGroup.Item>

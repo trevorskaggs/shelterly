@@ -74,17 +74,17 @@ function Reports({ incident, organization }) {
           setData(response.data);
 
           // Hide Shelter Report species columns if there are 0 animals.
-          let columns=[...shelterColumns];
-          columns.forEach(col => {
-            let count = 0;
-            response.data['shelter_report'].forEach(shelter => {
-              count = count + shelter[col.name.toLowerCase()]
-            })
-            if (count === 0) {
-              col.omit = true;
-            }
-          })
-          setShelterColumns(columns);
+          // let columns=[...shelterColumns];
+          // columns.forEach(col => {
+          //   let count = 0;
+          //   response.data['shelter_report'].forEach(shelter => {
+          //     count = count + shelter[col.name.toLowerCase()]
+          //   })
+          //   if (count === 0) {
+          //     col.omit = true;
+          //   }
+          // })
+          // setShelterColumns(columns);
         }
       })
       .catch(error => {
@@ -161,38 +161,28 @@ function Reports({ incident, organization }) {
       grow: 1,
     },
     {
-      name: 'Avians',
-      selector: row => row.avians,
-      compact: true,
-    },
-    {
-      name: 'Camelids',
-      selector: row => row.camelids,
-      compact: true,
-    },
-    {
       name: 'Cats',
-      selector: row => row.cats,
+      selector: row => row.cat,
       compact: true,
     },
     {
       name: 'Dogs',
-      selector: row => row.dogs,
+      selector: row => row.dog,
       compact: true,
     },
     {
-      name: 'Equines',
-      selector: row => row.equines,
+      name: 'Avians',
+      selector: row => row.avian,
       compact: true,
     },
-    // {
-    //   name: 'Reptiles/Amphibians',
-    //   selector: row => row.reptiles,
-    //   compact: true,
-    // },
     {
-      name: 'Ruminants',
-      selector: row => row.ruminants,
+      name: 'Reptiles/Amphibians',
+      selector: row => row.reptileamphibian,
+      compact: true,
+    },
+    {
+      name: 'Fish',
+      selector: row => row.fish,
       compact: true,
     },
     {
@@ -201,15 +191,35 @@ function Reports({ incident, organization }) {
       compact: true,
     },
     {
+      name: 'Equines',
+      selector: row => row.equine,
+      compact: true,
+    },
+    {
+      name: 'Ruminants',
+      selector: row => row.ruminant,
+      compact: true,
+    },
+    {
+      name: 'Camelids',
+      selector: row => row.camelid,
+      compact: true,
+    },
+    {
+      name: 'Swine',
+      selector: row => row.swine,
+      compact: true,
+    },
+    {
       name: 'Others',
-      selector: row => row.others,
+      selector: row => row.other,
       compact: true,
     },
     {
       name: 'Total',
       selector: row => row.total,
       compact: true,
-    },
+    }
   ];
 
   const [shelterColumns, setShelterColumns] = useState(shelter_columns);
@@ -219,16 +229,6 @@ function Reports({ incident, organization }) {
       name: 'Date',
       selector: row => row.date,
       format: row => moment(row.date).format('MM/DD/YY')
-    },
-    {
-      name: 'Avians',
-      selector: row => row.avian,
-      compact: true,
-    },
-    {
-      name: 'Camelids',
-      selector: row => row.camelid,
-      compact: true,
     },
     {
       name: 'Cats',
@@ -241,23 +241,43 @@ function Reports({ incident, organization }) {
       compact: true,
     },
     {
+      name: 'Avians',
+      selector: row => row.avian,
+      compact: true,
+    },
+    {
+      name: 'Reptiles/Amphibians',
+      selector: row => row.reptileamphibian,
+      compact: true,
+    },
+    {
+      name: 'Fish',
+      selector: row => row.fish,
+      compact: true,
+    },
+    {
+      name: 'Small Mammals',
+      selector: row => row.small_mammals,
+      compact: true,
+    },
+    {
       name: 'Equines',
       selector: row => row.equine,
       compact: true,
     },
-    // {
-    //   name: 'Reptiles/Amphibians',
-    //   selector: row => row.reptileamphibian,
-    //   compact: true,
-    // },
     {
       name: 'Ruminants',
       selector: row => row.ruminant,
       compact: true,
     },
     {
-      name: 'Small Mammals',
-      selector: row => row.small_mammal,
+      name: 'Camelids',
+      selector: row => row.camelid,
+      compact: true,
+    },
+    {
+      name: 'Swine',
+      selector: row => row.swine,
       compact: true,
     },
     {
@@ -642,7 +662,7 @@ function Reports({ incident, organization }) {
       />
       : selection.value === 'shelter' ?
       <DataTable
-          columns={shelterColumns}
+          columns={shelter_columns}
           data={data.shelter_report}
           actions={actionsMemo}
           title={selection.label}
