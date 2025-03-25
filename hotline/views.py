@@ -3,7 +3,7 @@ import json
 
 from evac.models import EvacAssignment
 from django.db import transaction
-from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
+from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, Sum, When, Value, BooleanField
 from django.http import HttpResponse, JsonResponse
 from actstream import action
 from datetime import datetime, timedelta
@@ -114,6 +114,9 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = (
             ServiceRequest.objects.all()
+            .annotate(
+                animal_count=Sum("animal__animal_count", default=1)
+            )
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             )
