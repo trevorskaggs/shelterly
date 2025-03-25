@@ -387,7 +387,7 @@ function ServiceRequestSearch({ incident, organization }) {
                     </Col>
                   </Row>
                   <Row className="mt-3" style={{maxHeight:"37px"}}>
-                    <Col style={{marginLeft:"-15px", paddingRight:"0px"}}>
+                    <Col style={{marginLeft:"-15px", paddingRight:"0px", marginTop:"-2px"}}>
                       <DateRangePicker
                         name={`end_date_range_picker`}
                         id={`end_date_range_picker`}
