@@ -45,7 +45,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     class Meta:
         model = Animal
         fields = ['id', 'id_for_incident', 'animal_count', 'name', 'species', 'species_string', 'confined', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
-        'microchip', 'front_image', 'intake_date', 'owners', 'owner_names', 'active_dispatch', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight', 'reporter', 'reporter_object']
+        'microchip', 'front_image', 'intake_date', 'sip_date', 'owners', 'owner_names', 'active_dispatch', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight', 'reporter', 'reporter_object']
 
     def get_found_location(self, obj):
         return build_full_address(obj)
@@ -112,7 +112,7 @@ class AnimalSerializer(ModestAnimalSerializer):
 
     class Meta:
         model = Animal
-        fields = ['id', 'id_for_incident', 'animal_count', 'species', 'species_string', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'address', 'city', 'state', 'zip_code',
+        fields = ['id', 'id_for_incident', 'animal_count', 'species', 'species_string', 'status', 'aco_required', 'front_image', 'side_image', 'extra_images', 'last_seen', 'intake_date', 'sip_date', 'address', 'city', 'state', 'zip_code',
         'aggressive', 'injured', 'fixed', 'confined', 'found_location', 'owner_names', 'owners', 'shelter_object', 'shelter', 'reporter', 'reporter_object', 'request', 'request_id_for_incident', 'request_address',
         'action_history', 'building_name', 'room', 'room_name', 'name', 'sex', 'size', 'age', 'pcolor', 'scolor', 'color_notes', 'behavior_notes', 'medical_notes',
         'latitude', 'longitude', 'medical_record', 'microchip', 'active_dispatch', 'vet_requests']
