@@ -36,7 +36,7 @@ const IncidentForm = ({ id, organization }) => {
     slug: '',
     latitude: '',
     longitude: '',
-    default_followup_days: '',
+    default_followup_days: '1',
     training: false,
     caltopo_map_id: '',
     watchduty_map_id: '',
@@ -170,7 +170,7 @@ const IncidentForm = ({ id, organization }) => {
         latlon: Yup.string().required('Required'),
         latitude: Yup.number(),
         longitude: Yup.number(),
-        default_followup_days: Yup.number().integer(),
+        default_followup_days: Yup.number().integer().required('Required'),
         training: Yup.boolean(),
         caltopo_map_id: Yup.string().nullable(),
         watchduty_map_id: Yup.string().nullable()

@@ -446,6 +446,7 @@ const ExamForm = (props) => {
                       formikProps.setFieldValue("open", dateStr)
                     }}
                     value={formikProps.values.open||new Date()}
+                    clearable={false}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
