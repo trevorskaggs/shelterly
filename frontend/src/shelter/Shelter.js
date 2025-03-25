@@ -59,7 +59,7 @@ function Shelter({ incident, organization }) {
     <>
     <Header>Shelter</Header>
     <hr/>
-    <Row className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
+    {/* <Row className="ml-0 mr-0 pl-0 pr-0" style={{marginBottom:"-1px"}}>
       <Col xs={10} className="border rounded pl-0 pr-0">
         {data.shelters.length ?
           <Map bounds={data.bounds} className="landing-leaflet-container">
@@ -98,7 +98,7 @@ function Shelter({ incident, organization }) {
     <Row className="ml-0 mr-0 border rounded" style={{maxHeight:"38px"}}>
       <h5 className="card-header" style={{paddingTop:"7px", paddingLeft:"10px", paddingRight:"10px", height:"36px", width:"100%", backgroundColor:"#808080"}}>Shelters</h5>
     </Row>
-    <hr/>
+    <hr/> */}
     <Row className="ml-0">
       {data.shelters.map(shelter => (
         <span key={shelter.id} className="pl-0 pr-0 mr-3 mb-3">
