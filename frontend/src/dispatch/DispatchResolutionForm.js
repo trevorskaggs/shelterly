@@ -623,7 +623,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       label={`Followup Date (Default: ${state.incident.default_followup_days} days)`}
                       name={`sr_updates.${index}.followup_date`}
                       id={`sr_updates.${index}.followup_date`}
-                      more_options={{minDate:new Date()}}
+                      more_options={{minDate:'today'}}
                       xs="4"
                       data-enable-time={false}
                       clearable={false}
