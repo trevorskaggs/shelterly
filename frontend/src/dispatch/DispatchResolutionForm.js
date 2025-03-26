@@ -620,10 +620,10 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   </BootstrapForm.Row>
                   <BootstrapForm.Row className="mt-3">
                     <DateTimePicker
-                      label="Service Request Followup Date"
+                      label={`Followup Date (Default: ${state.incident.default_followup_days} days)`}
                       name={`sr_updates.${index}.followup_date`}
                       id={`sr_updates.${index}.followup_date`}
-                      more_options={{minDate:new Date()}}
+                      more_options={{minDate:'today'}}
                       xs="4"
                       data-enable-time={false}
                       clearable={false}

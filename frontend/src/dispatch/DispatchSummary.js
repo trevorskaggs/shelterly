@@ -81,7 +81,7 @@ function DispatchSummary({ id, incident, organization }) {
     setIsLoading(true);
     await axios.patch('/evac/api/dispatchteam/' + data.team + '/', requestBody)
     .then(response => {
-      setData(prevState => ({ ...prevState, "team_object":{ ...prevState.team_object, "name": teamName} }));
+      setData(prevState => ({ ...prevState, "team_name":teamName }));
       handleTeamNameClose();
       setError('');
     })
@@ -391,7 +391,7 @@ function DispatchSummary({ id, incident, organization }) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 <ListGroup.Item>
                   <Row>
-                    <Col><b>Opened: </b>{<Moment format="MMM Do YYYY, HH:mm">{data.start_time}</Moment>}</Col>
+                    <Col><b>Created: </b>{<Moment format="MMM Do YYYY, HH:mm">{data.start_time}</Moment>}</Col>
                     <Col><b>Closed: </b>{data.end_time ? <Moment format="MMM Do YYYY, HH:mm">{data.end_time}</Moment> : "N/A"}</Col>
                   </Row>
                 </ListGroup.Item>
@@ -412,7 +412,7 @@ function DispatchSummary({ id, incident, organization }) {
                       </OverlayTrigger>
                     </Col>
                     <Col>
-                      <b>Dispatched: </b>{<Moment format="MMM Do YYYY">{data.dispatch_date || new Date()}</Moment>}
+                      <b>Dispatch Date: </b>{<Moment format="MMM Do YYYY">{data.dispatch_date || new Date()}</Moment>}
                     </Col>
                   </Row>
                 </ListGroup.Item>
@@ -718,7 +718,7 @@ function DispatchSummary({ id, incident, organization }) {
           id="team_name"
           name="team_name"
           type="text"
-          onChange={(event) => {setTeamName(event.target.value)}}
+          onChange={(event) => {setTeamName(event.target.value);}}
           value={teamName}
           disabled={defaultTeamName}
         />
