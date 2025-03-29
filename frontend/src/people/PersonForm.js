@@ -297,8 +297,8 @@ const PersonForm = (props) => {
       >
         {formikProps => (
           <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
-            {id ?
-              <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Update {isOwner ? "Owner" : "Reporter"}</Card.Header>
+            {id || servicerequest_id ?
+              <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? "Update " : "Create "} {isOwner ? "Owner" : "Reporter"}</Card.Header>
               :
               <Card.Header as="h5" className="pl-3">
                 <span style={{cursor:'pointer'}} onClick={() => {
