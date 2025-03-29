@@ -82,7 +82,7 @@ class Animal(Location):
         return None
 
     def save(self, *args, **kwargs):
-        if not self.pk:
+        if not self.pk and not self.id_for_incident:
             total_animals = Animal.objects.select_for_update().filter(incident=self.incident).values_list('id', flat=True)
             with transaction.atomic():
                 count = len(total_animals)

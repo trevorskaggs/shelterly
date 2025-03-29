@@ -110,6 +110,7 @@ export const initialWorkflowData = {
       latitude: null,
       longitude: null,
       incident_slug: '',
+      organization_slug: '',
       change_reason: '',},
     owner: {
       first_name: '',
@@ -128,6 +129,7 @@ export const initialWorkflowData = {
       latitude: null,
       longitude: null,
       incident_slug: '',
+      organization_slug: '',
       change_reason: '',},
     animals: [],
     request: {
@@ -144,7 +146,8 @@ export const initialWorkflowData = {
       key_required: false,
       accessible: false,
       turnaround: false,
-      incident_slug: ''
+      incident_slug: '',
+      organization_slug: '',
     },
   }
 }

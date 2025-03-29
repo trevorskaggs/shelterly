@@ -61,6 +61,7 @@ function ServiceRequestForm(props) {
     accessible: props.state.steps.request.accessible || false,
     turn_around: props.state.steps.request.turn_around || false,
     incident_slug: props.incident,
+    organization_slug: props.organization
   });
 
   // Hook for initializing data.
@@ -171,9 +172,9 @@ function ServiceRequestForm(props) {
               values['owners'] = [ownerResponse[0].data.id]
             }
             axios.post('/hotline/api/servicerequests/?incident=' + incident, values)
-            .then(response => {
+            .then(async response => {
               // Create Animals
-              let promises = props.state.steps.animals.map(async (animal) => {
+              let promises = props.state.steps.animals.map(async (animal, index) => {
                 // Add owner and reporter to animal data.
                 if (reporterResponse[0].data.id) {
                   animal.append('reporter', reporterResponse[0].data.id);
@@ -182,9 +183,9 @@ function ServiceRequestForm(props) {
                   animal.append('new_owner', ownerResponse[0].data.id);
                 }
                 animal.append('request', response.data.id);
-                return axios.post('/animals/api/animal/', animal)
+                return setTimeout(() => axios.post('/animals/api/animal/', animal), 500 * index)
               });
-              Promise.all(promises)
+              await Promise.all(promises)
               .then((results) => {
                 navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id_for_incident);
               })

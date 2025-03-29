@@ -73,7 +73,6 @@ class PersonViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(Q(is_owner=True)|Q(is_reporter=True))
         return queryset
 
-
     def perform_create(self, serializer):
         if serializer.is_valid():
             # Check for duplicate owners.
@@ -94,7 +93,7 @@ class PersonViewSet(viewsets.ModelViewSet):
 
             # If an owner is being added from an animal, update the animal with the new owner.
             if self.request.data.get('animal'):
-                animal = Animal.objects.get(id_for_incident=self.request.data.get('animal'), incident__slug=self.request.data.get('incident_slug'))
+                animal = Animal.objects.get(id_for_incident=self.request.data.get('animal'), incident__slug=self.request.data.get('incident_slug'), organization__slug=self.request.data.get('organization_slug'))
                 animal.owners.add(person)
                 if animal.request:
                     animal.request.owners.add(person)

@@ -176,7 +176,7 @@ const IncidentForm = ({ id, organization }) => {
         watchduty_map_id: Yup.string().nullable()
       })}
       onSubmit={(values, { setSubmitting }) => {
-        values['slug'] = values.name.trim().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
+        values['slug'] = values.name.trim().toLowerCase().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
         if (id) {
           axios.put('/incident/api/incident/' + id + '/?organization=' + state.organization.id, values)
           .then(function () {

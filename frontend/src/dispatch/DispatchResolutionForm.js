@@ -141,7 +141,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  // Initial animal data.
+  // Initial DA data.
   const [data, setData] = useState({
     id: null,
     closed: false,
@@ -156,6 +156,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
     dispatch_date: null,
     sr_updates: [],
     incident_slug: incident,
+    organization_slug: organization,
   });
 
   const [showSplit, setShowSplit] = useState(false);
