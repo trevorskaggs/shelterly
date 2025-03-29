@@ -195,6 +195,8 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def remove_active(self, request, pk=None):
         from rest_framework import response
         sr = ServiceRequest.objects.get(id=pk)
+        sr.followup_date=datetime.today()
+        sr.save()
         for assigned_request in AssignedRequest.objects.filter(service_request=sr, dispatch_assignment__end_time=None):
             assigned_request.delete()
         if len(sr.animal_set.all()):
