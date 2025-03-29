@@ -7,7 +7,7 @@ import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-boot
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import { AddressSearch, DateTimePicker, DropDown, FileUploader, ImageUploader, TextInput } from '../components/Form.js';
-import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, unknownChoices, otherAgeChoice } from './constants';
+import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, statusChoicesNFA, unknownChoices, otherAgeChoice } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare, faTimes } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from "../components/ButtonSpinner";
@@ -135,15 +135,22 @@ const AnimalForm = (props) => {
   let current_data = {...initialData};
   let imageList = [];
   if (is_workflow && props.state.steps.animals[props.state.animalIndex]) {
-    for (let pair of props.state.steps.animals[props.state.animalIndex].entries()) {
-      current_data[String(pair[0])] = pair[1];
-      if (['front_image', 'side_image'].includes(pair[0])) {
-        current_data[String(pair[0])] = null;
-        imageList.push({data_url:props.state.steps.animals[props.state.animalIndex].get(pair[0] + '_data_url'), file:pair[1]})
+    if (props.state.steps.animals[props.state.animalIndex] instanceof FormData) {
+      for (let pair of props.state.steps.animals[props.state.animalIndex].entries()) {
+        current_data[String(pair[0])] = pair[1];
+        if (['front_image', 'side_image'].includes(pair[0])) {
+          current_data[String(pair[0])] = null;
+          imageList.push({data_url:props.state.steps.animals[props.state.animalIndex].get(pair[0] + '_data_url'), file:pair[1]})
+        }
+        else if (['species'].includes(pair[0])) {
+          current_data[String(pair[0])] = Number(pair[1]);
+        }
       }
-      else if (['species'].includes(pair[0])) {
-        current_data[String(pair[0])] = Number(pair[1]);
-      }
+    }
+    else {
+      current_data = props.state.steps.animals[props.state.animalIndex];
+      current_data['presenting_complaints'] = [];
+      current_data['priority'] = 'green';
     }
   }
 
@@ -398,7 +405,7 @@ const AnimalForm = (props) => {
               props.onSubmit('animals', formData, 'animals');
               // Reset form data with existing animal data if we have it.
               let formdata = props.state.steps.animals[props.state.animalIndex + 1];
-              if (formdata) {
+              if (formdata instanceof FormData) {
                 let animal_json = {...initialData};
                 for (let pair of formdata.entries()) {
                   if (['front_image', 'side_image'].includes(pair[0])) {
@@ -417,6 +424,11 @@ const AnimalForm = (props) => {
                   }
                 }
                 resetForm({values:animal_json});
+                setRedirectCheck(true);
+                setIsButtonSubmitting(false);
+              }
+              else if (formdata && Object.keys(formdata).length) {
+                resetForm({values:formdata});
                 setRedirectCheck(true);
                 setIsButtonSubmitting(false);
               }
@@ -454,10 +466,10 @@ const AnimalForm = (props) => {
                 });
               }
               // Create Owner
-              let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
-              if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
+              let ownerResponse = [{data:{id:props.state.steps.owners.length ? props.state.steps.owners[0].id : ''}}];
+              if (props.state.steps.owners.length && props.state.steps.owners[0].first_name && !props.state.steps.owners[0].id) {
                 ownerResponse = await Promise.all([
-                  axios.post('/people/api/person/', props.state.steps.owner)
+                  axios.post('/people/api/person/', props.state.steps.owners[0])
                 ])
                 .catch(error => {
                   setIsButtonSubmitting(false);
@@ -465,9 +477,9 @@ const AnimalForm = (props) => {
                   setRedirectCheck(true);
                 });
               }
-              else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
+              else if (props.state.steps.owners.length && props.state.steps.owners[0].first_name && props.state.steps.owners[0].id) {
                 ownerResponse = await Promise.all([
-                  axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
+                  axios.put('/people/api/person/' + props.state.steps.owners[0].id + '/', props.state.steps.owners[0])
                 ])
                 .catch(error => {
                   setIsButtonSubmitting(false);
@@ -485,7 +497,7 @@ const AnimalForm = (props) => {
               let intakeSummaryResponse = [{data:{id:null}}];
               values['shelter'] = shelter_id;
               values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
-              values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
+              values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owners') + '_walkin';
               values['animal_count'] = count;
               intakeSummaryResponse = await Promise.all([
                 axios.post('/shelter/api/intakesummary/', values)
@@ -578,7 +590,7 @@ const AnimalForm = (props) => {
               :
               <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owner' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
+              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owners' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
                 <BootstrapForm.Row>
@@ -599,15 +611,15 @@ const AnimalForm = (props) => {
                       ref={speciesRef}
                       options={species.options}
                       value={formikProps.values.species||data.species}
-                      isClearable={true}
+                      isClearable={formikProps.values.id ? false : true}
                       onChange={(instance) => {
                         setPlaceholder("Select...")
                         sizeRef.current.select.clearValue();
                         // ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
-                        formikProps.setFieldValue("species", instance.value);
-                        formikProps.setFieldValue("species_string", instance.label);
+                        formikProps.setFieldValue("species", instance ? instance.value : '');
+                        formikProps.setFieldValue("species_string", instance ? instance.label : '');
                       }}
                     />
                   </Col>
@@ -670,7 +682,7 @@ const AnimalForm = (props) => {
                         name="status"
                         type="text"
                         key={`my_unique_requested_service_select_key__${formikProps.values.status}`}
-                        options={reportedStatusChoices}
+                        options={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) ? reportedStatusChoices : statusChoicesNFA}
                         disabled={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) && !data.active_dispatch ? false : true}
                         value={formikProps.values.status||''}
                         isClearable={false}

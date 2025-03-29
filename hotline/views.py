@@ -3,7 +3,7 @@ import json
 
 from evac.models import EvacAssignment
 from django.db import transaction
-from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
+from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, Sum, When, Value, BooleanField
 from django.http import HttpResponse, JsonResponse
 from actstream import action
 from datetime import datetime, timedelta
@@ -115,6 +115,9 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         queryset = (
             ServiceRequest.objects.all()
             .annotate(
+                animal_count=Sum("animal__animal_count", default=0)
+            )
+            .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             )
             .annotate(
@@ -130,6 +133,9 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         status = self.request.query_params.get('status', '')
         if status in ('open', 'assigned', 'closed', 'canceled'):
             queryset = queryset.filter(status=status).distinct()
+        exclude_status = self.request.query_params.get('exclude_status', '')
+        if exclude_status in ('open', 'assigned', 'closed', 'canceled'):
+            queryset = queryset.exclude(status=exclude_status).distinct()
 
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')  or self.request.query_params.get('landingmap', '')
@@ -201,6 +207,8 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def remove_active(self, request, pk=None):
         from rest_framework import response
         sr = ServiceRequest.objects.get(id=pk)
+        sr.followup_date=datetime.today()
+        sr.save()
         for assigned_request in AssignedRequest.objects.filter(service_request=sr, dispatch_assignment__end_time=None):
             assigned_request.delete()
         sr.update_status(self.request.user)

@@ -68,6 +68,8 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     # Add Owner to new animals if included.
                     if self.request.data.get('new_owner', 'undefined') != 'undefined':
                         animal.owners.add(self.request.data['new_owner'])
+                    if self.request.data.get('new_owners', 'undefined') != 'undefined':
+                        animal.owners.add(*self.request.data['new_owners'].split(','))
 
                     # Add ServiceRequest Owner to new animals being added to an SR.
                     if serializer.validated_data.get('request'):
