@@ -241,7 +241,7 @@ class ServiceRequestSerializer(SimpleServiceRequestSerializer):
         model = ServiceRequest
         fields = ['id', 'id_for_incident', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'address', 'city', 'state', 'zip_code', 'directions', 'priority',
         'injured', 'accessible', 'turn_around', 'animals', 'animal_count', 'reporter', 'reported_animals', 'reported_evac', 'sheltered_in_place', 'reported_sheltered_in_place', 'unable_to_locate', 'aco_required',
-        'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_names', 'owner_objects', 'reporter_object', 'assigned_requests', 'notes']
+        'images', 'key_provided', 'verbal_permission', 'action_history', 'owner_names', 'owners', 'owner_objects', 'reporter_object', 'assigned_requests', 'notes']
 
     # Custom field for ordering animals.
     def get_animals(self, obj):

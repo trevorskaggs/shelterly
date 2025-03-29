@@ -115,7 +115,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         queryset = (
             ServiceRequest.objects.all()
             .annotate(
-                animal_count=Sum("animal__animal_count")
+                animal_count=Sum("animal__animal_count", default=0)
             )
             .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))

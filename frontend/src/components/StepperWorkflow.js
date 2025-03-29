@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Stepper from '@material-ui/core/Stepper';
 import Step from '@material-ui/core/Step';
@@ -73,8 +73,8 @@ function getSteps(is_intake) {
   return ['Lookup Address', 'Create Contacts', 'Create Animals', 'Create Service Request'];
 }
 
-function getStepContent(incident, organization, step, handleStepSubmit, handleBack, state) {
-  switch (step) {
+function getStepContent(incident, organization, step, handleStepSubmit, handleBack, state, is_intake) {
+  switch (is_intake ? step + 1 : step) {
     case 0:
       return <AddressForm onSubmit={handleStepSubmit} handleBack={handleBack} state={state} incident={incident} organization={organization} />
     case 1:
@@ -93,6 +93,7 @@ export const initialWorkflowData = {
   hasOwner: false,
   animalCount: 0,
   animalIndex: 0,
+  ownerIndex: 0,
   shelter: null,
   steps: {
     initial: {
@@ -123,25 +124,26 @@ export const initialWorkflowData = {
       longitude: null,
       incident_slug: '',
       change_reason: '',},
-    owner: {
-      id: '',
-      first_name: '',
-      last_name: '',
-      phone: '',
-      alt_phone: '',
-      email: '',
-      drivers_license: '',
-      comments: '',
-      agency: '',
-      address: '',
-      apartment: '',
-      city: '',
-      state: '',
-      zip_code: '',
-      latitude: null,
-      longitude: null,
-      incident_slug: '',
-      change_reason: '',},
+    owners: [],
+    // owner: {
+    //   id: '',
+    //   first_name: '',
+    //   last_name: '',
+    //   phone: '',
+    //   alt_phone: '',
+    //   email: '',
+    //   drivers_license: '',
+    //   comments: '',
+    //   agency: '',
+    //   address: '',
+    //   apartment: '',
+    //   city: '',
+    //   state: '',
+    //   zip_code: '',
+    //   latitude: null,
+    //   longitude: null,
+    //   incident_slug: '',
+    //   change_reason: '',},
     animals: [],
     request: {
       id: '',
@@ -158,7 +160,8 @@ export const initialWorkflowData = {
       key_required: false,
       accessible: false,
       turnaround: false,
-      incident_slug: ''
+      incident_slug: '',
+      owner_objects: []
     },
   }
 }
@@ -172,6 +175,7 @@ function StepperWorkflow({ incident, organization }) {
   } = queryParams;
   // Set shelter if present.
   initialWorkflowData['shelter'] = Number(shelter_id);
+  initialWorkflowData['stepIndex'] = 0;
 
   // Determine if this is an intake workflow.
   let is_intake = window.location.pathname.includes("intake");
@@ -192,6 +196,12 @@ function StepperWorkflow({ incident, organization }) {
       setActiveStep((prevActiveStep) => prevActiveStep - 1);
     }
 
+    // Reduce the owner index when going backward from an owner to another owner.
+    var owner_track_index = state.ownerIndex;
+    if (nextStep === 'owners' && currentStep === 'owners') {
+      owner_track_index = state.ownerIndex -1;
+    }
+
     // Reduce the animal index when going backward from an animal to another animal.
     var track_index = state.animalIndex;
     if (nextStep === 'animals' && currentStep === 'animals') {
@@ -200,13 +210,15 @@ function StepperWorkflow({ incident, organization }) {
     // Reset state if going back to address lookup.
     if (nextStep === 'initial') {
       setState(initialWorkflowData);
+      setContactCount(0);
     }
     else {
       setState((prevState) => ({
         ...prevState,
-        hasOwner: nextStep === 'owner',
+        hasOwner: nextStep === 'owners',
         stepIndex: prevState.stepIndex - 1,
         animalIndex: track_index,
+        ownerIndex: owner_track_index,
         steps: { ...prevState.steps, 'request':data ? data : prevState.steps.request } // Only set SR data if present.
       }))
     }
@@ -214,26 +226,51 @@ function StepperWorkflow({ incident, organization }) {
 
   function handleStepSubmit(currentStep, data, nextStep, allData={}) {
 
-    // Calculate number of contacts.
-    console.log(allData)
-    setContactCount((((allData.existing_owner_id) || (currentStep === 'owner' && data.first_name) || (currentStep !== 'initial' && state.steps.owner.first_name)) ? 1 : 0) + (((currentStep === 'reporter' && data.first_name) || state.steps.reporter.first_name) ? 1 : 0));
-
     // Populate data if existing SR was picked.
     if (currentStep === 'initial' && Object.keys(allData).length) {
       setState((prevState) => ({
         ...prevState,
         stepIndex: prevState.stepIndex + 1,
         animalCount: allData.animal_count,
-        steps: { ...prevState.steps, ['owner']:allData.existing_owner_id ? allData.owner_objects.filter(owner => owner.id === allData.existing_owner_id)[0] : {id:''}, ['animals']:allData.animals, ['request']:allData, ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
+        steps: { ...prevState.steps, ['owners']:allData.owner_objects, ['animals']:allData.animals, ['request']:allData, ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
       }))
+      // setContactCount(contactCount + data.first_name ? allData.owner_objects.length : 0 +  (((currentStep === 'reporter' && data.first_name) || state.steps.reporter.first_name) ? 1 : 0));
     }
     // Otherwise proceed without SR data.
     else if (currentStep === 'initial') {
       setState((prevState) => ({
         ...prevState,
         stepIndex: prevState.stepIndex + 1,
-        steps: { ...prevState.steps, ['owner']:data, ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
+        steps: { ...prevState.steps, ['owners']:data.id ? [...prevState.steps.owners, data] : [], ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
       }))
+      // setContactCount(contactCount + data.first_name ? 1 : 0);
+    }
+    // Treat owners differently since we need an array of N owners.
+    else if (currentStep === 'owners') {
+      // Only increase owner index on save if we're adding another owner.
+      var index = state.ownerIndex;
+      if (nextStep === 'owners') {
+        index = index + 1;
+      }
+      // If we're not on the last owner, update the current owner based on the index.
+      if (state.ownerIndex !== state.steps.owners.length) {
+        const ownerList = [...state.steps.owners];
+        ownerList[state.ownerIndex] = data;
+        setState((prevState) => ({
+          ...prevState,
+          stepIndex: prevState.stepIndex + 1,
+          ownerIndex: index,
+          steps: { ...prevState.steps, [currentStep]:ownerList }
+        }))
+      }
+      else {
+        setState((prevState) => ({
+          ...prevState,
+          stepIndex: prevState.stepIndex + 1,
+          ownerIndex: index,
+          steps: { ...prevState.steps, [currentStep]:[...prevState.steps.owners, data] }
+        }))
+      }
     }
     // Treat animals differently since we need an array of N animals.
     else if (currentStep === 'animals') {
@@ -283,7 +320,7 @@ function StepperWorkflow({ incident, organization }) {
     else {
       setState((prevState) => ({
         ...prevState,
-        hasOwner: nextStep === 'owner',
+        hasOwner: nextStep === 'owners',
         stepIndex: prevState.stepIndex + 1,
         steps: { ...prevState.steps, [currentStep]:data }
       }))
@@ -295,23 +332,28 @@ function StepperWorkflow({ incident, organization }) {
     }
   }
 
+  // Calculate number of contacts.
+  useEffect(() => {
+    setContactCount(state.steps.owners.length + (state.steps.reporter.first_name ? 1 : 0));
+  }, [state.steps.owners.length, state.steps.reporter.first_name]);
+
   return (
     <div className={classes.root}>
       <Stepper className={classes.stepper} activeStep={activeStep}>
         {steps.map((label, index) => {
           const stepProps = {};
           const labelProps = {};
-          if (index === 1) {
+          if ((index === 1 && !is_intake) || (is_intake && index === 0)) {
             labelProps.optional = <Typography variant="caption" component={'span'}>{contactCount} Contact{contactCount === 1 ? "" : "s"} Created</Typography>;
           }
-          else if (index === 2) {
+          else if ((index === 2 && !is_intake) || (is_intake && index === 1)) {
             labelProps.optional = <Typography variant="caption" component={'span'}>{state.animalCount} Animal{state.animalCount === 1 ? "" : "s"} Created</Typography>;
           }
           return (
             <Step key={label} {...stepProps}>
               <StepLabel
                 // Use a custom checkbox for completed state in order to have a white background.
-                StepIconComponent={activeStep < index+1 ? undefined : CustomStepIcon}
+                StepIconComponent={activeStep < index + 1 ? undefined : CustomStepIcon}
                 classes={{
                   label: classes.stepper,
                   root: classes.stepper,
@@ -333,7 +375,7 @@ function StepperWorkflow({ incident, organization }) {
       </Stepper>
       <div>
           <div>
-            <Typography className={classes.instructions} component={'span'}>{getStepContent(incident, organization, activeStep, handleStepSubmit, handleBack, state)}</Typography>
+            <Typography className={classes.instructions} component={'span'}>{getStepContent(incident, organization, activeStep, handleStepSubmit, handleBack, state, is_intake)}</Typography>
           </div>
       </div>
     </div>

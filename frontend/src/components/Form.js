@@ -719,9 +719,9 @@ const AddressSearch = (props) => {
   }
 
   useEffect(() => {
-    setExistingOwner(props.existingOwner);
-    if (props.existingOwner) {
-      setFadeIn(true);
+    if (Object.keys(props).includes('existingOwner')) {
+      setExistingOwner(props.existingOwner);
+      setFadeIn(props.existingOwner);
     }
   }, [props.existingOwner]);
 

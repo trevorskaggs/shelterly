@@ -466,10 +466,10 @@ const AnimalForm = (props) => {
                 });
               }
               // Create Owner
-              let ownerResponse = [{data:{id:props.state.steps.owner.id}}];
-              if (props.state.steps.owner.first_name && !props.state.steps.owner.id) {
+              let ownerResponse = [{data:{id:props.state.steps.owners.length ? props.state.steps.owners[0].id : ''}}];
+              if (props.state.steps.owners.length && props.state.steps.owners[0].first_name && !props.state.steps.owners[0].id) {
                 ownerResponse = await Promise.all([
-                  axios.post('/people/api/person/', props.state.steps.owner)
+                  axios.post('/people/api/person/', props.state.steps.owners[0])
                 ])
                 .catch(error => {
                   setIsButtonSubmitting(false);
@@ -477,9 +477,9 @@ const AnimalForm = (props) => {
                   setRedirectCheck(true);
                 });
               }
-              else if (props.state.steps.owner.first_name && props.state.steps.owner.id) {
+              else if (props.state.steps.owners.length && props.state.steps.owners[0].first_name && props.state.steps.owners[0].id) {
                 ownerResponse = await Promise.all([
-                  axios.put('/people/api/person/' + props.state.steps.owner.id + '/', props.state.steps.owner)
+                  axios.put('/people/api/person/' + props.state.steps.owners[0].id + '/', props.state.steps.owners[0])
                 ])
                 .catch(error => {
                   setIsButtonSubmitting(false);
@@ -497,7 +497,7 @@ const AnimalForm = (props) => {
               let intakeSummaryResponse = [{data:{id:null}}];
               values['shelter'] = shelter_id;
               values['person'] = reporterResponse[0].data.id ? reporterResponse[0].data.id : ownerResponse[0].data.id
-              values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owner') + '_walkin';
+              values['intake_type'] = (reporterResponse[0].data.id ? 'reporter' : 'owners') + '_walkin';
               values['animal_count'] = count;
               intakeSummaryResponse = await Promise.all([
                 axios.post('/shelter/api/intakesummary/', values)
@@ -590,7 +590,7 @@ const AnimalForm = (props) => {
               :
               <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owner' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
+              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owners' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
                 <BootstrapForm.Row>
@@ -611,15 +611,15 @@ const AnimalForm = (props) => {
                       ref={speciesRef}
                       options={species.options}
                       value={formikProps.values.species||data.species}
-                      isClearable={true}
+                      isClearable={formikProps.values.id ? false : true}
                       onChange={(instance) => {
                         setPlaceholder("Select...")
                         sizeRef.current.select.clearValue();
                         // ageRef.current.select.clearValue();
                         pcolorRef.current.select.clearValue();
                         scolorRef.current.select.clearValue();
-                        formikProps.setFieldValue("species", instance.value);
-                        formikProps.setFieldValue("species_string", instance.label);
+                        formikProps.setFieldValue("species", instance ? instance.value : '');
+                        formikProps.setFieldValue("species_string", instance ? instance.label : '');
                       }}
                     />
                   </Col>
