@@ -203,7 +203,11 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         sr = ServiceRequest.objects.get(id=pk)
         for assigned_request in AssignedRequest.objects.filter(service_request=sr, dispatch_assignment__end_time=None):
             assigned_request.delete()
-        sr.update_status(self.request.user)
+        if len(sr.animal_set.all()):
+            sr.update_status(self.request.user)
+        else:
+            sr.status = 'open'
+            sr.save()
         return response.Response(ServiceRequestSerializer(sr).data, status=200)
 
 class VisitNoteViewSet(viewsets.ModelViewSet):

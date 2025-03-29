@@ -435,6 +435,9 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     evac_assignment.assigned_requests.remove(assigned_request)
                 if len(sr.animal_set.all()):
                     sr.update_status(self.request.user)
+                else:
+                    sr.status = 'open'
+                    sr.save()
 
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
 
