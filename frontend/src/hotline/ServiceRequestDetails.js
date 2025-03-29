@@ -164,7 +164,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const handleSRRemove = () => {
     axios.get('/hotline/api/servicerequests/' + data.id + '/remove_active/')
     .then(response => {
-      setData(prevState => ({ ...prevState, "status":response.data.status, "assigned_requests":response.data.assigned_requests }));
+      setData(prevState => ({ ...prevState, "status":response.data.status, "assigned_requests":response.data.assigned_requests, "followup_date":response.data.followup_date }));
       handleCloseRemoveModal();
     })
     .catch(error => {
