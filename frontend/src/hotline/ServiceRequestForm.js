@@ -183,7 +183,9 @@ function ServiceRequestForm(props) {
                   animal.append('new_owner', ownerResponse[0].data.id);
                 }
                 animal.append('request', response.data.id);
-                return setTimeout(() => axios.post('/animals/api/animal/', animal), 500 * index)
+                return new Promise(resolve => {
+                  setTimeout(() => resolve(axios.post('/animals/api/animal/', animal)), 500 * index)
+                })
               });
               await Promise.all(promises)
               .finally((results) => {
