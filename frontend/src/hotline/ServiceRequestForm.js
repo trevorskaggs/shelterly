@@ -48,7 +48,7 @@ function ServiceRequestForm(props) {
     reporter: null,
     directions: props.state.steps.request.directions || '',
     priority: props.state.steps.request.priority || 2,
-    followup_date: props.state.steps.request.followup_date || new Date(),
+    followup_date: props.state.steps.request.followup_date || new Date().toJSON().slice(0, 10),
     address: props.state.steps.request.address || props.state.steps.owner.address || '',
     apartment: props.state.steps.request.apartment || props.state.steps.owner.apartment || '',
     city: props.state.steps.request.city || props.state.steps.owner.city || '',
@@ -186,7 +186,7 @@ function ServiceRequestForm(props) {
                 return setTimeout(() => axios.post('/animals/api/animal/', animal), 500 * index)
               });
               await Promise.all(promises)
-              .then((results) => {
+              .finally((results) => {
                 navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id_for_incident);
               })
             })
@@ -247,7 +247,7 @@ function ServiceRequestForm(props) {
                 label="Service Request Followup Date"
                 name={`followup_date`}
                 id={`followup_date`}
-                // more_options={{minDate:new Date()}}
+                more_options={{minDate:'today'}}
                 clearable={false}
                 xs="4"
                 data-enable-time={false}
