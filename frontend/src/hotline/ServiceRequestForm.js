@@ -247,7 +247,7 @@ function ServiceRequestForm(props) {
                 label="Service Request Followup Date"
                 name={`followup_date`}
                 id={`followup_date`}
-                more_options={{minDate:'today'}}
+                // more_options={{minDate:'today'}}
                 clearable={false}
                 xs="4"
                 data-enable-time={false}
