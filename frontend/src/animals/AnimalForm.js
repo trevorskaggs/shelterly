@@ -131,6 +131,7 @@ const AnimalForm = (props) => {
     latitude: null,
     longitude: null,
     incident_slug: props.incident,
+    organization_slug: props.organization,
   }
   let current_data = {...initialData};
   let imageList = [];

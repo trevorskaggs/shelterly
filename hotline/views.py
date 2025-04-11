@@ -45,17 +45,11 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 return self.light_serializer_class
         return super(ServiceRequestViewSet, self).get_serializer_class()
 
-
     def perform_create(self, serializer):
         if serializer.is_valid():
 
-            total_srs = ServiceRequest.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug')).values_list('id', flat=True)
-            with transaction.atomic():
-                count = len(total_srs)
-                serializer.validated_data['id_for_incident'] = count + 1
-
             if self.request.data.get('incident_slug'):
-                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'))
+                serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'), organization__slug=self.request.data.get('organization_slug'))
 
             service_request = serializer.save()
             action.send(self.request.user, verb='created service request', target=service_request)
@@ -121,7 +115,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             )
             .annotate(
-                pending=Case(When(followup_date__gte=datetime.today() + timedelta(days=1) if self.request.query_params.get('when', '') == 'tomorrow' else datetime.today(), then=Value(True)), default=Value(False), output_field=BooleanField())
+                pending=Case(When(followup_date__gt=datetime.today(), then=Value(True)), default=Value(False), output_field=BooleanField())
             ).prefetch_related(Prefetch('animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED').order_by('id').prefetch_related('owners').select_related('species'), to_attr='animals'))
             .prefetch_related('owners')
             .select_related('reporter')
@@ -142,7 +136,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         if is_map == 'true':
             queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None)).exclude(status='canceled')
         if self.request.GET.get('incident'):
-            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
         return queryset
 
     @drf_action(detail=True, methods=['GET'], name='Download GeoJSON')
@@ -211,7 +205,11 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         sr.save()
         for assigned_request in AssignedRequest.objects.filter(service_request=sr, dispatch_assignment__end_time=None):
             assigned_request.delete()
-        sr.update_status(self.request.user)
+        if len(sr.animal_set.all()):
+            sr.update_status(self.request.user)
+        else:
+            sr.status = 'open'
+            sr.save()
         return response.Response(ServiceRequestSerializer(sr).data, status=200)
 
 class VisitNoteViewSet(viewsets.ModelViewSet):

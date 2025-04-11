@@ -277,7 +277,7 @@ function AnimalSearch({ incident, organization }) {
       setNumPages(0);
       setData({animals: [], isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/animals/api/animal/?search=' + searchTerm +'&incident=' + incident, {
+      await axios.get('/animals/api/animal/?search=' + searchTerm +'&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
       })
       .then(async (response) => {

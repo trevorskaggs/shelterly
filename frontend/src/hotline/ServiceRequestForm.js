@@ -43,7 +43,7 @@ function ServiceRequestForm(props) {
     reporter: null,
     directions: props.state.steps.request.directions || '',
     priority: props.state.steps.request.priority || 2,
-    followup_date: props.state.steps.request.followup_date || new Date(),
+    followup_date: props.state.steps.request.followup_date || new Date().toJSON().slice(0, 10),
     address: props.state.steps.request.address || props.state.steps.initial.address || '',
     apartment: props.state.steps.request.apartment || props.state.steps.initial.apartment || '',
     city: props.state.steps.request.city || props.state.steps.initial.city || '',
@@ -56,6 +56,7 @@ function ServiceRequestForm(props) {
     accessible: props.state.steps.request.accessible || false,
     turn_around: props.state.steps.request.turn_around || false,
     incident_slug: props.incident,
+    organization_slug: props.organization
   });
 
   // Hook for initializing data.
@@ -191,14 +192,18 @@ function ServiceRequestForm(props) {
               animal instanceof FormData ? animal.append('request', requestResponse[0].data.id) : animal['request'] = requestResponse[0].data.id;
               let animal_id = animal instanceof FormData ? animal.get('id') : animal.id
               if (animal_id) {
-                return axios.put('/animals/api/animal/' + animal_id + '/', animal)
+                return new Promise(resolve => {
+                  setTimeout(() => resolve(axios.put('/animals/api/animal/' + animal_id + '/', animal)), 500 * index)
+                })
               }
               else {
-                return axios.post('/animals/api/animal/', animal)
+                return new Promise(resolve => {
+                  setTimeout(() => resolve(axios.post('/animals/api/animal/', animal)), 500 * index)
+                })
               }
             });
-            Promise.all(animal_promises)
-            .then((results) => {
+            await Promise.all(animal_promises)
+            .finally((results) => {
               navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + requestResponse[0].data.id_for_incident);
             })
             .catch(error => {
@@ -263,7 +268,7 @@ function ServiceRequestForm(props) {
                 label="Service Request Followup Date"
                 name={`followup_date`}
                 id={`followup_date`}
-                // more_options={{minDate:new Date()}}
+                // more_options={{minDate:'today'}}
                 clearable={false}
                 xs="4"
                 data-enable-time={false}

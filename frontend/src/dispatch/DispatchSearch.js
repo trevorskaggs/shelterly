@@ -112,7 +112,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
     const fetchDispatchAssignments = async () => {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch DispatchAssignment data.
-      await axios.get('/evac/api/evacassignment/?map=true&search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident, {
+      await axios.get('/evac/api/evacassignment/?map=true&search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
       })
       .then(response => {

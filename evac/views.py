@@ -147,7 +147,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             queryset = queryset.exclude(service_requests=None)
 
         if self.request.GET.get('incident'):
-            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
 
         status = self.request.query_params.get('status', '')
         if status == "open":
@@ -165,11 +165,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
 
-            total_das = EvacAssignment.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug')).values_list('id', flat=True)
-            with transaction.atomic():
-                count = len(total_das)
-                serializer.validated_data['id_for_incident'] = count + 1
-
+            timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
             if self.request.data.get('team_members'):
@@ -456,6 +452,9 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     sr.save()
                 if len(sr.animal_set.all()):
                     sr.update_status(self.request.user)
+                else:
+                    sr.status = 'open'
+                    sr.save()
 
             action.send(self.request.user, verb='updated evacuation assignment', target=evac_assignment)
 

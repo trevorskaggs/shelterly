@@ -123,6 +123,7 @@ export const initialWorkflowData = {
       latitude: null,
       longitude: null,
       incident_slug: '',
+      organization_slug: '',
       change_reason: '',},
     owners: [],
     // owner: {
@@ -155,13 +156,14 @@ export const initialWorkflowData = {
       latitude: null,
       longitude: null,
       directions:'',
-      followup_date: new Date(),
+      followup_date: new Date().toJSON().slice(0, 10),
       verbal_permission: false,
       key_required: false,
       accessible: false,
       turnaround: false,
       incident_slug: '',
-      owner_objects: []
+      owner_objects: [],
+      organization_slug: '',
     },
   }
 }
