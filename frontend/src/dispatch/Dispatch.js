@@ -105,7 +105,7 @@ function Dispatch({ incident, organization }) {
 
     const fetchSubscribed = async () => {
       // Fetch IncidentNotification data.
-      await axios.get('/incident/api/notification/?incident=' + incident + '&dispatch=true', {
+      await axios.get('/incident/api/notification/?incident=' + incident + '&organization=' + organization +  '&dispatch=true', {
         cancelToken: source.token,
       })
       .then(response => {

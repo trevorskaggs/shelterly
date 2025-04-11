@@ -144,7 +144,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             queryset = queryset.exclude(service_requests=None)
 
         if self.request.GET.get('incident'):
-            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
 
         status = self.request.query_params.get('status', '')
         if status == "open":

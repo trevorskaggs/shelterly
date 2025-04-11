@@ -232,7 +232,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             .select_related("reporter", "room", "request", "shelter")
         )
         if self.request.GET.get('incident'):
-            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
         return queryset
 
 class SpeciesViewSet(viewsets.ModelViewSet):

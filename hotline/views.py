@@ -130,7 +130,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         if is_map == 'true':
             queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None)).exclude(status='canceled')
         if self.request.GET.get('incident'):
-            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'))
+            queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
         return queryset
 
     @drf_action(detail=True, methods=['GET'], name='Download GeoJSON')
