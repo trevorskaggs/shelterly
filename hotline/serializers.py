@@ -52,10 +52,20 @@ class BarebonesServiceRequestSerializer(serializers.ModelSerializer):
     animal_count = serializers.IntegerField(read_only=True)
     owner_names = serializers.StringRelatedField(source='owners', many=True, read_only=True)
     owner_objects = SimplePersonSerializer(source='owners', many=True, required=False, read_only=True)
+    aco_required = serializers.SerializerMethodField(read_only=True)
+    injured = serializers.BooleanField(read_only=True)
+
+    # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
+    def get_aco_required(self, obj):
+        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
+        try:
+            return bool([animal for animal in obj.animals if animal.aco_required == 'yes'])
+        except AttributeError:
+            return obj.animal_set.filter(aco_required='yes').exists()
 
     class Meta:
         model = ServiceRequest
-        fields = ['id', 'id_for_incident', 'address', 'city', 'state', 'full_address', 'status', 'owner_names', 'owner_objects', 'animal_count']
+        fields = ['id', 'id_for_incident', 'address', 'city', 'state', 'full_address', 'status', 'owner_names', 'owner_objects', 'latitude', 'longitude', 'aco_required', 'followup_date', 'injured', 'accessible', 'turn_around', 'full_address', 'animal_count']
 
     # Custom field for the full address.
     def get_full_address(self, obj):
@@ -74,20 +84,10 @@ class MapServiceRequestSerializer(BarebonesServiceRequestSerializer):
     reported_sheltered_in_place = serializers.SerializerMethodField()
     sheltered_in_place = serializers.SerializerMethodField()
     unable_to_locate = serializers.SerializerMethodField()
-    aco_required = serializers.SerializerMethodField(read_only=True)
-    injured = serializers.BooleanField(read_only=True)
 
     # Custom field for the full address.
     def get_full_address(self, obj):
         return build_full_address(obj)
-
-    # Custom field for if any animal is ACO Required. If it is aggressive or "Other" species.
-    def get_aco_required(self, obj):
-        # Performs list comp. on prefetched queryset of animals for this SR to avoid hitting db again.
-        try:
-            return bool([animal for animal in obj.animals if animal.aco_required == 'yes'])
-        except AttributeError:
-            return obj.animal_set.filter(aco_required='yes').exists()
 
     # Custom field for determining if an SR contains REPORTED animals.
     def get_reported_animals(self, obj):

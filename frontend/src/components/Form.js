@@ -71,6 +71,9 @@ const useStyles = makeStyles({
       backgroundColor: '#106ba3',
     },
   },
+  radio: {
+    color: 'inherit',
+  },
 });
 
 const DateRangePicker = React.forwardRef((props, ref) => {
@@ -243,15 +246,15 @@ const Radio = (props) => {
 
   return (
     <>
-    {props.label}
     <MaterialRadio
-    type="checkbox"
+      type="checkbox"
       className={classes.radio}
       disableRipple
       color="white"
       inputProps={{ 'aria-label': 'decorative radio' }}
       {...props}
     />
+    {props.label}
     {/* {meta.touched && meta.error ? (
       <div className="error">{meta.error}</div>
     ) : null} */}
