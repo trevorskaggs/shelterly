@@ -63,7 +63,7 @@ function Hotline({ incident, organization }) {
     const fetchServiceRequests = async () => {
       setData({service_requests: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
+      await axios.get('/hotline/api/servicerequests/?incident=' + incident + '&organization=' + organization, {
         params: {
           landingmap: true
         },

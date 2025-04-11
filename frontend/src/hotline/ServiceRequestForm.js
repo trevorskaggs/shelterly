@@ -48,7 +48,7 @@ function ServiceRequestForm(props) {
     reporter: null,
     directions: props.state.steps.request.directions || '',
     priority: props.state.steps.request.priority || 2,
-    followup_date: props.state.steps.request.followup_date || new Date(),
+    followup_date: props.state.steps.request.followup_date || new Date().toJSON().slice(0, 10),
     address: props.state.steps.request.address || props.state.steps.owner.address || '',
     apartment: props.state.steps.request.apartment || props.state.steps.owner.apartment || '',
     city: props.state.steps.request.city || props.state.steps.owner.city || '',
@@ -61,6 +61,7 @@ function ServiceRequestForm(props) {
     accessible: props.state.steps.request.accessible || false,
     turn_around: props.state.steps.request.turn_around || false,
     incident_slug: props.incident,
+    organization_slug: props.organization
   });
 
   // Hook for initializing data.
@@ -171,9 +172,9 @@ function ServiceRequestForm(props) {
               values['owners'] = [ownerResponse[0].data.id]
             }
             axios.post('/hotline/api/servicerequests/?incident=' + incident, values)
-            .then(response => {
+            .then(async response => {
               // Create Animals
-              let promises = props.state.steps.animals.map(async (animal) => {
+              let promises = props.state.steps.animals.map(async (animal, index) => {
                 // Add owner and reporter to animal data.
                 if (reporterResponse[0].data.id) {
                   animal.append('reporter', reporterResponse[0].data.id);
@@ -182,10 +183,12 @@ function ServiceRequestForm(props) {
                   animal.append('new_owner', ownerResponse[0].data.id);
                 }
                 animal.append('request', response.data.id);
-                return axios.post('/animals/api/animal/', animal)
+                return new Promise(resolve => {
+                  setTimeout(() => resolve(axios.post('/animals/api/animal/', animal)), 500 * index)
+                })
               });
-              Promise.all(promises)
-              .then((results) => {
+              await Promise.all(promises)
+              .finally((results) => {
                 navigate('/' + props.organization + '/' + incident + '/hotline/servicerequest/' + response.data.id_for_incident);
               })
             })
@@ -246,7 +249,7 @@ function ServiceRequestForm(props) {
                 label="Service Request Followup Date"
                 name={`followup_date`}
                 id={`followup_date`}
-                // more_options={{minDate:new Date()}}
+                // more_options={{minDate:'today'}}
                 clearable={false}
                 xs="4"
                 data-enable-time={false}

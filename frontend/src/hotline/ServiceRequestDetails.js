@@ -164,7 +164,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const handleSRRemove = () => {
     axios.get('/hotline/api/servicerequests/' + data.id + '/remove_active/')
     .then(response => {
-      setData(prevState => ({ ...prevState, "status":response.data.status, "assigned_requests":response.data.assigned_requests }));
+      setData(prevState => ({ ...prevState, "status":response.data.status, "assigned_requests":response.data.assigned_requests, "followup_date":response.data.followup_date }));
       handleCloseRemoveModal();
     })
     .catch(error => {
@@ -464,10 +464,10 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     ref={datetime}
                     name="followup_date"
                     id="followup_date"
-                    options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y h:i K", minDate:'today'}}
+                    options={{clickOpens:false, altInput:true, altInputClass:"hide-input", altFormat:"F j, Y"}}
                     onChange={(date, dateStr) => {
                       setData(prevState => ({ ...prevState, "followup_date":dateStr }));
-                      axios.patch('/hotline/api/servicerequests/' + data.id + '/', {followup_date:date[0]})
+                      axios.patch('/hotline/api/servicerequests/' + data.id + '/', {followup_date:date[0].toJSON().slice(0, 10)})
                       .catch(error => {
                         setShowSystemError(true);
                       });

@@ -141,7 +141,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  // Initial animal data.
+  // Initial DA data.
   const [data, setData] = useState({
     id: null,
     closed: false,
@@ -156,6 +156,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
     dispatch_date: null,
     sr_updates: [],
     incident_slug: incident,
+    organization_slug: organization,
   });
 
   const [showSplit, setShowSplit] = useState(false);
@@ -207,7 +208,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
             })
             response.data.sr_updates.push({
               id: assigned_request.service_request_object.id,
-              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + state.incident.default_followup_days)),
+              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + state.incident.default_followup_days)).toJSON().slice(0, 10),
               priority: assigned_request.service_request_object.priority,
               date_completed: assigned_request.visit_note && assigned_request.visit_note.date_completed ? assigned_request.visit_note.date_completed : new Date(),
               directions: assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : '',
@@ -623,14 +624,14 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       label={`Followup Date (Default: ${state.incident.default_followup_days} days)`}
                       name={`sr_updates.${index}.followup_date`}
                       id={`sr_updates.${index}.followup_date`}
-                      more_options={{minDate:'today'}}
+                      // more_options={{minDate:'today'}}
                       xs="4"
                       data-enable-time={false}
                       clearable={false}
                       onChange={(date, dateStr) => {
                         props.setFieldValue(`sr_updates.${index}.followup_date`, dateStr)
                       }}
-                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date().setDate(new Date().getDate() + state.incident.default_followup_days)}
+                      value={props.values.sr_updates[index] && props.values.sr_updates[index].followup_date ? props.values.sr_updates[index].followup_date : new Date(new Date().setDate(new Date().getDate() + state.incident.default_followup_days)).toJSON().slice(0, 10)}
                       disabled={data.end_time !== null && assigned_request.followup_date !== assigned_request.service_request_object.followup_date}
                     />
                   </BootstrapForm.Row>

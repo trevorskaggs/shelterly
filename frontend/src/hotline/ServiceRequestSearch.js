@@ -198,7 +198,7 @@ function ServiceRequestSearch({ incident, organization }) {
     const fetchServiceRequests = () => {
       setData({service_requests: [], isFetching: true});
       // Fetch ServiceRequest data.
-      axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&incident=' + incident, {
+      axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
       })
       .then(response => {

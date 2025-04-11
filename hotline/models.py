@@ -47,7 +47,7 @@ class ServiceRequest(Location):
     caltopo_feature_id = models.CharField(blank=True, max_length=100)
 
     #post_fields
-    followup_date = models.DateTimeField(auto_now=False, auto_now_add=False, blank=True, null=True)
+    followup_date = models.DateField(auto_now=False, auto_now_add=False, blank=True, null=True)
 
     def __str__(self):
         output = []
