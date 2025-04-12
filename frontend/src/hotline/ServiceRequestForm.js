@@ -1,12 +1,14 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useNavigationPrompt } from 'raviger';
 import { Field, Form, Formik } from 'formik';
-import { Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal } from "react-bootstrap";
+import { Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal, Row } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
+import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import { AddressSearch, DateTimePicker, DropDown, TextInput } from '../components/Form';
+import { Legend, pinMarkerIcon } from "../components/Map";
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
@@ -20,6 +22,9 @@ function ServiceRequestForm(props) {
 
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
+
+  const markerRef = useRef(null);
+  const mapRef = useRef(null);
 
   const id = props.id;
   const incident = props.incident;
@@ -36,6 +41,23 @@ function ServiceRequestForm(props) {
 
   // Is submitting state for save/next workflow buttons.
   const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
+
+  const [initialLatLon, setInitialLatLon] = useState([0, 0]);
+
+  const updatePosition = (formikProps) => {
+    const marker = markerRef.current;
+    const map = mapRef.current
+    if (marker !== null) {
+      const latLon = marker.leafletElement.getLatLng();
+      // Preserve the original map center LatLon.
+      if (initialLatLon[0] === 0) {
+        setInitialLatLon([formikProps.values.latitude, formikProps.values.longitude])
+      }
+      formikProps.setFieldValue("latitude", +(Math.round(latLon.lat + "e+4") + "e-4"));
+      formikProps.setFieldValue("longitude", +(Math.round(latLon.lng + "e+4") + "e-4"));
+      map.leafletElement.setView(latLon);
+    }
+}
 
   // Initial ServiceRequest data.
   const [data, setData] = useState({
@@ -245,7 +267,52 @@ function ServiceRequestForm(props) {
         </Card.Header>
         <Card.Body>
           <BootstrapForm as={Form}>
-            <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} disabled={is_workflow ? true : false} incident={props.incident} error="Service Request Address was not selected." />
+            {is_workflow ?
+              <span>
+                <BootstrapForm.Row>
+                  <TextInput
+                    label="Address"
+                    name="test"
+                    id="test"
+                    xs="6"
+                    value={props.state.steps.initial.address + (props.state.steps.initial.apartment ? " " + props.state.steps.initial.apartment : "") + ", " + props.state.steps.initial.city + ", " + props.state.steps.initial.state + " " + props.state.steps.initial.zip_code}
+                    disabled={true}
+                  />
+                </BootstrapForm.Row>
+                {/* <h4>{formikProps.values.full_address}</h4> */}
+                <Col className="pr-0 pl-0 mb-3" xs="4" style={{marginTop:"0px"}}>
+                  <BootstrapForm.Label>Refine Exact Lat/Lon Point</BootstrapForm.Label>
+                  <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || formikProps.values.latitude || 0, initialLatLon[1] || formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
+                    <Legend position="bottomleft" metric={false} />
+                    <TileLayer
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                    />
+                    {formikProps.values.latitude && formikProps.values.longitude ?
+                    <Marker
+                      draggable={true}
+                      onDragEnd={() => {updatePosition(formikProps)}}
+                      autoPan={true}
+                      position={[formikProps.values.latitude, formikProps.values.longitude]}
+                      icon={pinMarkerIcon}
+                      ref={markerRef}
+                    >
+                      <MapTooltip autoPan={false} direction="top">
+                        <div>
+                          {formikProps.values.full_address}
+                        </div>
+                        <div>
+                          Lat: {formikProps.values.latitude}, Lon: {formikProps.values.longitude}
+                        </div>
+                      </MapTooltip>
+                    </Marker>
+                    : ""}
+                  </Map>
+                </Col>
+              </span>
+            :
+              <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} disabled={is_workflow ? true : false} incident={props.incident} error="Service Request Address was not selected." />
+            }
             <BootstrapForm.Row className="mb-3">
               <Col xs={"2"}>
                 <DropDown

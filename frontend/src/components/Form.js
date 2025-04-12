@@ -799,7 +799,7 @@ const AddressSearch = (props) => {
             </Form.Row>
           </Col>
           <Col className="pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"0px"}}>
-            <Form.Label>Refine Exact Lat/Lon Point</Form.Label>
+            <Form.Label>{props.address_form === true ? "Location" : "Refine Exact Lat/Lon Point"}</Form.Label>
             <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
               <Legend position="bottomleft" metric={false} />
               <TileLayer
@@ -808,7 +808,7 @@ const AddressSearch = (props) => {
               />
               {props.formikProps.values.latitude && props.formikProps.values.longitude ?
               <Marker
-                draggable={true}
+                draggable={props.address_form ? false : true}
                 onDragEnd={updatePosition}
                 autoPan={true}
                 position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
