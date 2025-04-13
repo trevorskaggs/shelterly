@@ -203,7 +203,7 @@ function ServiceRequestForm(props) {
               ])
             }
             // Create Animals
-            let animal_promises = props.state.steps.animals.map(async (animal) => {
+            let animal_promises = props.state.steps.animals.map(async (animal, index) => {
               // Add owner and reporter to animal data.
               if (reporterResponse[0].data.id) {
                 animal instanceof FormData ? animal.append('reporter', reporterResponse[0].data.id) : animal['reporter'] = reporterResponse[0].data.id;

@@ -57,7 +57,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             if self.request.data.get('incident_slug'):
                 serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'), organization__slug=self.request.data.get('organization_slug'))
 
-            total_animals = Animal.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug'), organization__slug=self.request.data.get('organization_slug')).values_list('id', flat=True)
+            total_animals = Animal.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug'), incident__organization__slug=self.request.data.get('organization_slug')).values_list('id', flat=True)
             with transaction.atomic():
                 count = len(total_animals)
                 serializer.validated_data['id_for_incident'] = count + 1
