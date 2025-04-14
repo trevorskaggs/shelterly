@@ -895,7 +895,7 @@ const AnimalForm = (props) => {
                     type="text"
                     xs="2"
                     label="No. of Animals"
-                    disabled={data.medical_record ? true : false}
+                    disabled={data instanceof FormData ? data.get('medical_record') : data.medical_record ? true : false}
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}
