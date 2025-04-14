@@ -440,7 +440,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
       {props => (
         <>
           <BootstrapForm as={Form}>
-            <Header>Dispatch Assignment and Resolution</Header>
+            <Header>Dispatch Assignment Resolution</Header>
             <hr/>
             <Card className="mt-3 border rounded">
               <Card.Body>

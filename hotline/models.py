@@ -103,11 +103,11 @@ class ServiceRequest(Location):
         title = ''
         try:
             da = EvacAssignment.objects.get(end_time__isnull=True, service_requests=self)
-            title += 'DA#%s - ' % da.id_for_incident
+            title += 'DA#%03d - ' % da.id_for_incident
         except:
             #No active DA
             pass
-        title += "SR#" + str(self.id_for_incident)
+        title += "SR#%03d" % self.id_for_incident
         return title
 
     def get_feature_description(self):
@@ -189,9 +189,13 @@ class ServiceRequest(Location):
             accountId=settings.CALTOPO_ACCOUNT_ID,
             sync=False,
         )
+        folder_id = None
         # If the SR has already previously been pushed to Caltopo, it will have
         # a caltopo_feature_id, try to remove old object to create new one.
         if self.caltopo_feature_id:
+            feat = sts.getFeature(id=self.caltopo_feature_id)
+            if 'folderId' in feat['properties']:
+                folder_id = feat['properties']['folderId']
             try:
                 sts.delMarker(markerOrId=self.caltopo_feature_id)
             except:
@@ -200,7 +204,8 @@ class ServiceRequest(Location):
             'title': self.get_feature_title(),
             'color': self.get_marker_color(),
             'symbol': self.get_marker_symbol(),
-            'description': self.get_feature_description()
+            'description': self.get_feature_description(),
+            'folderId': folder_id
         }
         lon = self.longitude
         lat = self.latitude

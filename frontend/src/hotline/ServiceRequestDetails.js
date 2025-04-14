@@ -153,6 +153,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   }
 
   const handleGeoJsonPush = () => {
+    setIsLoading(true);
     axios.get('/hotline/api/servicerequests/' + data.id + '/push/', {
             responseType: 'json',
         }).then(res => {
@@ -413,7 +414,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
                       Download Service Request as Geojson
                     </LoadingLink>
-                    {state && state.incident.caltopo_map_id ?
+                    {state && state.incident.caltopo_map_id && data.status != 'closed' ?
                     <LoadingLink onClick={handleGeoJsonPush} isLoading={isLoading} className="text-white d-block py-1 px-3">
                       <FontAwesomeIcon icon={faUpload} className="mr-1"  inverse />
                       Push Service Request to CalTopo

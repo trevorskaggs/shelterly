@@ -313,18 +313,6 @@ function ServiceRequestSearch({ incident, organization }) {
               Download All ({`${filteredServiceRequests.length}`})
               <FontAwesomeIcon icon={faDownload} className="ml-2 text-light" inverse />
             </ButtonSpinner>
-            { state && state.incident.caltopo_map_id ?
-            <ButtonSpinner
-              variant="outline-light"
-              className="ml-1 mr-1 print-all-btn-icon"
-              onClick={handleGeoJsonPush}
-              isSubmitting={isSubmittingById()}
-              isSubmittingText={submittingLabel}
-            >
-              Push All ({`${filteredServiceRequests.length}`})
-              <FontAwesomeIcon icon={faUpload} className="ml-2 text-light" inverse />
-            </ButtonSpinner>
-            : ''}
           </InputGroup>
           </Col>
         </Row>
