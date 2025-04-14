@@ -475,9 +475,9 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   <h4>{data.team_name}</h4>
                 </Card.Title>
                 <hr />
-                <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px", textTransform: "capitalize" }}>
+                <ListGroup variant="flush" style={{ marginTop:"-13px", marginBottom:"-13px", textTransform: "capitalize" }}>
                   {data.team && data.team_object.team_member_objects.map(team_member => (
-                    <ListGroup.Item key={team_member.id}>
+                    <ListGroup.Item key={team_member.id} style={{marginLeft:"-5px"}}>
                       {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ? <span>&nbsp;({team_member.agency_id})</span> : ""}
                     </ListGroup.Item>
                   ))}
