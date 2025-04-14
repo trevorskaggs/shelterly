@@ -100,7 +100,8 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
           axios.get('/evac/api/evacassignment/?incident=' + incident, {
             params: {
               status: 'open',
-              map: true
+              map: true,
+              organization
             },
             cancelToken: source.token,
           })
