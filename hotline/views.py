@@ -73,7 +73,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     for animal in service_request.animal_set.all():
                         if assigned_request.animals.get(str(animal.id)):
                             assigned_request.animals[str(animal.id)]['status'] = 'CANCELED'
-                    assigned_request.save()
+                    assigned_request.delete()
 
             elif self.request.FILES.keys():
               # Create new files from uploads
