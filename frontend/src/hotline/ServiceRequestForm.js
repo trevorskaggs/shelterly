@@ -241,7 +241,7 @@ function ServiceRequestForm(props) {
           });
         }
         else if (id) {
-          axios.put('/hotline/api/servicerequests/' + data.id + '/?incident=' + incident, values)
+          axios.put('/hotline/api/servicerequests/' + data.id + '/?incident=' + incident + '&organization=' + props.organization, values)
           .then(function() {
             if (state.prevLocation) {
               navigate(state.prevLocation);
@@ -269,20 +269,9 @@ function ServiceRequestForm(props) {
           <BootstrapForm as={Form}>
             {is_workflow ?
               <span>
-                <BootstrapForm.Row>
-                  <TextInput
-                    label="Address"
-                    name="test"
-                    id="test"
-                    xs="6"
-                    value={props.state.steps.initial.address + (props.state.steps.initial.apartment ? " Apt #" + props.state.steps.initial.apartment : "") + ", " + props.state.steps.initial.city + ", " + props.state.steps.initial.state + " " + props.state.steps.initial.zip_code}
-                    disabled={true}
-                  />
-                </BootstrapForm.Row>
-                {/* <h4>{formikProps.values.full_address}</h4> */}
-                <Col className="pr-0 pl-0 mb-3" xs="4" style={{marginTop:"0px"}}>
+                <Col className="pr-0 pl-0 mb-3" xs="6" style={{marginTop:"0px"}}>
                   <BootstrapForm.Label>Refine Exact Lat/Lon Point</BootstrapForm.Label>
-                  <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || formikProps.values.latitude || 0, initialLatLon[1] || formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
+                  <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || formikProps.values.latitude || 0, initialLatLon[1] || formikProps.values.longitude || 0]} className="animal-search-leaflet-container border rounded" >
                     <Legend position="bottomleft" metric={false} />
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

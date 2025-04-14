@@ -71,6 +71,7 @@ function Dispatch({ incident, organization }) {
         params: {
           status: 'open',
           incident: incident,
+          organization: organization,
           map: true
         },
         cancelToken: source.token,

@@ -448,7 +448,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
               values.sr_updates[index].animals[inception].status = animal.status.replace("$", "");
             })
           })
-          axios.put('/evac/api/evacassignment/' + data.id + '/?incident=' + incident, values)
+          axios.put('/evac/api/evacassignment/' + data.id + '/?incident=' + incident + '&organization=' + organization, values)
             .then(response => {
               if (response.data.service_requests.length === 0) {
                 navigate('/' + organization + '/' + incident + '/dispatch');
