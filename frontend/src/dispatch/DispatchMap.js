@@ -298,6 +298,7 @@ function Deploy({ incident, organization }) {
               deploy_map: true,
               status: 'active',
               incident,
+              organization,
             },
             cancelToken: source.token,
           })
