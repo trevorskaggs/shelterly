@@ -347,7 +347,7 @@ function Deploy({ incident, organization }) {
     const fetchServiceRequests = async () => {
       setData({...data, isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
+      await axios.get('/hotline/api/servicerequests/?incident=' + incident + '&organization=' + organization, {
         params: {
           status: 'open',
           when: 'today',
@@ -437,6 +437,8 @@ function Deploy({ incident, organization }) {
         team_members: [],
         service_requests: [],
         incident: state.incident.id,
+        incident_slug: incident,
+        organization_slug: organization,
       }}
       enableReinitialize={true}
       onSubmit={(values, { setSubmitting, resetForm }) => {

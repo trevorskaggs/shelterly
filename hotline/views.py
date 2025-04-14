@@ -48,6 +48,11 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
 
+            total_srs = ServiceRequest.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug'), incident__organization__slug=self.request.data.get('organization_slug')).values_list('id', flat=True)
+            with transaction.atomic():
+                count = len(total_srs)
+                serializer.validated_data['id_for_incident'] = count + 1
+
             if self.request.data.get('incident_slug'):
                 serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'), organization__slug=self.request.data.get('organization_slug'))
 
