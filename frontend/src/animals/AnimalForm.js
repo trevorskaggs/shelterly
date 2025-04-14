@@ -612,7 +612,7 @@ const AnimalForm = (props) => {
                       ref={speciesRef}
                       options={species.options}
                       value={formikProps.values.species||data.species}
-                      isClearable={formikProps.values.id ? false : true}
+                      isClearable={(formikProps.values.id || is_intake) ? false : true}
                       onChange={(instance) => {
                         setPlaceholder("Select...")
                         sizeRef.current.select.clearValue();

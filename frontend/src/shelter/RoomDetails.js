@@ -126,7 +126,7 @@ function RoomDetails({ id, incident, organization }) {
         <Card className="mb-2 border rounded" style={{width:"100%"}}>
           <Card.Body style={{marginBottom:"-17px"}}>
             <Card.Title>
-              <h4 className="mb-0">Animals ({data.animal_count})
+              <h4 className="mb-0">Animals ({data.animal_count || 0})
                 <OverlayTrigger placement="top" overlay={<Tooltip id={`tooltip-assign`}>Assign animals to rooms</Tooltip>}>
                   <Link href={"/" + organization + "/" + incident + "/shelter/" + data.shelter + "/assign?building_id=" + data.building}><FontAwesomeIcon icon={faArrowDownToSquare} className="ml-1 fa-move-up" inverse /></Link>
                 </OverlayTrigger>

@@ -109,14 +109,19 @@ class SimpleShelterSerializer(serializers.ModelSerializer):
 class ModestShelterSerializer(SimpleShelterSerializer):
     
     buildings = SimpleBuildingSerializer(source='building_set', many=True, required=False, read_only=True)
-    # animal_count = serializers.IntegerField(required=False)
-    animal_count = serializers.SerializerMethodField()
+    animal_count = serializers.IntegerField(required=False, read_only=True)
+    # animal_count = serializers.SerializerMethodField()
 
-    def get_animal_count(self, obj):
-        count = 0
-        for animal in obj.animal_set.all():
-            count = count + animal.animal_count
-        return count
+    # def get_animal_count(self, obj):
+    #     count = 0
+    #     import ipdb;ipdb.set_trace()
+    #     try:
+    #         for animal in obj.animals.all():
+    #             count = count + animal.animal_count
+    #     except AttributeError:
+    #         for animal in obj.animal_set.all():
+    #             count = count + animal.animal_count
+    #     return count
 
 
 class ShelterSerializer(ModestShelterSerializer):

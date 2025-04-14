@@ -48,7 +48,7 @@ function ShelterDetails({ id, incident, organization }) {
 
     const fetchShelterData = async () => {
       // Fetch Shelter Details data.
-      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
+      await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
       })
       .then(response => {

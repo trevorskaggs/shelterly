@@ -238,7 +238,6 @@ function StepperWorkflow({ incident, organization }) {
         animalCount: allData.animal_count,
         steps: { ...prevState.steps, ['owners']:allData.owner_objects, ['animals']:allData.animals, ['request']:allData, ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
       }))
-      // setContactCount(contactCount + data.first_name ? allData.owner_objects.length : 0 +  (((currentStep === 'reporter' && data.first_name) || state.steps.reporter.first_name) ? 1 : 0));
     }
     // Otherwise proceed without SR data.
     else if (currentStep === 'initial') {
@@ -247,7 +246,6 @@ function StepperWorkflow({ incident, organization }) {
         stepIndex: prevState.stepIndex + 1,
         steps: { ...prevState.steps, ['owners']:data.id ? [...prevState.steps.owners, data] : [], ['initial']:{address:data.address, city:data.city, state:data.state, apartment:data.apartment, zip_code:data.zip_code, latitude:data.latitude, longitude:data.longitude} }
       }))
-      // setContactCount(contactCount + data.first_name ? 1 : 0);
     }
     // Treat owners differently since we need an array of N owners.
     else if (currentStep === 'owners') {
@@ -338,8 +336,8 @@ function StepperWorkflow({ incident, organization }) {
 
   // Calculate number of contacts.
   useEffect(() => {
-    setContactCount({new:state.steps.owners.filter(owner => !owner.id).length + (state.steps.reporter.first_name ? 1 : 0), existing:state.steps.owners.filter(owner => owner.id).length + (state.steps.reporter.first_name ? 1 : 0)});
-  }, [state.steps.owners.length, state.steps.reporter.first_name]);
+    setContactCount({new:state.steps.owners.filter(owner => !owner.id).length + (state.steps.reporter.first_name && !state.steps.reporter.id ? 1 : 0), existing:state.steps.owners.filter(owner => owner.id).length + (state.steps.reporter.first_name && state.steps.reporter.id ? 1 : 0)});
+  }, [state.steps.owners.length, state.steps.reporter.id]);
 
   return (
     <div className={classes.root}>

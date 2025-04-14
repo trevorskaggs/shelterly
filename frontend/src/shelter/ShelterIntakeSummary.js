@@ -149,7 +149,7 @@ function ShelterIntakeSummary({ id, incident, organization }) {
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px"}}>
                 <ListGroup.Item>
-                  <b>Type: </b>{data.intake_type === "owner_walkin"
+                  <b>Type: </b>{data.intake_type === "owners_walkin"
                     ? "Owner Walk-In "
                     : data.intake_type === "reporter_walkin"
                     ? "Reporter Walk-In "
@@ -158,7 +158,7 @@ function ShelterIntakeSummary({ id, incident, organization }) {
                 <ListGroup.Item>
                   <b>Date:</b> <Moment format="MMMM Do YYYY HH:mm">{data.date}</Moment>
                 </ListGroup.Item>
-                {data.intake_type === 'owner_walkin' ?
+                {data.intake_type === 'owners_walkin' ?
                   <ListGroup.Item>
                     <b>Owner:</b>{' '}
                     <Link

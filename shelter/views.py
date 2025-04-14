@@ -42,17 +42,16 @@ class ShelterViewSet(viewsets.ModelViewSet):
         if self.request.GET.get('training'):
             queryset = queryset.filter(incident__organization__slug=self.request.GET.get('organization'), incident__training=self.request.GET.get('training') == 'true')
         queryset = (queryset
-            # .annotate(
-            #     animal_count=Sum(
-            #         "animal__animal_count",
-            #         filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident')),
-            #         distinct=True
-            #     )
-            # )
+            .annotate(
+                animal_count=Sum(
+                    "animal__animal_count",
+                    filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident'))&Q(animal__incident__organization__slug=self.request.GET.get('organization')),
+                )
+            )
             .prefetch_related(
                         Prefetch(
                             "intakesummary_set",
-                            IntakeSummary.objects.filter(animals__incident__slug=self.request.GET.get('incident')).select_related("person")
+                            IntakeSummary.objects.filter(animals__incident__slug=self.request.GET.get('incident'), animals__incident__organization__slug=self.request.GET.get('organization')).select_related("person")
                         )
                     )
             .prefetch_related(
@@ -61,7 +60,7 @@ class ShelterViewSet(viewsets.ModelViewSet):
                     Building.objects.with_history()
                     .annotate(
                         animal_count=Sum(
-                            "room__animal__animal_count", filter=~Q(room__animal__status="CANCELED")&Q(room__animal__incident__slug=self.request.GET.get('incident'))
+                            "room__animal__animal_count", filter=~Q(room__animal__status="CANCELED")&Q(room__animal__incident__slug=self.request.GET.get('incident'))&Q(room__animal__incident__organization__slug=self.request.GET.get('organization'))
                         )
                     ).order_by('name')
                     .prefetch_related(
@@ -69,14 +68,14 @@ class ShelterViewSet(viewsets.ModelViewSet):
                             "room_set",
                             Room.objects.with_history().annotate(
                                 animal_count=Sum(
-                                    "animal__animal_count", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident'))
+                                    "animal__animal_count", filter=~Q(animal__status="CANCELED")&Q(animal__incident__slug=self.request.GET.get('incident'))&Q(animal__incident__organization__slug=self.request.GET.get('organization'))
                                 )
                             ).prefetch_related(Prefetch('animal_set',Animal.objects.with_images().prefetch_related('owners').exclude(status='CANCELED').filter(incident__slug=self.request.GET.get('incident')), to_attr='animals')).order_by('name')
                         )
                     ).order_by('name'),
                 )
             )
-            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None, incident__slug=self.request.GET.get('incident', '')).exclude(status='CANCELED'), to_attr="unroomed_animals"))).distinct().order_by('name')
+            .with_history().prefetch_related(Prefetch('animal_set', Animal.objects.filter(room=None, incident__slug=self.request.GET.get('incident', ''), incident__organization__slug=self.request.GET.get('organization', '')).exclude(status='CANCELED'), to_attr="unroomed_animals"))).distinct().order_by('name')
         if self.request.GET.get('medical', '') == 'true':
             queryset = queryset.filter(animal__medical_record__isnull=False)
         return queryset

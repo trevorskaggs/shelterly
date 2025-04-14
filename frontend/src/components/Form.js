@@ -673,7 +673,7 @@ const AddressSearch = (props) => {
   const { setFieldValue } = useFormikContext();
   const [initialLatLon, setInitialLatLon] = useState([0, 0]);
 
-  const [fadeIn, setFadeIn] = useState(props.show_same ? false : true);
+  const [fadeIn, setFadeIn] = useState((props.show_same) ? false : true);
   const [existingOwner, setExistingOwner] = useState(props.formikProps.values.id ? true : false);
 
   const setLatLon = (lat, lon) => {
@@ -682,7 +682,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={(!fadeIn && !existingOwner) || props.disabled} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={(!fadeIn && !existingOwner && !props.animal_id && !props.servicerequest_id) || props.disabled} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }

@@ -298,7 +298,7 @@ const PersonForm = (props) => {
       >
         {formikProps => (
           <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
-            {id || servicerequest_id ?
+            {id || servicerequest_id || animal_id || (!isOwner && is_intake) ?
               <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? "Update " : "Create "} {isOwner ? "Owner" : "Reporter"}</Card.Header>
               :
               <Card.Header as="h5" className="pl-3">
@@ -412,7 +412,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} show_same={is_intake ? false : true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={isOwner ? existingOwner : existingReporter} />
+            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} show_same={(is_intake || animal_id || servicerequest_id) ? false : true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={isOwner ? existingOwner : existingReporter} animal_id={animal_id} servicerequest_id={servicerequest_id} />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"

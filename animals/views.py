@@ -66,7 +66,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             action.send(self.request.user, verb='created animal', target=animal)
 
             # Add Owner to new animals if included.
-            if self.request.data.get('new_owner', 'undefined') != 'undefined':
+            if self.request.data.get('new_owner', 'undefined') != 'undefined' and self.request.data.get('new_owner'):
                 animal.owners.add(self.request.data['new_owner'])
             if self.request.data.get('new_owners', 'undefined') != 'undefined':
                 animal.owners.add(*self.request.data['new_owners'].split(','))
