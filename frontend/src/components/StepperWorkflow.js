@@ -66,11 +66,11 @@ function CustomStepIcon() {
   );
 }
 
-function getSteps(is_intake) {
+function getSteps(is_intake, sr_id) {
   if (is_intake) {
     return ['Create Contacts', 'Create Animals'];
   }
-  return ['Lookup Address', 'Create Contacts', 'Create Animals', 'Create Service Request'];
+  return ['Lookup Address', 'Create Contacts', 'Create Animals', (sr_id ? 'Update' : 'Create') + ' Service Request'];
 }
 
 function getStepContent(incident, organization, step, handleStepSubmit, handleBack, state, is_intake) {
@@ -183,14 +183,16 @@ function StepperWorkflow({ incident, organization }) {
   let is_intake = window.location.pathname.includes("intake");
 
   const classes = useStyles();
-  // The major overall step tracker.
-  const [activeStep, setActiveStep] = React.useState(0);
-  const steps = getSteps(is_intake);
 
   // Tracks the workflow state and data.
   const [state, setState] = useState(initialWorkflowData);
+
+  // The major overall step tracker.
+  const [activeStep, setActiveStep] = React.useState(0);
+  const steps = getSteps(is_intake, state.steps.request.id);
+
   // Counts number of reporter + owner
-  const [contactCount, setContactCount] = React.useState(0);
+  const [contactCount, setContactCount] = React.useState({'new':0, 'existing':0});
 
   function handleBack(currentStep, nextStep, data=null) {
     // Lower the active step if going backwards between major steps.
@@ -212,7 +214,7 @@ function StepperWorkflow({ incident, organization }) {
     // Reset state if going back to address lookup.
     if (nextStep === 'initial') {
       setState(initialWorkflowData);
-      setContactCount(0);
+      setContactCount({new:0, existing:0});
     }
     else {
       setState((prevState) => ({
@@ -336,7 +338,7 @@ function StepperWorkflow({ incident, organization }) {
 
   // Calculate number of contacts.
   useEffect(() => {
-    setContactCount(state.steps.owners.length + (state.steps.reporter.first_name ? 1 : 0));
+    setContactCount({new:state.steps.owners.filter(owner => !owner.id).length + (state.steps.reporter.first_name ? 1 : 0), existing:state.steps.owners.filter(owner => owner.id).length + (state.steps.reporter.first_name ? 1 : 0)});
   }, [state.steps.owners.length, state.steps.reporter.first_name]);
 
   return (
@@ -345,11 +347,14 @@ function StepperWorkflow({ incident, organization }) {
         {steps.map((label, index) => {
           const stepProps = {};
           const labelProps = {};
+          if (index === 0 && !is_intake && state.steps.initial.address) {
+            labelProps.optional = <Typography variant="caption" component={'span'}><div>{state.steps.initial.address}</div><div>{state.steps.initial.apartment ? <span>Apt #{state.steps.initial.apartment}, </span> : ""}{state.steps.initial.city}, {state.steps.initial.state}</div></Typography>;
+          }
           if ((index === 1 && !is_intake) || (is_intake && index === 0)) {
-            labelProps.optional = <Typography variant="caption" component={'span'}>{contactCount} Contact{contactCount === 1 ? "" : "s"} Created</Typography>;
+            labelProps.optional = <Typography variant="caption" component={'span'}><div>{contactCount.new} Contact{contactCount.new === 1 ? "" : "s"} Created</div>{contactCount.existing ? <div>{contactCount.existing} Contact{contactCount.existing === 1 ? "" : "s"} Updated</div> : ""}</Typography>;
           }
           else if ((index === 2 && !is_intake) || (is_intake && index === 1)) {
-            labelProps.optional = <Typography variant="caption" component={'span'}>{state.animalCount} Animal{state.animalCount === 1 ? "" : "s"} Created</Typography>;
+            labelProps.optional = <Typography variant="caption" component={'span'}><div>{state.steps.animals.filter(animal => !animal.id).length || 0} Animal{state.steps.animals.filter(animal => !animal.id).length === 1 ? "" : "s"} Created</div>{state.steps.animals.filter(animal => animal.id).length ? <div>{state.steps.animals.filter(animal => animal.id).length} Animal{state.steps.animals.filter(animal => !animal.id).length === 1 ? "" : "s"} Updated</div> : ""}</Typography>;
           }
           return (
             <Step key={label} {...stepProps}>
@@ -369,7 +374,7 @@ function StepperWorkflow({ incident, organization }) {
                     active: classes.active,
                   }
                 }}
-                {...labelProps}>{label}
+                {...labelProps}><span className="steps">{label}</span>
               </StepLabel>
             </Step>
           );

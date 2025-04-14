@@ -48,6 +48,10 @@ hr {
   min-width: 50vw;
 }
 
+.steps {
+  font-size: 16.5px
+}
+
 /* Data table CSS */
 .rdt_Pagination { border-bottom-left-radius : .25rem; border-bottom-right-radius : .25rem; }
 

@@ -275,7 +275,7 @@ function ServiceRequestForm(props) {
                     name="test"
                     id="test"
                     xs="6"
-                    value={props.state.steps.initial.address + (props.state.steps.initial.apartment ? " " + props.state.steps.initial.apartment : "") + ", " + props.state.steps.initial.city + ", " + props.state.steps.initial.state + " " + props.state.steps.initial.zip_code}
+                    value={props.state.steps.initial.address + (props.state.steps.initial.apartment ? " Apt #" + props.state.steps.initial.apartment : "") + ", " + props.state.steps.initial.city + ", " + props.state.steps.initial.state + " " + props.state.steps.initial.zip_code}
                     disabled={true}
                   />
                 </BootstrapForm.Row>
@@ -373,7 +373,7 @@ function ServiceRequestForm(props) {
         <ButtonGroup size="lg">
           {is_workflow ?
             <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Saving..." className="btn btn-primary border" type="submit" onClick={() => { formikProps.submitForm()}}>
-              Finish and Create Service Request
+              Finish and {props.state.steps.request.id ? 'Update' : 'Create'} Service Request
             </ButtonSpinner> :
             <ButtonSpinner isSubmitting={isButtonSubmitting} isSubmittingText="Saving..." type="submit" onClick={() => { formikProps.submitForm()}}>Save</ButtonSpinner>
           }
