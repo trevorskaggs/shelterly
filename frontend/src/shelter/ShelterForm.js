@@ -117,7 +117,7 @@ const ShelterForm = ({ id, incident, organization }) => {
         })}
         onSubmit={(values, { setSubmitting }) => {
           if (id) {
-            axios.put('/shelter/api/shelter/' + id + '/?incident=' + incident, values)
+            axios.put('/shelter/api/shelter/' + id + '/?incident=' + incident + '&organization=' + organization, values)
             .then(function() {
               if (values.active === false) {
                 navigate('/' + organization + "/" + incident + '/shelter');

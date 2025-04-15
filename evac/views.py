@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Count, Exists, OuterRef, Prefetch, Q
+from django.db.models import Count, Exists, OuterRef, Prefetch, Q, Sum
 from django.http import HttpResponse, JsonResponse
 import json
 import io
@@ -123,6 +123,9 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     ServiceRequest.objects
             .exclude(status='CANCELED')
             .annotate(
+                animal_count=Sum("animal__animal_count")
+            )
+            .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             ).prefetch_related(Prefetch(
                 'animal_set', queryset=Animal.objects.with_images().exclude(status='CANCELED'), to_attr='animals'))
@@ -162,11 +165,26 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
 
+            total_das = EvacAssignment.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug'), incident__organization__slug=self.request.data.get('organization_slug')).values_list('id', flat=True)
+            with transaction.atomic():
+                count = len(total_das)
+                serializer.validated_data['id_for_incident'] = count + 1
+
             timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
-            team = DispatchTeam.objects.create(name=self.request.data.get('team_name'), incident=Incident.objects.get(pk=self.request.data.get('incident')))
+            if self.request.data.get('team_members'):
+                name = 'Team '
+                i = 1
+                team_names = EvacAssignment.objects.filter(end_time__isnull=True).values_list('team__name', flat=True)
+                while name + str(i) in list(team_names):
+                    i+=1
+                name = name + str(i)
+            else:
+                name = 'Preplanned'
+            team = DispatchTeam.objects.create(name=name, incident=Incident.objects.get(pk=self.request.data.get('incident')))
 
+            timestamp = None
             if self.request.data.get('team_members'):
                 team.team_members.set(self.request.data.get('team_members'))
                 timestamp = datetime.now()
@@ -203,6 +221,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         'fixed':animal["fixed"],
                         'confined':animal["confined"],
                         'last_seen':animal["last_seen"],
+                        'is_new':False,
                     }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_request, animals=animals_dict, timestamp=timestamp)
 
@@ -225,9 +244,10 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 service_requests = ServiceRequest.objects.filter(pk=self.request.data.get('new_service_request'))
                 service_requests.update(status="assigned")
                 # Remove SR from any existing open DA if applicable.
-                old_da = EvacAssignment.objects.filter(service_requests=service_requests[0], end_time=None).first()
-                if old_da:
-                    old_da.service_requests.remove(service_requests[0])
+                if self.request.data.get('reassign', 'false') == 'true':
+                    old_da = EvacAssignment.objects.filter(service_requests=service_requests[0], end_time=None).first()
+                    if old_da:
+                        old_da.service_requests.remove(service_requests[0])
                 # Add SR to selected DA.
                 animals_dict = {}
                 full_animal_set = AnimalSerializer(service_requests[0].animal_set.filter(status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']), many=True, required=False, read_only=True).data
@@ -254,6 +274,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         'injured':animal["injured"],
                         "fixed": animal["fixed"],
                         "confined": animal["confined"],
+                        'is_new':False,
                     }
                 AssignedRequest.objects.create(dispatch_assignment=evac_assignment, service_request=service_requests[0], animals=animals_dict)
                 action.send(self.request.user, verb='assigned service request', target=service_requests[0])
@@ -265,7 +286,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 for animal_dict in service_request['animals']:
                     id = animal_dict.get("id", None)
                     if id:
-                      Animal.objects.filter(id=id).update(animal_count=animal_dict.get("animal_count", 1))
+                      # Animal.objects.filter(id=id).update(animal_count=animal_dict.get("animal_count", 1))
                       animals_dict[id] = {
                           "id_for_incident": animal_dict.get("id_for_incident"),
                           'animal_count':animal_dict.get("animal_count", 1),
@@ -288,6 +309,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                           'injured':animal_dict.get("injured"),
                           "fixed": animal_dict.get("fixed"),
                           "confined": animal_dict.get("confined"),
+                          "is_new": animal_dict.get("is_new"),
                       }
                     elif animal_dict.get("original_id", None):
                         with transaction.atomic():
@@ -321,6 +343,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                                 'injured':animal_dict.get("injured"),
                                 "fixed": animal_dict.get("fixed"),
                                 "confined": animal_dict.get("confined"),
+                                "is_new": animal_dict.get("is_new"),
                             }
                     else:
                         sr = ServiceRequest.objects.get(id=animal_dict.get("request"))
@@ -338,6 +361,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         new_animal_dict.pop("concern", None)
                         new_animal_dict.pop("caution", None)
                         new_animal_dict.pop("new", None)
+                        new_animal_dict.pop("is_new", None)
                         new_animal = Animal.objects.create(**new_animal_dict)
                         new_animal.owners.set(sr.owners.all())
                         id = new_animal.id
@@ -364,10 +388,11 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                           'injured':animal_dict.get("injured"),
                           "fixed": animal_dict.get("fixed"),
                           "confined": animal_dict.get("confined"),
+                          "is_new": animal_dict.get("is_new"),
                         }
                     # Record status change if applicable.
                     animal = Animal.objects.get(pk=id)
-                    new_status = animal_dict.get('status')
+                    new_status = animal_dict.get('status') if animal_dict.get('status') != 'DID NOT SEARCH FOR' else animal.status
                     if animal.status != new_status:
                         action.send(self.request.user, verb=f'changed animal status to {new_status}', target=animal)
                     ## Add SIP date if newly SIP'd, otherwise keep previous date.
@@ -384,7 +409,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         action.send(self.request.user, verb='sheltered animal', target=animal.shelter, action_object=animal)
                         intake_date = animal.intake_date if animal.intake_date else datetime.now()
                     # Update shelter, room, and intake_date info.
-                    Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date, sip_date=sip_date)
+                    Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date, sip_date=sip_date, animal_count=animal_dict.get("animal_count", 1))
                     # Update animal found location with SR location if blank.
                     if not animal.address:
                         Animal.objects.filter(id=id).update(address=sr.address, city=sr.city, state=sr.state, zip_code=sr.zip_code, latitude=sr.latitude, longitude=sr.longitude)

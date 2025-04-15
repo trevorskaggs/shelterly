@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useNavigationPrompt, useQueryParams } from 'raviger';
-import { Formik } from 'formik';
+import { Formik, useFormikContext } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
@@ -18,6 +18,8 @@ const PersonForm = (props) => {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
+  const existingOwnerRef = useRef(null);
+
   const id = props.id;
   const incident = "/" + props.incident
 
@@ -33,7 +35,9 @@ const PersonForm = (props) => {
   // Determine if this is a first responder when creating a Person.
   let is_first_responder = window.location.pathname.includes("first_responder");
 
-  useNavigationPrompt(is_workflow, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
+  // Check user navigating away when in workflow.
+  const [redirectCheck, setRedirectCheck] = useState(is_workflow);
+  useNavigationPrompt(redirectCheck, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
 
   // Identify any query param data.
   const [queryParams] = useQueryParams();
@@ -50,46 +54,23 @@ const PersonForm = (props) => {
 
   // Whether or not to skip Owner creation.
   const [skipOwner, setSkipOwner] = useState(false);
-  const [isOwner, setIsOwner] = useState(props.state.stepIndex > 0 || is_owner);
+  const [isOwner, setIsOwner] = useState(props.state.stepIndex > 1 || is_owner);
 
-  const [existingOwner, setExistingOwner] = useState(false);
-
-  // Track duplicate owner error.
-  const [error, setError] = useState({show:false, error:[]});
-  const [dupeOwner, setDupeOwner] = useState(false);
-  const handleErrorClose = () => {setError({show:false, error:[]}); setDupeOwner(null);}
-
-  const handleDuplicateOwner = (dupe_id, formikProps) => {
-    if (is_workflow) {
-      setDupeOwner(true);
-      formikProps.submitForm();
-    }
-    else {
-      axios.patch('/people/api/person/' + dupe_id + '/', formikProps.values)
-      .then(response => {
-        // If SR already exists, redirect to the SR details.
-        if (servicerequest_id) {
-          navigate('/' + props.organization + incident + '/hotline/servicerequest/' + response.data.requests.filter(request => request.id === servicerequest_id)[0].id_for_incident);
-        }
-        // If adding from an animal, redirect to the Animal details.
-        else if (animal_id) {
-          navigate('/' + props.organization + incident + '/animals/' + animal_id);
-        }
-        // Otherise redirect to the duplicate Owner details.
-        else {
-          navigate('/' + props.organization + incident + '/people/owner/' + response.data.id);
-        }
-      })
-      .catch(error => {
-        setShowSystemError(true);
-      });
-    }
-  }
+  const [existingOwner, setExistingOwner] = useState(props.state.steps.owners[props.state.ownerIndex] && props.state.steps.owners[props.state.ownerIndex].id ? true : false);
+  const [existingReporter, setExistingReporter] = useState(props.state.steps.reporter.id ? true : false);
 
   // Control Agency display.
-  const [showAgency, setShowAgency] = useState(props.state.stepIndex === 0 && is_first_responder);
+  const [showAgency, setShowAgency] = useState(props.state.stepIndex === 1 && is_first_responder);
+
+  const [showStartOverModal, setShowStartOverModal] = useState(false);
+  const handleCloseStartOverModal = () => setShowStartOverModal(false);
+
+  // Track whether or not to add another owner.
+  const [addAnother, setAddAnother] = useState(false);
 
   const initialData = {
+    id: null,
+    existing_owner: '',
     has_id: false,
     first_name: '',
     last_name: '',
@@ -100,30 +81,28 @@ const PersonForm = (props) => {
     show_agency: showAgency,
     agency: '',
     drivers_license: '',
-    address: '',
-    apartment: '',
-    city: '',
-    state: '',
-    zip_code: '',
+    address: props.state ? props.state.steps.initial.address : '',
+    apartment: props.state ? props.state.steps.initial.apartment : '',
+    city: props.state ? props.state.steps.initial.city : '',
+    state: props.state ? props.state.steps.initial.state : '',
+    zip_code: props.state ? props.state.steps.initial.zip_code : '',
     request: servicerequest_id,
     animal: animal_id,
     owner: owner_id,
-    latitude: null,
-    longitude: null,
+    latitude: props.state ? props.state.steps.initial.latitude : null,
+    longitude: props.state ? props.state.steps.initial.longitude : null,
     change_reason: '',
     incident: state.incident.id
   }
   let current_data = initialData;
-  if (is_workflow) {
-    if (isOwner) {
-      current_data = props.state.steps.owner
-    }
-    else {
-      current_data = props.state.steps.reporter
-    }
-    current_data['show_agency'] = showAgency;
-    current_data['incident'] = state.incident.id;
+  if (is_workflow && isOwner && props.state.steps.owners[props.state.ownerIndex]) {
+    current_data = props.state.steps.owners[props.state.ownerIndex].first_name ? props.state.steps.owners[props.state.ownerIndex] : props.state.steps.initial;
   }
+  else if (is_workflow) {
+    current_data = props.state.steps.reporter.first_name ? props.state.steps.reporter : props.state.steps.initial;
+  }
+  current_data['show_agency'] = showAgency;
+  current_data['incident'] = state.incident.id;
 
   // Initial Person data.
   const [data, setData] = useState(current_data);
@@ -236,47 +215,46 @@ const PersonForm = (props) => {
         })}
         onSubmit={(values, { setSubmitting, resetForm }) => {
           if (is_workflow) {
-            // Check to see if owner data already exists.
-            axios.get('/people/api/person/?search=' + values.first_name +  ' ' + values.last_name + ' ' + values.phone.replace(/\D/g, "")  + '&incident=' + props.incident + '&organization=' + props.organization +'&training=' + (state && state.incident.training))
-            .then(response => {
-              // If we have a dupe owner then use it.
-              if (!existingOwner && dupeOwner) {
-                values['id'] = response.data[0].id;
+            if (addAnother) {
+              props.onSubmit('owners', values, 'owners');
+              // Reset form data with existing owner data if we have it.
+              if (props.state.steps.owners[props.state.ownerIndex + 1] && Object.keys(props.state.steps.owners[props.state.ownerIndex + 1]).length) {
+                setExistingOwner(props.state.steps.owners[props.state.ownerIndex + 1] && props.state.steps.owners[props.state.ownerIndex + 1].id ? true : false);
+                resetForm({values:props.state.steps.owners[props.state.ownerIndex + 1]});
+                setRedirectCheck(true);
+                // setIsButtonSubmitting(false);
               }
-              if (response.data.length > 0 && !existingOwner && !dupeOwner) {
-                // Throw error if duplicate owner found.
-                if (isOwner) {
-                  setError({show:true, error:['a duplicate owner with the same name and phone number already exists.', response.data[0].id]});
-                  setSubmitting(false);
+              // Otherwise reset form with blank data.
+              else {
+                setExistingOwner(false);
+                resetForm({values:initialData});
+                setRedirectCheck(true);
+                // setIsButtonSubmitting(false);
+              }
+              existingOwnerRef.current.clear();
+            }
+            else if (isOwner) {
+              props.onSubmit('owners', values, 'animals');
+            }
+            // Always continue on if reporter.
+            else {
+              if (skipOwner) {
+                props.onSubmit('reporter', values, 'animals');
+              }
+              else {
+                props.onSubmit('reporter', values, 'owners');
+                setIsOwner(true);
+                setShowAgency(false);
+                setExistingOwner(props.state.steps.owners[props.state.ownerIndex] && props.state.steps.owners[props.state.ownerIndex].id ? true : false);
+                existingOwnerRef.current.clear();
+                if (props.state.steps.owners[props.state.ownerIndex] && props.state.steps.owners[props.state.ownerIndex].first_name) {
+                  resetForm({values:props.state.steps.owners[props.state.ownerIndex]});
                 }
-                // Use existing person object if duplicate reporter found.
                 else {
-                  values['id'] = response.data[0].id;
+                  resetForm({values:initialData});
                 }
               }
-              // Only continue on from owner if there are no errors.
-              else if (isOwner) {
-                setDupeOwner(false);
-                props.onSubmit('owner', values, 'animals');
-              }
-              // Always continue on if reporter.
-              if (!isOwner) {
-                setDupeOwner(false);
-                if (skipOwner) {
-                  props.onSubmit('reporter', values, 'animals');
-                }
-                else {
-                  props.onSubmit('reporter', values, 'owner');
-                  setIsOwner(true);
-                  setShowAgency(false);
-                  resetForm({values:props.state.steps.owner});
-                }
-              }
-            })
-            .catch(error => {
-              setSubmitting(false);
-              setShowSystemError(true);
-            });
+            }
           }
           else if (id) {
             axios.put('/people/api/person/' + id + '/', values)
@@ -312,12 +290,7 @@ const PersonForm = (props) => {
               }
             })
             .catch(error => {
-              if (error.response.data && error.response.data[0].includes('duplicate owner')) {
-                setError({show:true, error:error.response.data});
-              }
-              else {
-                setShowSystemError(true);
-              }
+              setShowSystemError(true);
               setSubmitting(false);
             });
           }
@@ -325,36 +298,60 @@ const PersonForm = (props) => {
       >
         {formikProps => (
           <Card border="secondary" className={is_workflow ? "mt-3" : "mt-5"}>
-            {id ?
-              <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Update {isOwner ? "Owner" : "Reporter"}</Card.Header>
+            {id || servicerequest_id || animal_id || (!isOwner && is_intake) ?
+              <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>{id ? "Update " : "Create "} {isOwner ? "Owner" : "Reporter"}</Card.Header>
               :
-              <Card.Header as="h5" className="pl-3">{props.state.stepIndex === 0 ?
-                <span style={{cursor:'pointer'}} onClick={() => {window.history.back()}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
-                :
-                <span style={{cursor:'pointer'}} onClick={() => {setIsOwner(false); setShowAgency(is_first_responder); formikProps.resetForm({values:props.state.steps.reporter}); props.handleBack('owner', 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}
+              <Card.Header as="h5" className="pl-3">
+                <span style={{cursor:'pointer'}} onClick={() => {
+                  if (isOwner && props.state.ownerIndex > 0) {
+                    formikProps.resetForm({values:props.state.steps.owners[props.state.ownerIndex -1]});
+                    setExistingOwner(props.state.steps.owners.length && props.state.steps.owners[props.state.ownerIndex -1].id ? true : false);
+                    props.handleBack('owners', 'owners');
+                  }
+                  else if (isOwner && props.state.steps.reporter.first_name) {
+                    setIsOwner(false);
+                    setShowAgency(is_first_responder);
+                    formikProps.resetForm({values:props.state.steps.reporter});
+                    props.handleBack('owners', 'reporter');
+                  }
+                  else {
+                    setShowStartOverModal(true);
+                  }
+                }} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
           {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
           </Card.Header>}
           <Card.Body>
           <BootstrapForm noValidate>
             {/* Only show existing owner if owner and in a workflow/intake */}
-            <span hidden={!(is_workflow || is_intake) || !isOwner}>
-              <label>Use Existing Owner</label>
+            <span hidden={!(is_workflow || is_intake)}>
+              <label>Use Existing {isOwner ? "Owner" : "Reporter"}</label>
               <Typeahead
                 id="existing_owner"
                 className="mb-3"
+                ref={existingOwnerRef}
                 onChange={(values) => {
                   if (values.length) {
-                    setData(existingOwners.data.filter(owner => owner.id === values[0].id)[0])
-                    setExistingOwner(true);
+                    setData(existingOwners.data.filter(owner => owner.id === values[0].id)[0]);
+                    if (isOwner) {
+                      setExistingOwner(true);
+                    }
+                    else {
+                      setExistingReporter(true);
+                    }
                   }
                   else {
-                    setData(initialData);
-                    setExistingOwner(false);
+                    setData({...initialData, ...props.state.steps.initial});
+                    if (isOwner) {
+                      setExistingOwner(false);
+                    }
+                    else {
+                      setExistingReporter(false);
+                    }
                   }
                 }}
                 options={existingOwners.options}
                 placeholder={existingOwners.fetching ? "Loading..." : "Search..."}
-                disabled={existingOwners.fetching ? true : false}
+                disabled={existingOwners.fetching ? true : false || (props.state.ownerIndex != props.state.steps.owners.length && props.state.steps.request && props.state.steps.request.owner_objects && props.state.steps.request.owner_objects.map(owner => Number(owner.id)).includes(Number(data.id)))}
                 emptyLabel="No matches found. Please fill out the form below."
               />
             </span>
@@ -415,7 +412,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} hidden={!isOwner} error="Contact Address was not selected." />
+            <AddressSearch formikProps={formikProps} label="Search for Contact Address" incident={props.incident} show_apt={true} show_same={(is_intake || animal_id || servicerequest_id) ? false : true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={isOwner ? existingOwner : existingReporter} animal_id={animal_id} servicerequest_id={servicerequest_id} />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"
@@ -433,34 +430,45 @@ const PersonForm = (props) => {
                   {!isOwner && !is_intake ? <span>{!id ? "Add Owner" : "Save"}</span> : "Save"}
                 </ButtonSpinner> : ""}
               {/* workflow buttons */}
-              {is_workflow && !isOwner ?
+              {is_workflow && isOwner && !is_intake ?
+              <ButtonSpinner isSubmitting={formikProps.isSubmitting && addAnother} isSubmittingText="Saving..." type="button" onClick={() => {
+                setAddAnother(true);
+                formikProps.submitForm();
+              }}>
+                {props.state.steps.owners.length -1 > props.state.ownerIndex ? "Next Owner" : "Add Another"}
+              </ButtonSpinner> : ""}
+              {is_workflow && !isOwner && !is_intake ?
                 <ButtonSpinner isSubmitting={formikProps.isSubmitting && !skipOwner} isSubmittingText="Saving..." type="button" onClick={() => { setSkipOwner(false); formikProps.submitForm(); }}>
-                  {props.state.steps.owner.first_name ? "Change Owner" : "Add Owner"}
+                  {props.state.steps.owners.length > props.state.ownerIndex ? "Next Owner" : "Add Owner"}
                 </ButtonSpinner> : ""}
               {is_workflow ?
-                <ButtonSpinner isSubmitting={formikProps.isSubmitting && skipOwner} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); formikProps.submitForm(); }}>
+                <ButtonSpinner isSubmitting={formikProps.isSubmitting && skipOwner} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { setSkipOwner(true); setAddAnother(false); formikProps.submitForm(); }}>
                   Next Step
                 </ButtonSpinner> : ""}
             </ButtonGroup>
-            <Modal show={error.show} onHide={handleErrorClose}>
-              <Modal.Header closeButton>
-                <Modal.Title>Duplicate Owner Found</Modal.Title>
-              </Modal.Header>
-              <Modal.Body>
-                <div>
-                  <span>This person cannot be created because</span> {error && error.error[0]}
-                  <div className="mt-1 mb-1">Click <Link target="_blank" rel="noreferrer" href={"/" + props.organization + incident + "/people/owner/" + error.error[1]} style={{color:"#8d99d4"}}>here</Link> to view this owner.</div>
-                  <div>Would you like to use the existing owner instead?</div>
-                </div>
-              </Modal.Body>
-              <Modal.Footer>
-                <Button variant="primary" onClick={() => {handleDuplicateOwner(error.error[1], formikProps)}}>Yes</Button>
-                <Button variant="secondary" onClick={handleErrorClose}>Close</Button>
-              </Modal.Footer>
-            </Modal>
           </Card>
         )}
       </Formik>
+      <Modal show={showStartOverModal} onHide={handleCloseStartOverModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Start Over</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Going back to the address lookup form will reset all current data. Are you sure you want to start over?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary"
+            onClick={() => {
+              if (!isOwner) {
+                props.handleBack('reporter', 'initial')
+              }
+              else {
+                props.handleBack('owners', 'initial')
+              }}}>Yes
+          </Button>
+          <Button variant="secondary" onClick={handleCloseStartOverModal}>No</Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 };

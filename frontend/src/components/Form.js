@@ -16,6 +16,7 @@ import Autocomplete from 'react-google-autocomplete';
 import { Map, Marker, Tooltip as MapTooltip, TileLayer } from "react-leaflet";
 import clsx from 'clsx';
 import MaterialCheckbox from '@material-ui/core/Checkbox';
+import MaterialRadio from '@material-ui/core/Radio';
 import { useRegisteredRef } from "react-register-nodes";
 import { makeStyles } from '@material-ui/core/styles';
 import Alert from 'react-bootstrap/Alert';
@@ -29,6 +30,10 @@ const useStyles = makeStyles({
     '&:hover': {
       backgroundColor: 'transparent',
     },
+    color: 'white',
+  },
+  radio: {
+    color: 'inherit',
   },
   icon: {
     borderRadius: 3,
@@ -65,6 +70,9 @@ const useStyles = makeStyles({
     'input:hover ~ &': {
       backgroundColor: '#106ba3',
     },
+  },
+  radio: {
+    color: 'inherit',
   },
 });
 
@@ -174,7 +182,7 @@ const ToggleSwitch = (props) => {
     </>
 )}
 
-const TextInput = React.forwardRef((props, ref) => {
+const TextInput = React.forwardRef(({togglePasswordVisibility, ...props}, ref) => {
   const [field, meta] = useField(props);
   const registeredRef = useRegisteredRef(props.name);
 
@@ -197,7 +205,7 @@ const TextInput = React.forwardRef((props, ref) => {
       :
       <span>
         <Form.Control ref={ref} type="text" isInvalid={meta.touched && meta.error} onFocus={(event) => { event.target.setAttribute('autocomplete', 'off'); }} {...field} {...props} />
-        {['password', 'password2'].includes(props.id) ? <FontAwesomeIcon icon={props.showPassword ? faEyeSlash : faEye} onClick={() => props.togglePasswordVisibility()} className="float-right" style={{marginRight: meta.error ? "35px" : "15px", marginTop:"-32px", color:"#222"}} size="lg" inverse /> : ""}
+        {['password', 'password2'].includes(props.id) ? <FontAwesomeIcon icon={props.showpassword === 'true' ? faEyeSlash : faEye} onClick={() => togglePasswordVisibility()} className="float-right" style={{marginRight: meta.error ? "35px" : "15px", marginTop:"-32px", color:"#222"}} size="lg" inverse /> : ""}
       </span>
       }
       {/* <Form.Control.Feedback type="invalid" style={props.errstyle ? props.errstyle : props.style}>{meta.error}</Form.Control.Feedback> */}
@@ -224,6 +232,29 @@ const Checkbox = (props) => {
       inputProps={{ 'aria-label': 'decorative checkbox' }}
       {...props}
     />
+    {/* {meta.touched && meta.error ? (
+      <div className="error">{meta.error}</div>
+    ) : null} */}
+    </>
+  );
+};
+
+const Radio = (props) => {
+
+  const classes = useStyles();
+  // const [field, meta] = useField({...props, type: 'checkbox'});
+
+  return (
+    <>
+    <MaterialRadio
+      type="checkbox"
+      className={classes.radio}
+      disableRipple
+      color="white"
+      inputProps={{ 'aria-label': 'decorative radio' }}
+      {...props}
+    />
+    {props.label}
     {/* {meta.touched && meta.error ? (
       <div className="error">{meta.error}</div>
     ) : null} */}
@@ -642,13 +673,16 @@ const AddressSearch = (props) => {
   const { setFieldValue } = useFormikContext();
   const [initialLatLon, setInitialLatLon] = useState([0, 0]);
 
+  const [fadeIn, setFadeIn] = useState((props.show_same) ? false : true);
+  const [existingOwner, setExistingOwner] = useState(props.formikProps.values.id ? true : false);
+
   const setLatLon = (lat, lon) => {
     setInitialLatLon([lat, lon]);
   }
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={!fadeIn} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={(!fadeIn && !existingOwner && !props.animal_id && !props.servicerequest_id) || props.disabled} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
@@ -669,20 +703,37 @@ const AddressSearch = (props) => {
       }
   }
 
-  const [fadeIn, setFadeIn] = useState(props.show_same ? false : true);
   function handleChange() {
+    // Populate with initial lookup address data if unchecked.
+    if (fadeIn) {
+      setFieldValue("address", props.initialData.address);
+      setFieldValue("city", props.initialData.city);
+      setFieldValue("state", props.initialData.state);
+      setFieldValue("apartment", props.initialData.apartment);
+      setFieldValue("zip_code", props.initialData.zip_code);
+      setFieldValue("latitude", props.initialData.latitude);
+      setFieldValue("longitude", props.initialData.longitude);
+      setExistingOwner(false);
+    }
     setFadeIn(!fadeIn);
     setTimeout(() => {
       mapRef.current.leafletElement.invalidateSize();
-    }, 250)
+    }, 250);
   }
+
+  useEffect(() => {
+    if (Object.keys(props).includes('existingOwner')) {
+      setExistingOwner(props.existingOwner);
+      setFadeIn(props.existingOwner);
+    }
+  }, [props.existingOwner]);
 
   return (
     <>
     {props.show_same ?
-      <span className="form-row mb-2">
-        <Form.Label style={{marginLeft:"5px"}}>Address Same as Owner: </Form.Label>
-        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn} onChange={handleChange} style={{marginTop:"-7px"}} />
+      <span className="form-row mb-2" hidden={props.hidden}>
+        <Form.Label style={{marginLeft:"5px"}}>Address Same as Service Request: </Form.Label>
+        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn && !existingOwner} onChange={handleChange} style={{marginTop:"-7px"}} />
       </span>
     : ""}
         <Row hidden={props.hidden} style={{fontSize:"15px"}}>
@@ -709,7 +760,7 @@ const AddressSearch = (props) => {
                   label="Apartment"
                   name="apartment"
                   value={props.formikProps.values.apartment || ''}
-                  disabled={!fadeIn}
+                  disabled={!fadeIn || props.disabled}
                 />
               : ""}
             </Form.Row>
@@ -730,6 +781,8 @@ const AddressSearch = (props) => {
                   id="state"
                   options={STATE_OPTIONS}
                   placeholder=''
+                  clearable={true}
+                  value={props.formikProps.values.state || ''}
                   tooltip="State must be populated using the Address Search."
                   disabled
                 />
@@ -746,7 +799,7 @@ const AddressSearch = (props) => {
             </Form.Row>
           </Col>
           <Col className="pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"0px"}}>
-            <Form.Label>Refine Exact Lat/Lon Point</Form.Label>
+            <Form.Label>{props.address_form === true ? "Location" : "Refine Exact Lat/Lon Point"}</Form.Label>
             <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
               <Legend position="bottomleft" metric={false} />
               <TileLayer
@@ -755,7 +808,7 @@ const AddressSearch = (props) => {
               />
               {props.formikProps.values.latitude && props.formikProps.values.longitude ?
               <Marker
-                draggable={true}
+                draggable={props.address_form ? false : true}
                 onDragEnd={updatePosition}
                 autoPan={true}
                 position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
@@ -788,6 +841,7 @@ export {
   DropDown,
   FileUploader,
   ImageUploader,
+  Radio,
   TextInput,
   ToggleSwitch,
 };

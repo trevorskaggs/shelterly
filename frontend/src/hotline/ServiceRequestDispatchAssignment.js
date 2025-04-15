@@ -75,7 +75,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
   }
 
   const handleSubmit = () => {
-    axios.patch('/evac/api/evacassignment/' + selected + '/', {new_service_request:currentRequest.id})
+    axios.patch('/evac/api/evacassignment/' + selected + '/', {new_service_request:currentRequest.id, reassign:activeDispatch ? "true" : "false"})
     .then(response => {
       navigate('/' + organization + '/' + incident + '/dispatch/summary/' + response.data.id_for_incident)
     })
@@ -100,7 +100,8 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
           axios.get('/evac/api/evacassignment/?incident=' + incident, {
             params: {
               status: 'open',
-              map: true
+              map: true,
+              organization
             },
             cancelToken: source.token,
           })

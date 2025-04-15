@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faBan, faBandAid, faBullseye, faCalendarDay, faCar, faCheckCircle, faChevronDown, faChevronUp, faEquals, faExclamationTriangle, faCircle, faClipboardList, faExclamationCircle, faMapMarkedAlt, faQuestionCircle, faPencilAlt, faPlusSquare, faTrailer, faUserAlt, faUserAltSlash, faExclamation, faFilter
 } from '@fortawesome/free-solid-svg-icons';
-import { faBadgeSheriff, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faLocationCrosshairs, faRotate } from '@fortawesome/pro-solid-svg-icons';
+import { faBadgeSheriff, faBarsSort, faChevronDoubleDown, faChevronDoubleUp, faCircleBolt, faHomeAlt, faLocationCrosshairs, faRotate } from '@fortawesome/pro-solid-svg-icons';
 import { faHomeAlt as faHomeAltReg } from '@fortawesome/pro-regular-svg-icons';
 import { Circle, Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
@@ -18,16 +18,16 @@ import Moment from 'react-moment';
 import moment from 'moment';
 import useWebSocket from 'react-use-websocket';
 import Map, { countMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, checkMarkerIcon, operationsMarkerIcon } from "../components/Map";
-import { Checkbox, DateRangePicker, TextInput } from "../components/Form";
+import { Checkbox, DateRangePicker, Radio, TextInput } from "../components/Form";
 import { DispatchDuplicateSRModal, DispatchAlreadyAssignedTeamModal } from "../components/Modals";
 import Scrollbar from '../components/Scrollbars';
 import Header from '../components/Header';
 import 'react-bootstrap-typeahead/css/Typeahead.css';
 import 'leaflet/dist/leaflet.css';
+import { capitalize } from '../utils/formatString';
 import { priorityChoices } from '../constants';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
-// import { faCheckCircle } from '@fortawesome/pro-duotone-svg-icons';
 
 function Deploy({ incident, organization }) {
 
@@ -37,10 +37,6 @@ function Deploy({ incident, organization }) {
   // Regex validators.
   const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
 
-  // Determine if this is a preplanning workflow.
-  let preplan = window.location.pathname.includes("preplan");
-
-  const filterRef = useRef(null);
   const openStartRef = useRef(null);
   const openEndRef = useRef(null);
 
@@ -52,26 +48,27 @@ function Deploy({ incident, organization }) {
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
   const [statusOptions, setStatusOptions] = useState({aco_required:false, hide_pending: true});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
-  const [teamData, setTeamData] = useState({teams: [], options: [], isFetching: false});
+  const [teamData, setTeamData] = useState({teams: [], members:[], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
-  const [teamName, setTeamName] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [assignedTeamMembers, setAssignedTeamMembers] = useState([]);
-  const handleClose = () => setShow(false);
-  const [show, setShow] = useState(false);
-  const [error, setError] = useState('');
   const [showAddTeamMember, setShowAddTeamMember] = useState(false);
   const handleCloseShowAddTeamMember = () => setShowAddTeamMember(false);
-  const [filterData, setFilterData] = useState({priority:[], followup_date_start:null, followup_date_end:null});
+  const [sortChoice, setSortChoice] = useState('followup_date');
+  const [filterData, setFilterData] = useState({priority:[], species:[], followup_date_start:null, followup_date_end:null});
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [showFilterModal, setShowFilterModal] = useState(false);
   const handleCloseFilterModal = () => setShowFilterModal(false);
+  const [showSortModal, setShowSortModal] = useState(false);
+  const handleCloseSortModal = () => setShowSortModal(false);
   const [showDispatchDuplicateSRModal, setShowDispatchDuplicateSRModal] = useState(false);
   const [duplicateSRs, setDuplicateSRs] = useState([]);
   const handleCloseDispatchDuplicateSRModal = () => {setDuplicateSRs([]);setShowDispatchDuplicateSRModal(false);}
   const [showAlreadyAssignedTeamModal, setShowAlreadyAssignedTeamModal] = useState(false);
   const handleCloseAlreadyAssignedTeamModal = () => {setDuplicateSRs([]);setShowAlreadyAssignedTeamModal(false);}
   const [proceed, setProceed] = useState(false);
+  const [speciesChoices, setSpeciesChoices] = useState([]);
 
   const priorityText = {1:'Urgent', 2:'High', 3:'Medium', 4:'Low', 5:'Lowest'};
 
@@ -97,63 +94,56 @@ function Deploy({ incident, organization }) {
 
   // Handle TeamMember selector onChange.
   const handleChange = (values, props) => {
-    let team_name = props.values.team_name;
     let id_list = [];
     let selected_list = [];
     values.forEach(value => {
       id_list = [...id_list, ...value.id];
       // Handle if Team.
       if (value.label.split(':').length > 1) {
-        // Parse out the team name.
-        team_name = value.label.split(':')[0];
-        value.label.split(':')[1].split(',').forEach((name, index) =>  {
-          let team_option = {id: [value.id[index]], label:name.replace(' ', ''), is_assigned:value.is_assigned};
-          // Add to list if not already selected.
-          if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
-            selected_list.push(team_option);
-          }
-        });
+        setSelectedTeam(value.da_id);
+        selected_list.push({id:value.id, da_id:value.da_id, label:value.label, is_assigned:value.is_assigned});
       }
       // Else handle as an individual TeamMember.
       else {
-        selected_list.push({id:value.id, label:value.label, is_assigned:value.is_assigned})
+        setSelectedTeam(null);
+        selected_list.push({id:value.id, da_id:value.da_id, label:value.label, is_assigned:value.is_assigned});
       }
     });
+
     // If deselecting.
     if (selected.length > selected_list.length) {
       let team_options = [];
-      teamData.teams.filter(team => team.team_object.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
+      setSelectedTeam(null);
+      // Add back teams if the select list is empty.
+      if (selected_list.length === 0) {
+        let team_names = [];
+        teamData.teams.forEach(function(team) {
+          // Add selectable options back if if not already available.
+          if (team.team_object.team_members.length && !team_names.includes(team.team_name) && !teamData.options.some(option => option.da_id === team.id)) {
+            team_options.unshift({id:team.team_object.team_members, da_id:team.id, label:"DA#" + team.id_for_incident + " (" + team.team_object.name + "): " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
+            team_names.push(team.team_name);
+          }
+        });
+      }
+      teamData.members.forEach(function(member) {
         // Add selectable options back if if not already available.
-        if (team.team_object.team_members.length && !teamData.options.some(option => option.label === team.team_object.name + ": " + team.team_object.display_name)) {
-          team_options.push({id:team.team_object.team_members, label:team.team_object.name + ": " + team.team_object.display_name, is_assigned:team.team_object.is_assigned});
-        }
+        team_options.push({id:[member.id], da_id:null, label:member.display_name, is_assigned:member.is_assigned});
       });
-      setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(selected.filter(option => !id_list.includes(option.id[0])))) }));
+      setTeamData(prevState => ({ ...prevState, "options":team_options }));
       setSelectedCount((prevState) => ({...prevState, disabled: (prevState.count > 0 ? false : true)}));
     }
     // Else we're selecting. Remove selection from option list.
     else {
-      setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
+      // Remove other options if we've selected a team.
+      if (values.filter(value => value.label.includes(':')).length) {
+        setTeamData(prevState => ({ ...prevState, "options":[] }));
+      }
+      else {
+        setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => (!id_list.includes(option.id[0])) && (option.da_id === null)) }));
+      }
     }
     props.setFieldValue('team_members', id_list);
-    props.setFieldValue('team_name', team_name);
-    props.setFieldValue('temp_team_name', team_name);
     setSelected(selected_list);
-  }
-
-  // Handle Team Name updating to reject names already in use.
-  const handleSubmit = (props) => {
-    if (props.values.temp_team_name.length === 0) {
-      setError("Team name cannot be blank.");
-    }
-    else if (props.values.temp_team_name.length > 18) {
-      // Do nothing.
-    }
-    else {
-      setError('');
-      setShow(false);
-      props.setFieldValue("team_name", props.values.temp_team_name);
-    }
   }
 
   // Handle reselecting after hitting dupe assigned SR error.
@@ -263,60 +253,85 @@ function Deploy({ incident, organization }) {
     let unmounted = false;
     let source = axios.CancelToken.source();
 
+    const fetchSpecies = () => {
+      setSpeciesChoices([]);
+      // Fetch Species data.
+      axios.get('/animals/api/species/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          let species_options = [];
+          response.data.forEach(result => {
+            // Build species option list.
+            species_options.push({value: result.name, label: capitalize(result.name)});
+          });
+          setSpeciesChoices(species_options);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchSpecies();
+
     const fetchTeamMembers = async () => {
       setTeamData({teams: [], options: [], isFetching: true});
       // Fetch all TeamMembers.
       await axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
-      .then(response => {
+      .then(memberResponse => {
         if (!unmounted) {
           let options = [];
           let team_names = [];
-          let team_name = '';
-          response.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
-            options.push({id: [teammember.id], label: teammember.display_name, is_assigned:teammember.is_assigned})
+          // let team_name = '';
+          memberResponse.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
+            options.push({id:[teammember.id], da_id:null, label:teammember.display_name, is_assigned:teammember.is_assigned})
           });
-          setAssignedTeamMembers(response.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
+          setAssignedTeamMembers(memberResponse.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
           axios.get('/evac/api/evacassignment/', {
             params: {
               deploy_map: true,
-              status: preplan ? 'preplanned' : '',
+              status: 'active',
               incident,
+              organization,
             },
             cancelToken: source.token,
           })
           .then(response => {
             response.data
               .filter(({ team_object }) => team_object.show === true) 
-              .forEach(function({ team_object: team }) {
-                // Only add to option list if team has members and is not already in the list which is sorted by newest.
-                if (team.team_member_objects.length && !team_names.includes(team.name)) {
-                  options.unshift({id: team.team_members, label: team.name + ": " + team.display_name, is_assigned:team.is_assigned});
+              .forEach(function(da) {
+                // Only add to option list if team has members and team name isn't already in the list.
+                if (da.team_object.team_member_objects.length && !team_names.includes(da.team_object.name)) {
+                  options.unshift({id:da.team_object.team_members, da_id:da.id, label:"DA#" + da.id_for_incident + " (" + da.team_object.name + "): " + da.team_object.display_name, is_assigned:da.team_object.is_assigned});
+                  team_names.push(da.team_object.name);
                 }
-                team_names.push(team.name);
               });
             // Provide a default "TeamN" team name that hasn't already be used.
-            let i = 1;
-            let name = preplan ? "Preplanned " : "Team "
-            // Sort team_names to ensure we start with the lowest available number for default team name
-            team_names = team_names.filter(n => n.startsWith(name)).sort((a, b) => {
-              let numA = parseInt(a.replace(/^\D+/g, ''), 10);
-              let numB = parseInt(b.replace(/^\D+/g, ''), 10);
-              return numA - numB;
-            });
-            // Find the lowest available number for the new team name
-            while (team_names.includes(name + i)) {
-              i++;
-            }
-            team_name = name + i;
-            setTeamData({teams: response.data, options: options, isFetching: false});
-            setTeamName(team_name);
+            // let i = 1;
+            // let name = preplan ? "Preplanned " : "Team "
+            // // Sort team_names to ensure we start with the lowest available number for default team name
+            // team_names = team_names.filter(n => n.startsWith(name)).sort((a, b) => {
+            //   let numA = parseInt(a.replace(/^\D+/g, ''), 10);
+            //   let numB = parseInt(b.replace(/^\D+/g, ''), 10);
+            //   return numA - numB;
+            // });
+            // // Find the lowest available number for the new team name
+            // while (team_names.includes(name + i)) {
+            //   i++;
+            // }
+            // team_name = name + i;
+            setTeamData({teams:response.data, members:memberResponse.data, options:options, isFetching:false});
+            // setTeamName(team_name);
           })
           .catch(error => {
             if (!unmounted) {
-              setTeamData({teams: [], options: [], isFetching: false});
+              setTeamData({teams:[], members:[], options:[], isFetching:false});
               setShowSystemError(true);
             }
           });
@@ -324,7 +339,7 @@ function Deploy({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setTeamData({teams: [], options: [], isFetching: false});
+          setTeamData({teams: [], members:[], options: [], isFetching: false});
           setShowSystemError(true);
         }
       });
@@ -333,10 +348,10 @@ function Deploy({ incident, organization }) {
     const fetchServiceRequests = async () => {
       setData({...data, isFetching: true});
       // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?incident=' + incident, {
+      await axios.get('/hotline/api/servicerequests/?incident=' + incident + '&organization=' + organization, {
         params: {
           status: 'open',
-          when: preplan ? 'today' : 'today',
+          when: 'today',
           landingmap: true
         },
         cancelToken: source.token,
@@ -414,22 +429,18 @@ function Deploy({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [triggerRefresh, preplan, incident]);
+  }, [triggerRefresh, incident]);
 
   return (
     <Formik
       initialValues={{
-        team_name: teamName,
-        temp_team_name: teamName,
+        da_id: selectedTeam,
         team_members: [],
         service_requests: [],
         incident: state.incident.id,
+        incident_slug: incident,
+        organization_slug: organization,
       }}
-      validationSchema={Yup.object({
-        temp_team_name: Yup.string()
-          .max(18, 'Must be 18 characters or less')
-          .required('Required'),
-      })}
       enableReinitialize={true}
       onSubmit={(values, { setSubmitting, resetForm }) => {
         // Check if assigned team members have been submitted.
@@ -442,35 +453,48 @@ function Deploy({ incident, organization }) {
           if (duplicateSRs.length > 0) {
             values.service_requests = values.service_requests.filter(sr_id => !duplicateSRs.includes(sr_id));
           }
-
           setTimeout(() => {
-            axios.post('/evac/api/evacassignment/', values)
-            .then(response => {
-              // Stay on map and remove selected SRs if in Preplanning mode.
-              if (preplan) {
-                setSelectedCount({count:0, disabled:true});
-                const newState = {...mapState};
-                values.service_requests.forEach(sr => {
-                  delete newState[sr];
-                })
-                setMapState(newState);
-                resetForm();
-                setTriggerRefresh(!triggerRefresh);
-              }
-              // Otherwise navigate to the DA Summary page.
-              else {
-                navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id_for_incident);
-              }
-            })
-            .catch(error => {
-              if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
-                setDuplicateSRs(error.response.data[1]);
-                setShowDispatchDuplicateSRModal(true);
-              }
-              else {
+            if (selectedTeam) {
+              let promises = [];
+              values.service_requests.forEach((sr_id) => {
+                promises.push(axios.patch('/evac/api/evacassignment/' + selectedTeam + '/', {new_service_request:sr_id}));
+              });
+              Promise.all(promises).then(async (results) => {
+                navigate('/' + organization + '/' + incident + '/dispatch/summary/' + results[0].data.id_for_incident);
+              })
+              .catch(error => {
                 setShowSystemError(true);
-              }
-            });
+              });
+            }
+            else {
+              axios.post('/evac/api/evacassignment/', values)
+              .then(response => {
+                // Stay on map and remove selected SRs if in Preplanning mode.
+                if (values.team_members.length === 0 && selectedCount.count > 0) {
+                  setSelectedCount({count:0, disabled:true});
+                  const newState = {...mapState};
+                  values.service_requests.forEach(sr => {
+                    delete newState[sr];
+                  })
+                  setMapState(newState);
+                  resetForm();
+                  setTriggerRefresh(!triggerRefresh);
+                }
+                // Otherwise navigate to the DA Summary page.
+                else {
+                  navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id_for_incident);
+                }
+              })
+              .catch(error => {
+                if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {
+                  setDuplicateSRs(error.response.data[1]);
+                  setShowDispatchDuplicateSRModal(true);
+                }
+                else {
+                  setShowSystemError(true);
+                }
+              });
+            }
             setSubmitting(false);
           }, 500);
         }
@@ -479,7 +503,7 @@ function Deploy({ incident, organization }) {
     {props => (
       <Form>
         <Header>
-          {preplan ? "Preplan Dispatch Assignments" : "Deploy Teams "}
+          Deploy Teams&nbsp;
           <OverlayTrigger
             key={"new-data"}
             placement="bottom"
@@ -639,10 +663,45 @@ function Deploy({ incident, organization }) {
           </Col>
           <Col xs={10} className="border rounded pl-0 pr-0">
             <Map style={{marginRight:"0px"}} bounds={data.bounds} onMoveEnd={onMove}>
+              {teamData.teams.filter(evac => evac.id === selectedTeam).length && teamData.teams.filter(evac => evac.id === selectedTeam)[0].service_request_objects.map(service_request => (
+                <Marker
+                  key={service_request.id}
+                  position={[service_request.latitude, service_request.longitude]}
+                  icon={checkMarkerIcon}
+                  // onClick={() => handleMapState(service_request.id)}
+                  zIndexOffset={1000}
+                >
+                  <MapTooltip autoPan={false}>
+                    <span>
+                      SR#{service_request.id_for_incident}: {service_request.full_address}
+                      {/* {mapState[service_request.id] ?
+                        <span>
+                          <br />
+                          {Object.keys(mapState[service_request.id].matches).map((key,i) => (
+                            <span key={key} style={{textTransform:"capitalize"}}>
+                              {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[service_request.id].matches[key])}
+                            </span>
+                          ))}
+                          {Object.keys(mapState[service_request.id].matches).length === 0 ? "0 Animals" : ""}
+                        </span>
+                      :""} */}
+                      <div>{service_request.animal_count || 0} Animal{service_request.animal_count === 1 ? "" : "s"}</div>
+                      {service_request.followup_date ? <div>Followup Date: <Moment format="L">{service_request.followup_date}</Moment></div> : ""}
+                      <div>
+                      {service_request.aco_required ? <img width={16} height={16} src="/static/images/badge-sheriff.png" alt="ACO Required" className="mr-1" /> : ""}
+                      {service_request.injured ? <img width={16} height={16} src="/static/images/band-aid-solid.png" alt="Injured" className="mr-1" /> : ""}
+                      {service_request.accessible ? <img width={16} height={16} src="/static/images/car-solid.png" alt="Accessible" className="mr-1" /> : <img width={16} height={16} src="/static/images/car-ban-solid.png" alt="Not Acessible" className="mr-1" />}
+                      {service_request.turn_around ? <img width={16} height={16} src="/static/images/trailer-solid.png" alt="Turn Around" className="mr-1" /> : <img width={16} height={16} src="/static/images/trailer-ban-solid.png" alt="No Turn Around" className="mr-1" />}
+                      </div>
+                    </span>
+                  </MapTooltip>
+                </Marker>
+              ))}
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
+              .filter(service_request => filterData.species.length ? filterData.species.some(species => new Set(service_request.animals.filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'UNABLE TO LOCATE' , 'SHELTERED IN PLACE'].includes(animal.status)).map(animal => animal.species_string)).has(species)) : true)
               .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
               .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .map(service_request => (
@@ -687,9 +746,9 @@ function Deploy({ incident, organization }) {
         </Row>
         <Row className="ml-0 mr-0 border rounded" style={{marginTop:"-1px"}}>
           <Col xs={2} className="pl-0 pr-0" style={{marginLeft:"-1px", marginRight:"1px"}}>
-            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.disabled || (!preplan && props.values.team_members.length === 0)}>{preplan ? "PREPLAN" : "DEPLOY"}</Button>
+            <Button type="submit" className="btn-block mt-auto border" disabled={selectedCount.count === 0}>{selectedTeam ? "ASSIGN" : props.values.team_members.length > 0 ? "DEPLOY" : selectedCount.count > 0 ? "PREPLAN" : "DEPLOY/PREPLAN"}</Button>
           </Col>
-          <Col className="pl-0 pr-0 ml-1" style={{maxWidth:"170px"}}>
+          {/* <Col className="pl-0 pr-0 ml-1" style={{maxWidth:"170px"}}>
             <div className="card-header border rounded text-center" style={{height:"37px", marginLeft:"-6px", marginRight:"-11px", paddingTop:"6px", whiteSpace:"nowrap"}}>
               <span style={{marginLeft:"-12px"}}>{props.values.team_name || teamName}
                 {!preplan ? <OverlayTrigger
@@ -705,18 +764,8 @@ function Deploy({ incident, organization }) {
                 </OverlayTrigger> : ""}
               </span>
             </div>
-          </Col>
-          <Col style={{marginLeft:"2px", paddingLeft:"2px", paddingRight:"4px"}}>
-            {preplan ?
-              <BootstrapForm.Control
-                id="disabled_team_name"
-                name="disabled_team_name"
-                type="text"
-                placeholder="Cannot choose team members when preplanning..."
-                disabled={true}
-                style={{height:"37px"}}
-              />
-            :
+          </Col> */}
+          <Col style={{marginLeft:"-1px", paddingLeft:"0px", paddingRight:"4px"}}>
               <Typeahead
                 id="team_members"
                 multiple
@@ -732,10 +781,21 @@ function Deploy({ incident, organization }) {
                   </div>
                 )}
               />
-            }
           </Col>
           <Col className="pr-0" style={{maxWidth:"31px", paddingLeft:"2px"}}>
+            {selectedTeam ?
             <OverlayTrigger
+              key={"add-team-member-disabled"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-add-team-member-disabled`}>
+                  Cannot add new team members when a team is selected.
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" style={{cursor:"not-allowed", color:'#b4b4b4'}} inverse />
+            </OverlayTrigger>
+            : <OverlayTrigger
               key={"add-team-member"}
               placement="top"
               overlay={
@@ -745,14 +805,14 @@ function Deploy({ incident, organization }) {
               }
             >
               <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-18 down-6" onClick={() => setShowAddTeamMember(true)} style={{cursor:"pointer"}} inverse />
-            </OverlayTrigger>
+            </OverlayTrigger>}
           </Col>
         </Row>
         <Row className="d-flex flex-wrap" style={{marginTop:"-1px", marginRight:"-23px", marginLeft:"6px", minHeight:"36vh", paddingRight:"14px"}}>
           <Col xs={2} className="d-flex flex-column pl-0 pr-0" style={{marginLeft:"-7px", marginRight:"-2px", height:"277px"}}>
             <div className="card-header border rounded pl-3 pr-3" style={{height:"100%"}}>
               <h5 className="mb-0 text-center">Options
-              {filterData.priority.length > 0 || filterData.followup_date_start || filterData.followup_date_end ?
+              {filterData.species.length > 0 || filterData.priority.length > 0 || filterData.followup_date_start || filterData.followup_date_end ?
                 <OverlayTrigger
                   key={"filtered"}
                   placement="top"
@@ -764,7 +824,7 @@ function Deploy({ incident, organization }) {
                 >
                   <span className="fa-layers" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer"}}>
                     <FontAwesomeIcon icon={faFilter} className="ml-1" />
-                    <FontAwesomeIcon icon={faCheckCircle} size="sm" className="fa-inverse" transform={'shrink-4 down-3 right-10'} inverse />
+                    <FontAwesomeIcon icon={faCheckCircle} size="sm" className="fa-inverse" transform={'shrink-4 down-3 right-9'} inverse />
                   </span>
                 </OverlayTrigger>
               :
@@ -777,9 +837,20 @@ function Deploy({ incident, organization }) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faFilter} className="ml-1" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer"}} />
+                  <FontAwesomeIcon icon={faFilter} className="ml-1" onClick={() => {setShowFilterModal(true)}} style={{cursor:"pointer", marginRight:"-4px"}} />
                 </OverlayTrigger>
               }
+              <OverlayTrigger
+                key={"sort"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-sort`}>
+                    Sort options
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faBarsSort} onClick={() => {setShowSortModal(true)}} style={{cursor:"pointer", marginLeft:"11px"}} transform={'grow-3'} />
+              </OverlayTrigger>
               </h5>
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
@@ -800,23 +871,41 @@ function Deploy({ incident, organization }) {
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
               .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
+              .filter(service_request => filterData.species.length ? filterData.species.some(species => new Set(service_request.animals.filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'UNABLE TO LOCATE' , 'SHELTERED IN PLACE'].includes(animal.status)).map(animal => animal.species_string)).has(species)) : true)
               .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
               .filter(service_request => filterData.followup_date_end ? moment(service_request.followup_date).format('YYYY-MM-DD') <= filterData.followup_date_end : true)
               .sort((a, b) => {
                 // Sort by followup_date
-                if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom
-                if (a.followup_date && !b.followup_date) return -1; // `b` is null, move it to the bottom
-                if (a.followup_date && b.followup_date) {
-                  const dateA = new Date(a.followup_date);
-                  const dateB = new Date(b.followup_date);
-                  if (dateA - dateB !== 0) return dateA - dateB;
+                if (sortChoice === 'followup_date') {
+                  if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom
+                  if (a.followup_date && !b.followup_date) return -1; // `b` is null, move it to the bottom
+                  if (a.followup_date && b.followup_date) {
+                    const dateA = new Date(a.followup_date);
+                    const dateB = new Date(b.followup_date);
+                    if (dateA - dateB !== 0) return dateA - dateB;
+                  }
+
+                  // Compare priority (ascending order)
+                  if ((a.priority || 0) - (b.priority || 0) !== 0) return (a.priority || 0) - (b.priority || 0);
+
+                  // Compare pk (ascending order)
+                  return (a.id || 0) - (b.id || 0);
                 }
+                else {
+                  // Compare priority (ascending order)
+                  if ((a.priority || 0) - (b.priority || 0) !== 0) return (a.priority || 0) - (b.priority || 0);
 
-                // Compare priority (ascending order)
-                if ((a.priority || 0) - (b.priority || 0) !== 0) return (a.priority || 0) - (b.priority || 0);
+                  if (!a.followup_date && b.followup_date) return 1; // `a` is null, move it to the bottom
+                  if (a.followup_date && !b.followup_date) return -1; // `b` is null, move it to the bottom
+                  if (a.followup_date && b.followup_date) {
+                    const dateA = new Date(a.followup_date);
+                    const dateB = new Date(b.followup_date);
+                    if (dateA - dateB !== 0) return dateA - dateB;
+                  }
 
-                // Compare pk (ascending order)
-                return (a.id || 0) - (b.id || 0);
+                  // Compare pk (ascending order)
+                  return (a.id || 0) - (b.id || 0);
+                }
               })
               .map(service_request => (
                 <span key={service_request.id}>{mapState[service_request.id] && (mapState[service_request.id].checked || !mapState[service_request.id].hidden) ?
@@ -1159,24 +1248,6 @@ function Deploy({ incident, organization }) {
         </Row>
         <DispatchDuplicateSRModal dupe_list={data.service_requests.filter(sr => duplicateSRs.includes(String(sr.id)))} sr_list={data.service_requests.filter(sr => mapState[sr.id] && mapState[sr.id].checked === true)} show={showDispatchDuplicateSRModal} handleClose={handleCloseDispatchDuplicateSRModal} handleSubmit={props.handleSubmit} handleReselect={handleReselect} />
         <DispatchAlreadyAssignedTeamModal team_members={props.values.team_members} team_options={selected} setProceed={setProceed} show={showAlreadyAssignedTeamModal} handleClose={handleCloseAlreadyAssignedTeamModal} handleSubmit={props.handleSubmit} />
-        <Modal show={show} onHide={handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Update Team Name</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <TextInput
-              label="Team Name"
-              id="temp_team_name"
-              name="temp_team_name"
-              type="text"
-            />
-            {error ? <div style={{ color: "#e74c3c", marginTop: "-8px", marginLeft: "16px", fontSize: "80%" }}>{error}</div> : ""}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="primary" onClick={() => handleSubmit(props)}>Save</Button>
-            <Button variant="secondary" onClick={handleClose}>Close</Button>
-          </Modal.Footer>
-        </Modal>
         <Modal show={showFilterModal} onHide={handleCloseFilterModal}>
           <Modal.Header closeButton>
             <Modal.Title>Filter Options</Modal.Title>
@@ -1191,6 +1262,16 @@ function Deploy({ incident, organization }) {
               placeholder="Choose priorities..."
               className="priority-typeahead mb-3"
               selected={priorityChoices.filter(choice => filterData.priority.includes(choice.value))}
+            />
+            <label>Species</label>
+            <Typeahead
+              id="species"
+              multiple
+              onChange={(values) => {setFilterData((prevState) => ({...prevState, species:values.map(option => option.value)}))}}
+              options={speciesChoices}
+              placeholder="Choose species..."
+              className="species-typeahead mb-3"
+              selected={speciesChoices.filter(choice => filterData.species.includes(choice.value))}
             />
             <label>Followup Date</label>
             <Row>
@@ -1252,6 +1333,32 @@ function Deploy({ incident, organization }) {
           <Modal.Footer>
             {/* <Button variant="primary" onClick={() => applyFilters()}>Save</Button> */}
             <Button variant="secondary" onClick={handleCloseFilterModal}>Close</Button>
+          </Modal.Footer>
+        </Modal>
+        <Modal show={showSortModal} onHide={handleCloseSortModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>Sort Options</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div><label>Primary Sort Method</label></div>
+            <Radio
+              inline
+              id="primary-sort-followup-date"
+              label="Followup Date"
+              onClick={() => {setSortChoice('followup_date')}}
+              checked={sortChoice === 'followup_date' ? true : false}
+            />
+            <Radio
+              inline
+              id="primary-sort-priority"
+              label="Priority"
+              style={{marginLeft:"50px"}}
+              onClick={() => {setSortChoice('priority')}}
+              checked={sortChoice === 'priority' ? true : false}
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseSortModal}>Close</Button>
           </Modal.Footer>
         </Modal>
         <Formik

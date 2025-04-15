@@ -1,20 +1,23 @@
 import React, { useContext, useEffect, useState } from 'react';
 import axios from "axios";
 import { Link } from 'raviger';
-import { Button, Card, Col, Form, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner, ListGroupItem } from 'react-bootstrap';
+import { Form, Formik } from 'formik';
+import { Button, Card, Col, Form as BootstrapForm, ListGroup, Modal, OverlayTrigger, Row, Tooltip, Spinner, ListGroupItem } from 'react-bootstrap';
 import { Typeahead } from 'react-bootstrap-typeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCalendarDay, faClipboardCheck, faClipboardList,  faChevronDown, faChevronUp, faEquals, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPencilAlt, faUserCheck, faUserPlus
+  faCalendarDay, faClipboardCheck, faClipboardList,  faChevronDown, faChevronUp, faEquals, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage, faBriefcaseMedical, faMinusSquare, faPlusSquare, faPencilAlt, faUserCheck, faUserPlus
 } from '@fortawesome/free-solid-svg-icons';
-import { faClockRotateLeft, faExclamationSquare, faChevronDoubleDown, faChevronDoubleUp } from '@fortawesome/pro-solid-svg-icons';
+import { faClockRotateLeft, faExclamationSquare, faChevronDoubleDown, faChevronDoubleUp, faSparkles } from '@fortawesome/pro-solid-svg-icons';
 import { Marker, Tooltip as MapTooltip } from "react-leaflet";
 import L from "leaflet";
 import Moment from 'react-moment';
+import * as Yup from 'yup';
 import Map, { countDictMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, operationsMarkerIcon } from "../components/Map";
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { printDispatchResolutionForm } from './Utils'
+import { TextInput } from "../components/Form";
 import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
@@ -26,6 +29,9 @@ function DispatchSummary({ id, incident, organization }) {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Regex validators.
+  const phoneRegex = /^((\+\d{1,3}(-| )?\(?\d\)?(-| )?\d{1,3})|(\(?\d{2,3}\)?))(-| )?(\d{3,4})(-| )?(\d{4})(( x| ext)\d{1,5}){0,1}$/;
 
   // Initial animal data.
   const [data, setData] = useState({
@@ -53,6 +59,8 @@ function DispatchSummary({ id, incident, organization }) {
   const [teamMembers, setTeamMembers] = useState([]);
   const [show, setShow] = useState(false);
   const handleClose = () => {setShow(false);}
+  const [showAddTeamMember, setShowAddTeamMember] = useState(false);
+  const handleCloseShowAddTeamMember = () => setShowAddTeamMember(false);
   const [teamMemberToDelete, setTeamMemberToDelete] = useState({id: 0, name: '', display_name: ''});
   const [showTeamMemberConfirm, setShowTeamMemberConfirm] = useState(false);
   const handleTeamMemberClose = () => setShowTeamMemberConfirm(false);
@@ -97,37 +105,8 @@ function DispatchSummary({ id, incident, organization }) {
     let selected_list = [];
     values.forEach(value => {
       id_list = [...id_list, ...value.id];
-      // Handle if Team.
-      if (value.label.split(':').length > 1) {
-        // Parse out the team name.
-        value.label.split(':')[1].split(',').forEach((name, index) =>  {
-          let team_option = {id: [value.id[index]], label:name.replace(' ', '')};
-          // Add to list if not already selected.
-          if (!selected_list.some(option => option.id[0] === team_option.id[0])) {
-            selected_list.push(team_option);
-          }
-        });
-      }
-      // Else handle as an individual TeamMember.
-      else {
-        selected_list.push({id:value.id, label:value.label})
-      }
+      selected_list.push({id:value.id, label:value.label})
     });
-    // If deselecting.
-    if (teamMembers.length > selected_list.length) {
-      let team_options = [];
-      teamData.teams.filter(team => team.team_members.filter(value => id_list.includes(value)).length === 0).forEach(function(team) {
-        // Add selectable options back if if not already available.
-        if (team.team_members.length && !teamData.options.some(option => option.label === team.name + ": " + team.display_name)) {
-          team_options.push({id:team.team_members, label:team.name + ": " + team.display_name, is_assigned:team.is_assigned});
-        }
-      });
-      setTeamData(prevState => ({ ...prevState, "options":team_options.concat(teamData.options.concat(teamMembers.filter(option => !id_list.includes(option.id[0])))) }));
-    }
-    // Else we're selecting. Remove selection from option list.
-    else {
-      setTeamData(prevState => ({ ...prevState, "options":teamData.options.filter(option => !id_list.includes(option.id[0])) }));
-    }
     setTeamMembers(selected_list);
   }
 
@@ -227,7 +206,7 @@ function DispatchSummary({ id, incident, organization }) {
           response.data['bounds'] = bounds.length > 0 ? bounds : L.latLngBounds([[0,0]]);
           setData(response.data);
           setMapState(map_dict);
-          setTeamData({teams: [], options: [], isFetching: true});
+          setTeamData({options: [], isFetching: true});
           setTeamName(response.data.team_name);
           setIsPreplanned(response.data.team_name.match(/^Preplanned [0-9]+$/));
           axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
@@ -235,34 +214,11 @@ function DispatchSummary({ id, incident, organization }) {
           })
           .then(teamMemberResponse => {
             let options = [];
-            let team_names = [];
+            // let team_names = [];
             teamMemberResponse.data.filter(team_member => !response.data.team_object.team_members.includes(team_member.id) && team_member.show === true).forEach(function(teammember){
               options.push({id: [teammember.id], label: teammember.display_name})
             });
-            setTeamData({teams: [], options: options, isFetching: false});
-            // Then fetch all recent Teams.
-            axios.get('/evac/api/dispatchteam/', {
-              params: {
-                map: true
-              },
-              cancelToken: source.token,
-            })
-            .then(teamResponse => {
-              teamResponse.data.filter(team => team.show === true).forEach(function(team) {
-                // Only add to option list if team has members, is populated with at least 1 new valid team member, and is not already in the list which is sorted by newest.
-                if (team.team_members.length && team.team_members.filter(team_member => !response.data.team_object.team_members.includes(team_member)).length > 0 && !team_names.includes(team.name)) {
-                  options.unshift({id: team.team_members, label: team.name + ": " + team.display_name});
-                }
-                team_names.push(team.name);
-              });
-              setTeamData({teams: teamResponse.data, options: options, isFetching: false});
-            })
-            .catch(error => {
-              if (!unmounted) {
-                setTeamData({teams: [], options: [], isFetching: false});
-                setShowSystemError(true);
-              }
-            });
+            setTeamData({options: options, isFetching: false});
           })
           .catch(error => {
             if (!unmounted) {
@@ -668,6 +624,19 @@ function DispatchSummary({ id, incident, organization }) {
                     <FontAwesomeIcon icon={faBriefcaseMedical} className="ml-1" size="sm" inverse />
                   </OverlayTrigger>
                 : ""}
+                {assigned_request.animals[animal.id].is_new ?
+                  <OverlayTrigger
+                    key={"animal-is-new"}
+                    placement="top"
+                    overlay={
+                      <Tooltip id={`tooltip-animal-is-new`}>
+                        This animal was added to the Service Request while it was already assigned to this active Dispatch Assignment.
+                      </Tooltip>
+                    }
+                  >
+                    <FontAwesomeIcon icon={faSparkles} className="ml-1" size="sm" inverse />
+                  </OverlayTrigger>
+                : ""}
                 {animal.pcolor || animal.scolor ? <span className="ml-1" style={{textTransform:"capitalize"}}>({animal.pcolor ? animal.pcolor : "" }{animal.scolor ? <span>{animal.pcolor ? <span>/</span> : ""}{animal.scolor}</span> : ""})</span>: ""}
                 &nbsp;- {animal.status}
               </ListGroup.Item>
@@ -713,7 +682,7 @@ function DispatchSummary({ id, incident, organization }) {
         <Modal.Title>Edit Team Name</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form.Control
+        <BootstrapForm.Control
           label="Team Name"
           id="team_name"
           name="team_name"
@@ -726,7 +695,7 @@ function DispatchSummary({ id, incident, organization }) {
       </Modal.Body>
       <Modal.Footer>
         {!isLoading && isPreplanned ? (
-          <Form.Check
+          <BootstrapForm.Check
             id="defaultNameCheck"
             type="checkbox"
             style={{ flexGrow: 1 }}
@@ -745,20 +714,121 @@ function DispatchSummary({ id, incident, organization }) {
         <Modal.Title>Add Team Members</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Typeahead
-          id="team_members"
-          multiple
-          onChange={(values) => {handleChange(values)}}
-          selected={teamMembers}
-          options={teamData.options}
-          placeholder="Choose team members..."
-        />
+        <label>Use Existing Team Members</label>
+        <Row>
+          <Col>
+            <Typeahead
+              id="team_members"
+              multiple
+              onChange={(values) => {handleChange(values)}}
+              selected={teamMembers}
+              options={teamData.options}
+              placeholder="Choose team members..."
+            />
+          </Col>
+          <Col className="pr-0" style={{maxWidth:"31px", paddingLeft:"0px", marginLeft:"-10px", marginRight:"15px", marginTop:"-1px"}}>
+            <OverlayTrigger
+              key={"add-team-member"}
+              placement="top"
+              overlay={
+                <Tooltip id={`tooltip-add-team-member`}>
+                  Add a new team member
+                </Tooltip>
+              }
+            >
+              <FontAwesomeIcon icon={faPlusSquare} className="ml-1" size="lg" transform="grow-16 down-6" onClick={() => setShowAddTeamMember(true)} style={{cursor:"pointer"}} inverse />
+            </OverlayTrigger>
+          </Col>
+        </Row>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="primary" onClick={handleAddTeamMemberSubmit}>Add</Button>
         <Button variant="secondary" onClick={handleClose}>Cancel</Button>
       </Modal.Footer>
     </Modal>
+    <Formik
+          initialValues={{
+            first_name: '',
+            last_name: '',
+            phone: '',
+            agency_id: '',
+            incident: state ? state.incident.id : 'undefined',
+          }}
+          enableReinitialize={true}
+          validationSchema={Yup.object({
+            first_name: Yup.string()
+              .max(50, 'Must be 50 characters or less')
+              .required('Required'),
+            last_name: Yup.string()
+              .max(50, 'Must be 50 characters or less')
+              .required('Required'),
+            phone: Yup.string()
+              .matches(phoneRegex, "Phone number is not valid")
+              .required('Required'),
+            agency_id: Yup.string(),
+          })}
+          onSubmit={(values, { resetForm, setFieldValue }) => {
+            axios.post('/evac/api/evacteammember/', values)
+            .then(response => {
+              let selected_list = [...teamMembers];
+              selected_list.push({id:[response.data.id], label:response.data.first_name + " " + response.data.last_name + (response.data.agency_id ? " (" + response.data.agency_id + ")" : "")})
+              setTeamMembers(selected_list);
+              handleCloseShowAddTeamMember();
+              resetForm();
+            })
+            .catch(error => {
+              setShowSystemError(true);
+            });
+          }}
+        >
+          {formikProps => (
+            <Modal show={showAddTeamMember} onHide={handleCloseShowAddTeamMember}>
+              <Modal.Header closeButton>
+                <Modal.Title>Add New Team Member</Modal.Title>
+              </Modal.Header>
+              <Modal.Body>
+                <BootstrapForm>
+                  <BootstrapForm.Row className="mt-3">
+                    <TextInput
+                      type="text"
+                      label="First Name*"
+                      name="first_name"
+                      id="first_name"
+                      xs="6"
+                    />
+                    <TextInput
+                      type="text"
+                      label="Last Name*"
+                      name="last_name"
+                      id="last_name"
+                      xs="6"
+                    />
+                  </BootstrapForm.Row>
+                  <BootstrapForm.Row>
+                    <TextInput
+                      type="text"
+                      label="Phone*"
+                      name="phone"
+                      id="phone"
+                      xs="6"
+                    />
+                    <TextInput
+                      type="text"
+                      label="Agency ID"
+                      name="agency_id"
+                      id="agency_id"
+                      xs="6"
+                    />
+                  </BootstrapForm.Row>
+                </BootstrapForm>
+              </Modal.Body>
+              <Modal.Footer>
+                <Button variant="primary" onClick={() => formikProps.submitForm()}>Save</Button>
+                <Button variant="secondary" onClick={handleCloseShowAddTeamMember}>Close</Button>
+              </Modal.Footer>
+            </Modal>
+          )}
+        </Formik>
     <Modal show={showTeamMemberConfirm} onHide={handleTeamMemberClose}>
       <Modal.Header closeButton>
         <Modal.Title>Confirm Team Member Removal</Modal.Title>

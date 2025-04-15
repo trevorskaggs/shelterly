@@ -36,7 +36,7 @@ import { SystemErrorContext } from '../components/SystemError';
 import { titleCase } from '../components/Utils';
 import ActionsDropdown from '../components/ActionsDropdown';
 import LoadingLink from "../components/LoadingLink";
-import { faSplit } from '@fortawesome/pro-solid-svg-icons';
+import { faSparkles, faSplit } from '@fortawesome/pro-solid-svg-icons';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, unknownChoices, otherAgeChoice } from '../animals/constants';
 import CustomSelect from "../components/CustomSelect.js";
 
@@ -44,6 +44,13 @@ function AnimalStatus(props) {
 
   const roomRef = useRef(null);
   const shelterRef = useRef(null);
+
+  let newStatusChoices = statusChoices;
+  let newStatusChoicesNFA = statusChoicesNFA;
+  if (props.formikProps.values.assigned_requests[props.index] && props.formikProps.values.assigned_requests[props.index].animals[props.animal.id].is_new) {
+    newStatusChoices = [ ...statusChoicesNFA, {value:'DID NOT SEARCH FOR', label:'Did Not Search For'} ]
+    newStatusChoicesNFA = [ ...statusChoicesNFA, {value:'DID NOT SEARCH FOR', label:'Did Not Search For'} ]
+  }
 
   return (
     <>
@@ -54,7 +61,7 @@ function AnimalStatus(props) {
           name={`sr_updates.${props.index}.animals.${props.inception}.status`}
           type="text"
           className="mt-0"
-          options={props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && ['UNABLE TO LOCATE', 'NO FURTHER ACTION'].includes(props.formikProps.values.sr_updates[props.index].animals[props.inception].status) ? statusChoicesNFA :statusChoices}
+          options={props.formikProps.values && props.formikProps.values.sr_updates[props.index] && props.formikProps.values.sr_updates[props.index].animals[props.inception] && ['UNABLE TO LOCATE', 'NO FURTHER ACTION'].includes(props.formikProps.values.sr_updates[props.index].animals[props.inception].status) ? newStatusChoicesNFA : newStatusChoices}
           value={`sr_updates.${props.index}.animals.${props.inception}.status`}
           key={`sr_updates.${props.index}.animals.${props.inception}.status`}
           isClearable={false}
@@ -83,6 +90,19 @@ function AnimalStatus(props) {
         >
           <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse />
         </OverlayTrigger>
+        : ""}
+        {props.formikProps.values.assigned_requests[props.index] && props.formikProps.values.assigned_requests[props.index].animals[props.animal.id].is_new ?
+          <OverlayTrigger
+            key={"animal-is-new"}
+            placement="top"
+            overlay={
+              <Tooltip id={`tooltip-animal-is-new`}>
+                This animal was added to the Service Request while it was already assigned to this active Dispatch Assignment.
+              </Tooltip>
+            }
+          >
+            <FontAwesomeIcon icon={faSparkles} className="ml-1" size="sm" inverse />
+          </OverlayTrigger>
         : ""}
         {props.animal.pcolor || props.animal.scolor ? <span className="ml-1">({props.animal.pcolor ? titleCase(props.animal.pcolor) : "" }{props.animal.scolor ? <span>{titleCase(props.animal.pcolor) ? <span>/</span> : ""}{titleCase(props.animal.scolor)}</span> : ""})</span>: ""}
       </span>
@@ -238,7 +258,8 @@ function DispatchResolutionForm({ id, incident, organization }) {
                 injured:assigned_request.animals[animal_id].injured,
                 request:assigned_request.service_request_object.id,
                 shelter:assigned_request.animals[animal_id].shelter || '',
-                room:assigned_request.animals[animal_id].room || ''}}),
+                room:assigned_request.animals[animal_id].room || '',
+                is_new:assigned_request.animals[animal_id].is_new,}}),
               owner: assigned_request.service_request_object.owners.length > 0,
               owner_contact_id: assigned_request.owner_contact ? assigned_request.owner_contact.owner : '',
               owner_contact_time: assigned_request.owner_contact ? assigned_request.owner_contact.owner_contact_time : null,
@@ -421,7 +442,13 @@ function DispatchResolutionForm({ id, incident, organization }) {
       onSubmit={(values, { setSubmitting }) => {
         setTimeout(() => {
           values['closed'] = saveClose;
-          axios.put('/evac/api/evacassignment/' + data.id + '/?incident=' + incident, values)
+          // Clean out dummy value for Did Not Search For
+          values.sr_updates.forEach((sr, index) => {
+            sr.animals.forEach((animal, inception) => {
+              values.sr_updates[index].animals[inception].status = animal.status.replace("$", "");
+            })
+          })
+          axios.put('/evac/api/evacassignment/' + data.id + '/?incident=' + incident + '&organization=' + organization, values)
             .then(response => {
               if (response.data.service_requests.length === 0) {
                 navigate('/' + organization + '/' + incident + '/dispatch');
@@ -440,7 +467,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
       {props => (
         <>
           <BootstrapForm as={Form}>
-            <Header>Dispatch Assignment and Resolution</Header>
+            <Header>Dispatch Assignment Resolution</Header>
             <hr/>
             <Card className="mt-3 border rounded">
               <Card.Body>
@@ -448,9 +475,9 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   <h4>{data.team_name}</h4>
                 </Card.Title>
                 <hr />
-                <ListGroup variant="flush" style={{ marginTop: "-13px", marginBottom: "-13px", textTransform: "capitalize" }}>
+                <ListGroup variant="flush" style={{ marginTop:"-13px", marginBottom:"-13px", textTransform: "capitalize" }}>
                   {data.team && data.team_object.team_member_objects.map(team_member => (
-                    <ListGroup.Item key={team_member.id}>
+                    <ListGroup.Item key={team_member.id} style={{marginLeft:"-5px"}}>
                       {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ? <span>&nbsp;({team_member.agency_id})</span> : ""}
                     </ListGroup.Item>
                   ))}
@@ -742,7 +769,8 @@ function DispatchResolutionForm({ id, incident, organization }) {
                 fixed:values.fixed,
                 request:selectedSR,
                 shelter:'',
-                room:''
+                room:'',
+                is_new:false
               });
               setData(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));
               props.setValues(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));

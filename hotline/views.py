@@ -3,7 +3,7 @@ import json
 
 from evac.models import EvacAssignment
 from django.db import transaction
-from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, When, Value, BooleanField
+from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, Sum, When, Value, BooleanField
 from django.http import HttpResponse, JsonResponse
 from actstream import action
 from datetime import datetime, timedelta
@@ -48,6 +48,11 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if serializer.is_valid():
 
+            total_srs = ServiceRequest.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug'), incident__organization__slug=self.request.data.get('organization_slug')).values_list('id', flat=True)
+            with transaction.atomic():
+                count = len(total_srs)
+                serializer.validated_data['id_for_incident'] = count + 1
+
             if self.request.data.get('incident_slug'):
                 serializer.validated_data['incident'] = Incident.objects.get(slug=self.request.data.get('incident_slug'), organization__slug=self.request.data.get('organization_slug'))
 
@@ -73,7 +78,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     for animal in service_request.animal_set.all():
                         if assigned_request.animals.get(str(animal.id)):
                             assigned_request.animals[str(animal.id)]['status'] = 'CANCELED'
-                    assigned_request.save()
+                    assigned_request.delete()
 
             elif self.request.FILES.keys():
               # Create new files from uploads
@@ -109,6 +114,9 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         queryset = (
             ServiceRequest.objects.all()
             .annotate(
+                animal_count=Sum("animal__animal_count", default=0)
+            )
+            .annotate(
                 injured=Exists(Animal.objects.filter(request_id=OuterRef("id"), injured="yes"))
             )
             .annotate(
@@ -124,6 +132,9 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         status = self.request.query_params.get('status', '')
         if status in ('open', 'assigned', 'closed', 'canceled'):
             queryset = queryset.filter(status=status).distinct()
+        exclude_status = self.request.query_params.get('exclude_status', '')
+        if exclude_status in ('open', 'assigned', 'closed', 'canceled'):
+            queryset = queryset.exclude(status=exclude_status).distinct()
 
         # Exclude SRs without a geolocation when fetching for a map.
         is_map = self.request.query_params.get('map', '')  or self.request.query_params.get('landingmap', '')

@@ -1,6 +1,7 @@
 export const ITEMS_PER_PAGE = 10;
 
 export const STATE_OPTIONS = [
+  { value: '', label: ''},
   // US
   { value: 'AL', label: 'AL' }, { value: 'AK', label: 'AK' }, { value: 'AZ', label: 'AZ' }, { value: 'AR', label: 'AR' }, { value: 'CA', label: 'CA' }, { value: 'CO', label: 'CO' }, { value: 'CT', label: 'CT' },
   { value: 'DE', label: 'DE' }, { value: 'FL', label: 'FL' }, { value: 'GA', label: 'GA' }, { value: 'HI', label: 'HI' }, { value: 'ID', label: 'ID' }, { value: 'IL', label: 'IL' }, { value: 'IN', label: 'IN' },
