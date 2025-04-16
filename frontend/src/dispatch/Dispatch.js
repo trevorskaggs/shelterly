@@ -142,7 +142,7 @@ function Dispatch({ incident, organization }) {
       placement="bottom"
       overlay={
         <Tooltip id={`tooltip-unsubscribe`}>
-          Unsubscribe from receiving email notifications when Dispatch Assignements are created for this incident.
+          Unsubscribe from receiving email notifications when Dispatch Assignmeents are created for this incident.
         </Tooltip>
       }
     >
@@ -156,7 +156,7 @@ function Dispatch({ incident, organization }) {
       placement="bottom"
       overlay={
         <Tooltip id={`tooltip-subscribe`}>
-          Subscribe to receive email notifications when Dispatch Assignements are created for this incident.
+          Subscribe to receive email notifications when Dispatch Assignmeents are created for this incident.
         </Tooltip>
       }
     >
@@ -203,7 +203,7 @@ function Dispatch({ incident, organization }) {
                           <span key={key} style={{textTransform:"capitalize"}}>
                             {i > 0 && ", "}{prettyText(key.split(',')[0], mapState[dispatch_assignment.id].service_requests[assigned_request.service_request_object.id].matches[key])}
                           </span>
-                        )) : "Assignemnt ready for resolution"}
+                        )) : "Assignment ready for resolution"}
                       </span>
                     :""}
                     <br />
