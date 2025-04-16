@@ -11,7 +11,7 @@ import {
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faChevronDoubleDown, faChevronDoubleUp, faHammerCrash, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faHammerCrash, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import { DATE_FORMAT } from '../constants';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -498,11 +498,11 @@ function ServiceRequestSearch({ incident, organization }) {
                     placement="top"
                     overlay={
                       <Tooltip id={`tooltip-verbal`}>
-                        Forced entry permission granted
+                        Verbal Liability Release
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faHammerCrash} size="sm" className="ml-1" transform={'shrink-2'} />
+                    <FontAwesomeIcon icon={faCommentSmile} size="sm" className="ml-1" />
                   </OverlayTrigger> : ""
                   }
                   {service_request.key_provided ?
@@ -543,7 +543,7 @@ function ServiceRequestSearch({ incident, organization }) {
                     }
                   >
                     <span className="fa-layers mr-1">
-                      <FontAwesomeIcon icon={faCar} size="sm" className="ml-1 fa-move-down" />
+                      <FontAwesomeIcon icon={faCar} size="sm" className="ml-1 fa-move-up" />
                     </span>
                   </OverlayTrigger> :
                   <OverlayTrigger
@@ -571,7 +571,7 @@ function ServiceRequestSearch({ incident, organization }) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faTrailer} size="sm" className="ml-2" />
+                    <FontAwesomeIcon icon={faTrailer} size="sm" className="ml-1 fa-move-down" />
                   </OverlayTrigger> :
                   <OverlayTrigger
                     key={"no-turnaround"}

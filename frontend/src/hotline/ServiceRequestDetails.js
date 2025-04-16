@@ -13,7 +13,7 @@ import {
   faBan, faCar, faClipboardCheck, faDownload, faUpload, faEdit, faEnvelope, faHouseDamage,
   faKey, faMapMarkedAlt, faPlusSquare, faTimes, faTrailer, faUserPlus, faUsers
 } from '@fortawesome/free-solid-svg-icons';
-import { faCalendarEdit, faCheckCircle, faHomeHeart, faRightLeft, faPhoneRotary, faMessagePlus } from '@fortawesome/pro-solid-svg-icons';
+import { faCalendarEdit, faCheckCircle, faHomeHeart, faRightLeft, faPhoneRotary, faMessagePlus, faCommentSmile } from '@fortawesome/pro-solid-svg-icons';
 import Header from '../components/Header';
 import History from '../components/History';
 import { Checkbox, TextInput } from '../components/Form';
@@ -272,7 +272,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faCheckCircle} size="sm" className="fa-move-up" transform={'shrink-2'} />
+                    <FontAwesomeIcon icon={faCommentSmile} size="sm" className="fa-move-up" transform={'shrink-2'} />
                   </OverlayTrigger> : ""
                   }
                   {data.key_provided ?
