@@ -420,6 +420,9 @@ const AnimalForm = (props) => {
                       setSideImage(imageList);
                     }
                   }
+                  else if (['species'].includes(pair[0])) {
+                    animal_json[String(pair[0])] = Number(pair[1]);
+                  }
                   else {
                     animal_json[String(pair[0])] = pair[1];
                   }
