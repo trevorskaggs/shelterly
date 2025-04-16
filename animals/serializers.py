@@ -45,7 +45,7 @@ class ModestAnimalSerializer(SimpleAnimalSerializer):
     class Meta:
         model = Animal
         fields = ['id', 'id_for_incident', 'animal_count', 'name', 'species', 'species_string', 'confined', 'aggressive', 'injured', 'fixed', 'request', 'request_id_for_incident', 'found_location', 'request_address', 'request_lat_lon', 'shelter_object', 'shelter', 'status', 'aco_required', 'color_notes',
-        'microchip', 'front_image', 'intake_date', 'sip_date', 'owners', 'owner_names', 'active_dispatch', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight', 'reporter', 'reporter_object']
+        'microchip', 'front_image', 'intake_date', 'sip_date', 'owners', 'owner_names', 'active_dispatch', 'sex', 'size', 'age', 'pcolor', 'scolor', 'medical_notes', 'medical_record', 'behavior_notes', 'room', 'room_name', 'category', 'latitude', 'longitude', 'weight', 'reporter', 'reporter_object', 'last_seen']
 
     def get_found_location(self, obj):
         return build_full_address(obj)
