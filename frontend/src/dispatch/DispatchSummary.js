@@ -282,7 +282,7 @@ function DispatchSummary({ id, incident, organization }) {
                     className="text-white d-block py-1 px-3"
                     isLoading={isLoading}
                   >
-                    <FontAwesomeIcon icon={faEdit} className="mr-1" inverse />
+                    <FontAwesomeIcon icon={faEdit} style={{marginRight:"6px"}} inverse />
                     Update Dispatch Assignment
                   </LoadingLink>
                   : <LoadingLink
@@ -290,16 +290,17 @@ function DispatchSummary({ id, incident, organization }) {
                     className="text-white d-block py-1 px-3"
                     isLoading={isLoading}
                   >
-                    <FontAwesomeIcon icon={faClipboardCheck} className="mr-1" inverse />
+                    <FontAwesomeIcon icon={faClipboardCheck} style={{marginRight:"6px"}} inverse />
                     Resolve Dispatch Assignment
                   </LoadingLink>
                 }
                 <LoadingLink
                   onClick={() => {setShow(true)}}
-                  className="text-white d-block py-1 px-3"
+                  className="text-white d-block py-1"
+                  style={{marginLeft:"12px"}}
                   isLoading={isLoading}
                 >
-                  <FontAwesomeIcon icon={faUserPlus} className="mr-1"  inverse />
+                  <FontAwesomeIcon icon={faUserPlus} className="mr-1" inverse />
                   Add Team Member
                 </LoadingLink>
                 <ShelterlyPrintifyButton
@@ -313,16 +314,18 @@ function DispatchSummary({ id, incident, organization }) {
                 />
                 <LoadingLink
                   onClick={handleGeoJsonDownload}
-                  className="text-white d-block py-1 px-3"
+                  className="text-white d-block py-1"
+                  style={{marginLeft:"12px"}}
                   isLoading={isLoading}
                 >
-                  <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
+                  <FontAwesomeIcon icon={faDownload} style={{marginRight:"6px"}} inverse />
                   Download Dispatch Assignment as Geojson
                 </LoadingLink>
                 {state.incident.caltopo_map_id ?
                 <LoadingLink
                   onClick={handleGeoJsonPush}
-                  className="text-white d-block py-1 px-3"
+                  className="text-white d-block py-1"
+                  style={{marginLeft:"12px"}}
                   isLoading={isLoading}
                 >
                   <FontAwesomeIcon icon={faUpload} className="mr-1"  inverse />

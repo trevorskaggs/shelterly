@@ -39,7 +39,8 @@ const ShelterlyPrintifyButton = ({
         data-testid="button-test-component"
         as="a"
         variant="outline-light"
-        className="fa-icon-spinner-button d-block text-white px-3 py-1"
+        className="fa-icon-spinner-button d-block text-white py-1"
+        style={{marginLeft:"12px"}}
         onClick={handleClick}
         isSubmitting={isSubmitting}
         isSubmittingText={''}
@@ -54,7 +55,7 @@ const ShelterlyPrintifyButton = ({
       >
         <span data-testid="icon-test-component">
           {textPlacement === 'left' ? tooltipText : null}
-          <FontAwesomeIcon icon={faPrint} className={`mr-1 ${disabled ? disabledClassName : ''}`} inverse />
+          <FontAwesomeIcon icon={faPrint} style={{marginRight:"6px"}} className={` ${disabled ? disabledClassName : ''}`} inverse />
           {textPlacement === 'right' ? tooltipText : null}
         </span>
       </ButtonSpinner>

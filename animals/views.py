@@ -169,14 +169,15 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                 action.send(self.request.user, verb='roomed animal', target=serializer.validated_data.get('room'), action_object=serializer.instance)
                 action.send(self.request.user, verb='roomed animal', target=serializer.validated_data.get('room').building, action_object=serializer.instance)
 
-            # Record status change if appplicable.
-            if serializer.instance.status != serializer.validated_data.get('status', serializer.instance.status):
-                new_status = serializer.validated_data.get('status')
-                if serializer.instance.request:
-                    serializer.instance.request.update_status(self.request.user)
-                    for assigned_request in AssignedRequest.objects.filter(service_request=serializer.instance.request, dispatch_assignment__end_time=None):
-                        assigned_request.animals[str(serializer.instance.id)]['status'] = new_status
-                        assigned_request.save()
+            # Record status change if appplicable and update open assigned requests.
+            new_status = serializer.validated_data.get('status')
+            if serializer.instance.request:
+                for assigned_request in AssignedRequest.objects.filter(service_request=serializer.instance.request, dispatch_assignment__end_time=None):
+                    assigned_request.animals[str(serializer.instance.id)]['status'] = new_status
+                    assigned_request.animals[str(serializer.instance.id)]['color_notes'] = serializer.validated_data.get('color_notes', serializer.instance.color_notes)
+                    assigned_request.animals[str(serializer.instance.id)]['animal_notes'] = serializer.validated_data.get('behavior_notes', serializer.instance.behavior_notes)
+                    assigned_request.animals[str(serializer.instance.id)]['medical_notes'] = serializer.validated_data.get('medical_notes', serializer.instance.medical_notes)
+                    assigned_request.save()
 
                     # AssignedRequest.objects.filter(service_request=serializer.instance.request, dispatch_assignment__end_time=None).update(animals=Func(
                     #   F("animals"),
@@ -185,6 +186,8 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     #   Value("REUNITED", JSONField()),
                     #   function="jsonb_set",
                     # ))
+            if serializer.instance.status != serializer.validated_data.get('status', serializer.instance.status):
+                serializer.instance.request.update_status(self.request.user)
                 action.send(self.request.user, verb=f'changed animal status to {new_status}', target=serializer.instance)
 
             # Identify if there were any animal changes that aren't status, shelter, room, or owner.

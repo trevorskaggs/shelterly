@@ -206,9 +206,9 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         text: `Turn Around: ${assigned_request.service_request_object.turn_around ? 'Yes' : 'No'}`
       });
 
-      // forced entry
+      // verbal liability release
       pdf.drawWrappedText({
-        text: `Forced Entry Permission: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
+        text: `Verbal Liability Release: ${assigned_request.service_request_object.verbal_permission ? 'Yes' : 'No'}`
       });
 
       // key at staging (key provided)
