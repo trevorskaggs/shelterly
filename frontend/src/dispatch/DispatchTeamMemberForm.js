@@ -97,7 +97,8 @@ const DispatchTeamMemberForm = ({ id, incident, organization }) => {
         phone: Yup.string()
           .matches(phoneRegex, "Phone number is not valid")
           .required('Required'),
-        agency_id: Yup.string(),
+        agency_id: Yup.string()
+          .max(20, 'Must be 20 characters or less'),
       })}
       onSubmit={(values, { setSubmitting, resetForm }) => {
         if (id) {

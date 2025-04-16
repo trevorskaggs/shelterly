@@ -18,7 +18,7 @@ class EvacTeamMember(models.Model):
     first_name = models.CharField(max_length=50, blank=False)
     last_name = models.CharField(max_length=50, blank=False)
     phone = models.CharField(max_length=50, blank=False)
-    agency_id = models.CharField(max_length=50, blank=True)
+    agency_id = models.CharField(max_length=20, blank=True)
     show = models.BooleanField(default=True)
     incident = models.ForeignKey(Incident, on_delete=models.CASCADE)
 
