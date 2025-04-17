@@ -673,7 +673,7 @@ const AddressSearch = (props) => {
   const { setFieldValue } = useFormikContext();
   const [initialLatLon, setInitialLatLon] = useState([0, 0]);
 
-  const [fadeIn, setFadeIn] = useState((props.show_same) ? false : true);
+  const [fadeIn, setFadeIn] = useState(!(props.initialData && props.initialData.address === props.formikProps.values.address) ? false : true);
   const [existingOwner, setExistingOwner] = useState(props.formikProps.values.id ? true : false);
 
   const setLatLon = (lat, lon) => {
@@ -717,117 +717,125 @@ const AddressSearch = (props) => {
     }
     setFadeIn(!fadeIn);
     setTimeout(() => {
-      mapRef.current.leafletElement.invalidateSize();
+      mapRef.current ? mapRef.current.leafletElement.invalidateSize() : null;
     }, 250);
   }
 
   useEffect(() => {
     if (Object.keys(props).includes('existingOwner')) {
       setExistingOwner(props.existingOwner);
-      setFadeIn(props.existingOwner);
     }
   }, [props.existingOwner]);
 
+  useEffect(() => {
+    if (props.initialData && props.initialData.address) {
+      setFadeIn(!(props.initialData && props.initialData.address === props.formikProps.values.address));
+    }
+  }, [props.formikProps.values.address]);
+
   return (
     <>
-    {props.show_same ?
-      <span className="form-row mb-2" hidden={props.hidden}>
-        <Form.Label style={{marginLeft:"5px"}}>{props.isOwner ? "Owner" : "Reporter"} Address Same as Service Request: </Form.Label>
-        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn && !existingOwner} onChange={handleChange} style={{marginTop:"-7px"}} />
+    {props.show_same && props.isOwner ?
+      <span className="form-row" hidden={props.hidden} style={{marginBottom:props.lookup_hidden ? "-10px" : "10px"}}>
+        <Form.Label style={{marginLeft:"5px"}}>Owner Address Same as Service Request: </Form.Label>
+        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn && props.initialData && props.initialData.address === props.formikProps.values.address} onChange={handleChange} style={{marginTop:"-7px"}} />
       </span>
     : ""}
-        <Row hidden={props.hidden} style={{fontSize:"15px"}}>
-          <Col>
-            <Form.Row>
-              <Form.Group as={Col} xs="12">
-                {renderAddressLookup()}
-              </Form.Group>
-            </Form.Row>
-            <Form.Row>
-              <TextInput
-                xs={props.show_apt ? "10" : "12"}
-                type="text"
-                label="Address"
-                name="address"
-                value={props.formikProps.values.address || ''}
-                tooltip="Address must be populated using the Address Search."
-                disabled
-              />
-              {props.show_apt ?
-                <TextInput
-                  xs="2"
-                  type="text"
-                  label="Apartment"
-                  name="apartment"
-                  value={props.formikProps.values.apartment || ''}
-                  disabled={!fadeIn || props.disabled}
-                />
-              : ""}
-            </Form.Row>
-            <Form.Row>
-              <TextInput
-                xs="8"
-                type="text"
-                label="City"
-                name="city"
-                value={props.formikProps.values.city || ''}
-                tooltip="City must be populated using the Address Search."
-                disabled
-              />
-              <Col xs="2">
-                <DropDown
-                  label="State"
-                  name="state"
-                  id="state"
-                  options={STATE_OPTIONS}
-                  placeholder=''
-                  clearable={true}
-                  value={props.formikProps.values.state || ''}
-                  tooltip="State must be populated using the Address Search."
-                  disabled
-                />
-              </Col>
+    {props.address_form || fadeIn || !(props.initialData && props.initialData.address === props.formikProps.values.address) ?
+      <Row hidden={props.hidden} style={{fontSize:"15px"}}>
+        <Col>
+          <Form.Row>
+            <Form.Group as={Col} xs="12">
+              {renderAddressLookup()}
+            </Form.Group>
+          </Form.Row>
+          <Form.Row>
+            <TextInput
+              xs={props.show_apt ? "10" : "12"}
+              type="text"
+              label="Address"
+              name="address"
+              value={props.formikProps.values.address || ''}
+              tooltip="Address must be populated using the Address Search."
+              disabled
+            />
+            {props.show_apt ?
               <TextInput
                 xs="2"
                 type="text"
-                label="Zip Code"
-                name="zip_code"
-                value={props.formikProps.values.zip_code || ''}
-                tooltip="Zip Code must be populated using the Address Search."
+                label="Apartment"
+                name="apartment"
+                value={props.formikProps.values.apartment || ''}
+                disabled={!fadeIn || props.disabled}
+              />
+            : ""}
+          </Form.Row>
+          <Form.Row>
+            <TextInput
+              xs="8"
+              type="text"
+              label="City"
+              name="city"
+              value={props.formikProps.values.city || ''}
+              tooltip="City must be populated using the Address Search."
+              disabled
+            />
+            <Col xs="2">
+              <DropDown
+                label="State"
+                name="state"
+                id="state"
+                options={STATE_OPTIONS}
+                placeholder=''
+                clearable={true}
+                value={props.formikProps.values.state || ''}
+                tooltip="State must be populated using the Address Search."
                 disabled
               />
-            </Form.Row>
-          </Col>
-          <Col className="pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"0px"}}>
-            <Form.Label>{props.address_form === true ? "Location" : "Refine Exact Lat/Lon Point"}</Form.Label>
-            <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
-              <Legend position="bottomleft" metric={false} />
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-              />
-              {props.formikProps.values.latitude && props.formikProps.values.longitude ?
-              <Marker
-                draggable={props.address_form ? false : true}
-                onDragEnd={updatePosition}
-                autoPan={true}
-                position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
-                icon={pinMarkerIcon}
-                ref={markerRef}
-              >
-                <MapTooltip autoPan={false} direction="top">
-                  <div>
-                    {props.formikProps.values.full_address}
-                  </div>
-                  <div>
-                    Lat: {props.formikProps.values.latitude}, Lon: {props.formikProps.values.longitude}
-                  </div>
-                </MapTooltip>
-              </Marker>
-              : ""}
-            </Map>
-          </Col>
-        </Row>
+            </Col>
+            <TextInput
+              xs="2"
+              type="text"
+              label="Zip Code"
+              name="zip_code"
+              value={props.formikProps.values.zip_code || ''}
+              tooltip="Zip Code must be populated using the Address Search."
+              disabled
+            />
+          </Form.Row>
+        </Col>
+        <Col className="pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"0px"}}>
+          <Form.Label>{props.address_form === true ? "Location" : "Refine Exact Lat/Lon Point"}</Form.Label>
+          <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
+            <Legend position="bottomleft" metric={false} />
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+            />
+            {props.formikProps.values.latitude && props.formikProps.values.longitude ?
+            <Marker
+              draggable={props.address_form ? false : true}
+              onDragEnd={updatePosition}
+              autoPan={true}
+              position={[props.formikProps.values.latitude, props.formikProps.values.longitude]}
+              icon={pinMarkerIcon}
+              ref={markerRef}
+            >
+              <MapTooltip autoPan={false} direction="top">
+                <div>
+                  {props.formikProps.values.full_address}
+                </div>
+                <div>
+                  Lat: {props.formikProps.values.latitude}, Lon: {props.formikProps.values.longitude}
+                </div>
+              </MapTooltip>
+            </Marker>
+            : ""}
+          </Map>
+        </Col>
+      </Row>
+      :
+      props.isOwner ? <span><b>Service Request Address: </b>{props.formikProps.values.address}{props.formikProps.values.apartment ? <span> Apt #{props.formikProps.values.apartment}</span> : ""}, {props.formikProps.values.city}, {props.formikProps.values.state}</span> : ""}
     </>
   );
 }

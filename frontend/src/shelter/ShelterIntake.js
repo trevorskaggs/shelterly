@@ -255,7 +255,7 @@ function AnimalStatus(props) {
             props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.presenting_complaints`, instance === null ? [] : values);
           }}
         />
-        {props.formikProps.errors['presenting_complaints'] ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{props.formikProps.errors['presenting_complaints']}</div> : ""}
+        {props.formikProps.errors['sr_updates'] && props.formikProps.errors['sr_updates'][props.index] && props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints}</div> : ""}
       </Col>
     </BootstrapForm.Row>: ""}
     {props.presentingComplaintChoices.length && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints.includes(props.presentingComplaintChoices.filter(option => option.label === 'Other')[0].value) ?
@@ -338,7 +338,8 @@ function ShelterIntake({ id, incident, organization }) {
           axios.get('/evac/api/evacassignment/?incident=' + incident, {
             params: {
               status: 'active',
-              map: true
+              map: true,
+              organization
             },
             cancelToken: source.token,
           })
@@ -358,7 +359,8 @@ function ShelterIntake({ id, incident, organization }) {
                       request:assigned_request.service_request_object.id,
                       shelter:assigned_request.animals[animal_id].shelter || null,
                       room:assigned_request.animals[animal_id].room || null,
-                      priority:'green'
+                      priority:'green',
+                      presenting_complaints:[],
                     }}),
                   });
                 });
@@ -453,13 +455,18 @@ function ShelterIntake({ id, incident, organization }) {
                 status: Yup.string(),
                 shelter: Yup.number().nullable(),
                 room: Yup.number().nullable(),
+                priority: Yup.string(),
+                presenting_complaints: Yup.array().when('priority', {
+                  is: value => value && value !== 'green',
+                  then: Yup.array().min(1, 'Required')
+                }),
               })
             ),
           })
         ),
       })}
       onSubmit={(values, { setSubmitting }) => {
-        axios.patch('/evac/api/evacassignment/' + selected + '/?shelter=' + id + '&incident=' + incident, values)
+        axios.patch('/evac/api/evacassignment/' + selected + '/?shelter=' + id + '&incident=' + incident + '&organization=' + organization, values)
         .then(DAresponse => {
           values['intake_type'] = 'dispatch';
           // Update values with returned IDs for newly added animals.
@@ -600,6 +607,7 @@ function ShelterIntake({ id, incident, organization }) {
           shelter:Number(id),
           room:null,
           priority:'green',
+          presenting_complaints:[],
           new:true,
         });
         setData(prevState => ({ ...prevState, "sr_updates":sr_updates_copy}));

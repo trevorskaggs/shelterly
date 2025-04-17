@@ -177,6 +177,18 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     assigned_request.animals[str(serializer.instance.id)]['color_notes'] = serializer.validated_data.get('color_notes', serializer.instance.color_notes)
                     assigned_request.animals[str(serializer.instance.id)]['animal_notes'] = serializer.validated_data.get('behavior_notes', serializer.instance.behavior_notes)
                     assigned_request.animals[str(serializer.instance.id)]['medical_notes'] = serializer.validated_data.get('medical_notes', serializer.instance.medical_notes)
+                    assigned_request.animals[str(serializer.instance.id)]['animal_count'] = serializer.validated_data.get('animal_count', serializer.instance.animal_count)
+                    assigned_request.animals[str(serializer.instance.id)]['pcolor'] = serializer.validated_data.get('pcolor', serializer.instance.pcolor)
+                    assigned_request.animals[str(serializer.instance.id)]['scolor'] = serializer.validated_data.get('scolor', serializer.instance.scolor)
+                    assigned_request.animals[str(serializer.instance.id)]['aggressive'] = serializer.validated_data.get('aggressive', serializer.instance.aggressive)
+                    assigned_request.animals[str(serializer.instance.id)]['confined'] = serializer.validated_data.get('confined', serializer.instance.confined)
+                    assigned_request.animals[str(serializer.instance.id)]['injured'] = serializer.validated_data.get('injured', serializer.instance.injured)
+                    assigned_request.animals[str(serializer.instance.id)]['fixed'] = serializer.validated_data.get('fixed', serializer.instance.fixed)
+                    assigned_request.animals[str(serializer.instance.id)]['aco_required'] = serializer.validated_data.get('aco_required', serializer.instance.aco_required)
+                    assigned_request.animals[str(serializer.instance.id)]['species'] = serializer.validated_data.get('species_string', serializer.instance.species.name)
+                    assigned_request.animals[str(serializer.instance.id)]['age'] = serializer.validated_data.get('age', serializer.instance.age)
+                    assigned_request.animals[str(serializer.instance.id)]['sex'] = serializer.validated_data.get('sex', serializer.instance.sex)
+                    assigned_request.animals[str(serializer.instance.id)]['size'] = serializer.validated_data.get('size', serializer.instance.size)
                     assigned_request.save()
 
                     # AssignedRequest.objects.filter(service_request=serializer.instance.request, dispatch_assignment__end_time=None).update(animals=Func(
