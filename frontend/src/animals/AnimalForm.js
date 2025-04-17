@@ -350,6 +350,11 @@ const AnimalForm = (props) => {
           state: Yup.string(),
           zip_code: Yup.string()
             .max(10, 'Must be 10 characters or less'),
+          priority: Yup.string(),
+          presenting_complaints: Yup.array().when('priority', {
+            is: value => value && value !== 'green',
+            then: Yup.array().min(1, 'Required')
+          }),
           latitude: Yup.number()
             .nullable(),
           longitude: Yup.number()
