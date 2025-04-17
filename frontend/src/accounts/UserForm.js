@@ -125,7 +125,8 @@ const UserForm = ({ id, organization }) => {
           then: () => Yup.string().required('Required').matches(phoneRegex, "Phone number is not valid").min(10, "Phone number is not valid"),
           otherwise: () => Yup.string().required('Required')
         }),
-        agency_id: Yup.string().nullable(),
+        agency_id: Yup.string().nullable()
+          .max(50, 'Must be 50 characters or less'),
         access_expires_at: Yup.string().nullable(),
         user_perms: Yup.boolean(),
         incident_perms: Yup.boolean(),

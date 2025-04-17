@@ -206,9 +206,9 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         text: `Turn Around: ${assigned_request.service_request_object.turn_around ? 'Yes' : 'No'}`
       });
 
-      // forced entry
+      // verbal liability release
       pdf.drawWrappedText({
-        text: `Forced Entry Permission: ${assigned_request.visit_note?.forced_entry ? 'Yes' : 'No'}`
+        text: `Verbal Liability Release: ${assigned_request.service_request_object.verbal_permission ? 'Yes' : 'No'}`
       });
 
       // key at staging (key provided)
@@ -279,7 +279,6 @@ const buildDispatchResolutionsDoc = (drs = []) => {
 
         const animalRow = [{
           label: `\n\n${animal.status.replace('UNABLE TO LOCATE', 'UTL').replace('SHELTERED IN PLACE', 'SIP').replace('No Further Action (NFA)', 'NFA')}`,
-          marginTop: -32
         }].concat(Array(6).fill({
           type: 'checkbox',
           label: '',
@@ -290,7 +289,7 @@ const buildDispatchResolutionsDoc = (drs = []) => {
         pdf.drawList({
           listItems: animalRow,
           listStyle: 'inline',
-          // bottomPadding: 5
+          bottomPadding: 10
         });
 
         pdf.setDocumentFontSize({ size: 10 });

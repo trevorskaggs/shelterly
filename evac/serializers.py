@@ -88,7 +88,7 @@ class SimpleDispatchServiceRequestSerializer(SimpleServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
-        'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'accessible', 'turn_around', 'verbal_permission', 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'owners', 'owner_objects', 'visit_notes', 'notes']
 
 class SimpleAssignedRequestDispatchSerializer(serializers.ModelSerializer):
@@ -119,7 +119,7 @@ class DispatchServiceRequestSerializer(SimpleDispatchServiceRequestSerializer):
     class Meta:
         model = ServiceRequest
         fields = ['id', 'animals', 'id_for_incident', 'directions', 'latitude', 'longitude', 'full_address', 'followup_date', 'status', 'injured', 'priority', 'key_provided',
-        'accessible', 'turn_around' , 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
+        'accessible', 'turn_around', 'verbal_permission', 'reported_animals', 'reported_evac', 'reported_sheltered_in_place', 'sheltered_in_place', 'unable_to_locate', 'aco_required',
         'owners', 'owner_objects', 'reporter_object', 'visit_notes', 'notes']
 
 

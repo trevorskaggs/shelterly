@@ -228,7 +228,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
             })
             response.data.sr_updates.push({
               id: assigned_request.service_request_object.id,
-              followup_date: assigned_request.followup_date ? assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + state.incident.default_followup_days)).toJSON().slice(0, 10),
+              followup_date: assigned_request.followup_date ? String(assigned_request.followup_date).includes('T') ? assigned_request.followup_date.slice(0, 10) : assigned_request.followup_date : new Date(new Date().setDate(new Date().getDate() + state.incident.default_followup_days)).toJSON().slice(0, 10),
               priority: assigned_request.service_request_object.priority,
               date_completed: assigned_request.visit_note && assigned_request.visit_note.date_completed ? assigned_request.visit_note.date_completed : new Date(),
               directions: assigned_request.service_request_object.directions ? assigned_request.service_request_object.directions : '',
