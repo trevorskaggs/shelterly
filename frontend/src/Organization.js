@@ -14,12 +14,12 @@ function Organization() {
   const { dispatch } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [organization, setOrganization] = useState({id: '', name:'', slug:'', watchduty_enabled: '', caltopo_enabled: ''});
+  const [organization, setOrganization] = useState({id: '', name:'', slug:'', watchduty_enabled: '', caltopo_enabled: '', verbal_liability_text: ''});
   const [options, setOptions] = useState([]);
   const [, , removeCookie] = useCookies(['token']);
 
-  const handleSubmit = (organization_id, organization_name, watchduty_enabled, caltopo_enabled) => {
-    dispatch({type: "SET_ORGANIZATION", data: {id:organization_id, name:organization_name, watchduty_enabled: watchduty_enabled, caltopo_enabled: caltopo_enabled}});
+  const handleSubmit = (organization_id, organization_name, watchduty_enabled, caltopo_enabled, verbal_liability_text) => {
+    dispatch({type: "SET_ORGANIZATION", data: {id:organization_id, name:organization_name, watchduty_enabled: watchduty_enabled, caltopo_enabled: caltopo_enabled, verbal_liability_text: verbal_liability_text}});
     navigate(organization.slug);
   }
 
@@ -84,9 +84,9 @@ function Organization() {
     </Row>
     <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{maxHeight:"200px", minWidth:"572px"}}>
       <SimpleValue options={options}>
-        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select organization..." onChange={(instance) => setOrganization({id:instance.value, name:instance.label, slug:instance.slug, watchduty_enabled: instance.watchduty_enabled, caltopo_enabled: instance.caltopo_enabled})} />}
+        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select organization..." onChange={(instance) => setOrganization({id:instance.value, name:instance.label, slug:instance.slug, watchduty_enabled: instance.watchduty_enabled, caltopo_enabled: instance.caltopo_enabled, verbal_liability_text: instance.verbal_liability_text})} />}
       </SimpleValue>
-      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(organization.id, organization.name, organization.watchduty_enabled, organization.caltopo_enabled)} disabled={organization.id ? false : true} block>Select Organization</Button>
+      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(organization.id, organization.name, organization.watchduty_enabled, organization.caltopo_enabled, organization.verbal_liability_text)} disabled={organization.id ? false : true} block>Select Organization</Button>
       <Button size="lg" className="btn-primary mt-2 mb-3" onClick={() => logoutUser({dispatch}, {removeCookie})} block>Return to Login</Button>
     </Col>
     </>

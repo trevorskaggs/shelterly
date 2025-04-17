@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import axios from "axios";
 import { Link, navigate, useNavigationPrompt } from 'raviger';
 import { Field, Form, Formik } from 'formik';
-import { Button, ButtonGroup, Card, Col, Form as BootstrapForm, Modal, Row } from "react-bootstrap";
+import { Button, ButtonGroup, Card, Col, Form as BootstrapForm, OverlayTrigger, Tooltip, Modal, Row } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
 import 'flatpickr/dist/themes/light.css';
@@ -11,7 +11,7 @@ import { AddressSearch, DateTimePicker, DropDown, TextInput } from '../component
 import { Legend, pinMarkerIcon } from "../components/Map";
 import { AuthContext } from "../accounts/AccountsReducer";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowAltCircleLeft, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
 import { priorityChoices } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
@@ -78,7 +78,7 @@ function ServiceRequestForm(props) {
     accessible: props.state.steps.request.accessible || false,
     turn_around: props.state.steps.request.turn_around || false,
     incident_slug: props.incident,
-    organization_slug: props.organization
+    organization_slug: props.organization,
   });
 
   // Hook for initializing data.
@@ -348,8 +348,24 @@ function ServiceRequestForm(props) {
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
-              <span hidden={is_first_responder}><BootstrapForm.Label htmlFor="verbal_permission" className="ml-1">Verbal Liability Release</BootstrapForm.Label>
+                <span hidden={is_first_responder}><BootstrapForm.Label htmlFor="verbal_permission" className="ml-1">
+                Verbal Liability Release
+                { state.organization.verbal_liability_release != '' ?
+                  <OverlayTrigger
+                  key={"verbal"}
+                  placement="top"
+                  overlay={
+                    <Tooltip id={`tooltip-verbal`}>
+                      { state.organization.verbal_liability_text }
+                    </Tooltip>
+                  }
+                >
+                  <FontAwesomeIcon icon={faInfoCircle} size="lg" className="fa-move-up" transform={'shrink-2'} />
+                </OverlayTrigger> : ""
+                }
+              </BootstrapForm.Label>
               <Field component={Switch} name="verbal_permission" type="checkbox" color="primary"/>
+ 
 
               <BootstrapForm.Label htmlFor="key_provided">Key at Staging</BootstrapForm.Label>
               <Field component={Switch} name="key_provided" type="checkbox" color="primary" /></span>
