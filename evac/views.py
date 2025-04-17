@@ -360,6 +360,10 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         new_animal_dict.pop("caution", None)
                         new_animal_dict.pop("new", None)
                         new_animal_dict.pop("is_new", None)
+                        total_animals = Animal.objects.select_for_update().filter(incident__slug=self.request.data.get('incident_slug'), incident__organization__slug=self.request.data.get('organization_slug')).values_list('id', flat=True)
+                        with transaction.atomic():
+                            count = len(total_animals)
+                            new_animal_dict['id_for_incident'] = count + 1
                         new_animal = Animal.objects.create(**new_animal_dict)
                         new_animal.owners.set(sr.owners.all())
                         id = new_animal.id

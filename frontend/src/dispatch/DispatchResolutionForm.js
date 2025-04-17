@@ -47,7 +47,7 @@ function AnimalStatus(props) {
 
   let newStatusChoices = statusChoices;
   let newStatusChoicesNFA = statusChoicesNFA;
-  if (props.formikProps.values.assigned_requests[props.index] && props.formikProps.values.assigned_requests[props.index].animals[props.animal.id].is_new) {
+  if (props.formikProps.values.assigned_requests[props.index] && props.animal.id && props.formikProps.values.assigned_requests[props.index].animals[props.animal.id].is_new) {
     newStatusChoices = [ ...statusChoicesNFA, {value:'DID NOT SEARCH FOR', label:'Did Not Search For'} ]
     newStatusChoicesNFA = [ ...statusChoicesNFA, {value:'DID NOT SEARCH FOR', label:'Did Not Search For'} ]
   }
@@ -91,7 +91,7 @@ function AnimalStatus(props) {
           <FontAwesomeIcon icon={faClipboardList} size="sm" className="ml-1" inverse />
         </OverlayTrigger>
         : ""}
-        {props.formikProps.values.assigned_requests[props.index] && props.formikProps.values.assigned_requests[props.index].animals[props.animal.id].is_new ?
+        {props.formikProps.values.assigned_requests[props.index] && props.animal.id && props.formikProps.values.assigned_requests[props.index].animals[props.animal.id].is_new ?
           <OverlayTrigger
             key={"animal-is-new"}
             placement="top"
@@ -415,11 +415,14 @@ function DispatchResolutionForm({ id, incident, organization }) {
                     function(value) {
                       let required = true;
                       data.sr_updates.filter(sr => sr.id === this.parent.request).forEach(sr_update => {
-                        if (sr_update.unable_to_complete || !saveClose) {
+                        if (sr_update.unable_to_complete) {
                           required = false;
                         }
                       })
-                      if (value && value.includes('REPORTED') && required) {
+                      if (!saveClose) {
+                        required = false;
+                      }
+                      if ((value && value.includes('REPORTED') && required)) {
                         return false;
                       }
                       return true;
