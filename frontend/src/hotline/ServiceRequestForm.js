@@ -270,7 +270,7 @@ function ServiceRequestForm(props) {
             {is_workflow ?
               <span>
                 <Col className="pr-0 pl-0 mb-3" xs="6" style={{marginTop:"0px"}}>
-                  Service Request Address: {formikProps.values.address} {formikProps.values.city}, {formikProps.values.state}
+                  <b>Service Request Address: </b>{formikProps.values.address}{formikProps.values.apartment ? <span> Apt #{formikProps.values.apartment}</span> : ""}, {formikProps.values.city}, {formikProps.values.state}
                   <br />
                   <br />
                   <BootstrapForm.Label>Refine Exact Lat/Lon Point</BootstrapForm.Label>
