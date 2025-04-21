@@ -716,9 +716,11 @@ const AddressSearch = (props) => {
       setExistingOwner(false);
     }
     setFadeIn(!fadeIn);
-    setTimeout(() => {
-      mapRef.current ? mapRef.current.leafletElement.invalidateSize() : null;
-    }, 250);
+    if (mapRef.current) {
+      setTimeout(() => {
+        mapRef.current ? mapRef.current.leafletElement.invalidateSize() : null;
+      }, 250);
+    }
   }
 
   useEffect(() => {
