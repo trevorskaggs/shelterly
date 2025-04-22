@@ -718,7 +718,9 @@ const AddressSearch = (props) => {
     setFadeIn(!fadeIn);
     if (mapRef.current) {
       setTimeout(() => {
-        mapRef.current ? mapRef.current.leafletElement.invalidateSize() : null;
+        if (mapRef.current) {
+          mapRef.current.leafletElement.invalidateSize()
+        }
       }, 250);
     }
   }
