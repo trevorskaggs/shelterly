@@ -15,6 +15,7 @@ class Organization(models.Model):
     short_name = models.CharField(max_length=10, default='changeme')
     liability_name = models.CharField(max_length=80)
     liability_short_name = models.CharField(max_length=40)
+    verbal_liability_text = models.CharField(max_length=1000, default='')
     caltopo_enabled = models.BooleanField(default=False)
     watchduty_enabled = models.BooleanField(default=False)
 
