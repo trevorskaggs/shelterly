@@ -272,8 +272,7 @@ function ServiceRequestForm(props) {
                 <Col className="pr-0 pl-0 mb-3" xs="6" style={{marginTop:"0px"}}>
                   <b>Service Request Address: </b>{formikProps.values.address}{formikProps.values.apartment ? <span> Apt #{formikProps.values.apartment}</span> : ""}, {formikProps.values.city}, {formikProps.values.state}
                   <br />
-                  <br />
-                  <BootstrapForm.Label>Refine Exact Lat/Lon Point</BootstrapForm.Label>
+                  <BootstrapForm.Label className="mt-2">Refine Exact Lat/Lon Point</BootstrapForm.Label>
                   <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || formikProps.values.latitude || 0, initialLatLon[1] || formikProps.values.longitude || 0]} className="animal-search-leaflet-container border rounded" >
                     <Legend position="bottomleft" metric={false} />
                     <TileLayer

@@ -682,7 +682,7 @@ const AddressSearch = (props) => {
 
   const renderAddressLookup = () => {
     if (process.env.REACT_APP_GOOGLE_API_KEY) {
-      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={(!fadeIn && !existingOwner && !props.animal_id && !props.servicerequest_id) || props.disabled} />
+      return <AddressLookup label={props.label} style={{width: '100%'}} className={"form-control"} setLatLon={setLatLon} error={props.error} incident={props.incident} disabled={props.disabled} />
     } else {
       return <Alert variant="danger">Found Location Search is not available. Please contact support for assistance.</Alert>
     }
