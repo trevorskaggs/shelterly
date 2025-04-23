@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 
 from accounts.models import ShelterlyUser
-from incident.models import Incident
+from incident.models import Incident, Organization
 
 class TestViews(APITestCase):
 
