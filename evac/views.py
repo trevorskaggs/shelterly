@@ -350,7 +350,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         new_animal_dict["room"] = Room.objects.get(id=animal_dict.get("room")) if animal_dict.get("room") else None
                         new_animal_dict["shelter"] = Shelter.objects.get(id=animal_dict.get("shelter")) if animal_dict.get("shelter") else None
                         new_animal_dict["species"] = Species.objects.get(name=animal_dict.get("species"))
-                        new_animal_dict["incident"] = Incident.objects.get(slug=self.request.GET.get('incident'))
+                        new_animal_dict["incident"] = Incident.objects.get(slug=self.request.GET.get('incident'), organization__slug=self.request.GET.get('organization'))
                         new_animal_dict["behavior_notes"] = new_animal_dict["animal_notes"]
                         # Clear out extraneous keys not used for animal creation if present.
                         new_animal_dict.pop("animal_notes", None)
@@ -364,7 +364,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                         with transaction.atomic():
                             count = len(total_animals)
                             new_animal_dict['id_for_incident'] = count + 1
-                        new_animal = Animal.objects.create(**new_animal_dict)
+                            new_animal = Animal.objects.create(**new_animal_dict)
                         new_animal.owners.set(sr.owners.all())
                         id = new_animal.id
 
