@@ -110,7 +110,7 @@ function AuthProvider(props) {
       }
       // Fetch Incident data.
       if (incident_slug && !state.incident.name && incident_slug !== 'accounts'){
-        axios.get('/incident/api/incident/?incident=' + incident_slug)
+        axios.get('/incident/api/incident/?incident=' + incident_slug + '&organization_slug=' + org_slug)
         .then(incidentResponse => {
           dispatch({type: "SET_INCIDENT", data: {id:incidentResponse.data[0].id, name:incidentResponse.data[0].name, training:incidentResponse.data[0].training, watchduty_map_id:incidentResponse.data[0].watchduty_map_id, caltopo_map_id:incidentResponse.data[0].caltopo_map_id, default_followup_days:incidentResponse.data[0].default_followup_days}});
         })

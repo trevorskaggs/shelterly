@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 
 from accounts.models import ShelterlyUser
-from incident.models import Incident
+from incident.models import Incident, Organization
 
 class TestViews(APITestCase):
 
@@ -9,7 +9,8 @@ class TestViews(APITestCase):
     def setUpTestData(cls):
         cls.user = ShelterlyUser.objects.create_user(email="test@test.com", cell_phone="5555555", password="test", is_active=True)
         cls.staff_user = ShelterlyUser.objects.create_user(email="staff_test@test.com", cell_phone="5555555", password="test", is_active=True, is_staff=True)
-        cls.incident = Incident.objects.create(name='Bow Fire', slug='bow-fire', latitude=43.1569, longitude=-71.5529)
+        cls.organization = Organization.objects.create(name='Test', slug='test', short_name='test')
+        cls.incident = Incident.objects.create(organization=cls.organization, name='Bow Fire', slug='bow-fire', latitude=43.1569, longitude=-71.5529)
 
     def test_get_all_incidents(self):
         self.client.force_authenticate(self.user)
