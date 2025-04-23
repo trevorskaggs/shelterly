@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('incident', '0017_alter_incident_organization'),
+        ('incident', '0017_organization_verbal_liability_text'),
     ]
 
     operations = [
