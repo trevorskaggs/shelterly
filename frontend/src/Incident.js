@@ -142,7 +142,7 @@ function Incident() {
       : ""}
       <Row>
         {state.user.is_superuser || state.user.user_perms ? <Col style={{marginRight:"-23px"}}>
-          <Link href={'/' + org_slug + '/accounts/user_management'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>User Administration</Button></Link>
+          <Link href={'/' + org_slug + '/accounts/user_management'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>User Management</Button></Link>
         </Col> : ""}
         {state.user.is_superuser || state.user.user_perms ? <Col>
           <Link href={'/' + org_slug + '/signup/manage'} style={{textDecoration:"none"}}><Button size="lg" className="btn-primary mt-2" block>Access Tokens</Button></Link>
