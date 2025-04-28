@@ -671,7 +671,7 @@ const AddressSearch = (props) => {
   const markerRef = useRef(null);
   const mapRef = useRef(null);
   const { setFieldValue } = useFormikContext();
-  const [initialLatLon, setInitialLatLon] = useState([0, 0]);
+  const [initialLatLon, setInitialLatLon] = useState(props.initial_coordinates);
 
   const [fadeIn, setFadeIn] = useState(!(props.initialData && props.initialData.address === props.formikProps.values.address) ? false : true);
   const [existingOwner, setExistingOwner] = useState(props.formikProps.values.id ? true : false);
@@ -810,7 +810,7 @@ const AddressSearch = (props) => {
         </Col>
         <Col className="pl-0 pr-0 mb-3 mr-3" xs="4" style={{marginTop:"0px"}}>
           <Form.Label>{props.address_form === true ? "Location" : "Refine Exact Lat/Lon Point"}</Form.Label>
-          <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
+          <Map zoom={9} ref={mapRef} center={[initialLatLon[0] || props.formikProps.values.latitude || 0, initialLatLon[1] || props.formikProps.values.longitude || 0]} className="search-leaflet-container border rounded " >
             <Legend position="bottomleft" metric={false} />
             <TileLayer
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
