@@ -26,7 +26,7 @@ function Incident() {
   const path = window.location.pathname;
   const org_slug = path.split('/')[1];
 
-  const handleSubmit = (incident_id, incident_name, incident_description, incident_training, incident_default_followup_days, incident_caltopo_map_id, incident_watchduty_map_id, incident_latitude, incident_longitude) => {
+  const handleSubmit = (incident_id, incident_name, incident_description, incident_training, incident_default_followup_days, incident_caltopo_map_id, incident_watchduty_map_id, incident_coordinates) => {
     dispatch({type: "SET_INCIDENT", data: {
       id:incident_id, 
       name:incident_name, 
@@ -35,7 +35,7 @@ function Incident() {
       default_followup_days: incident_default_followup_days, 
       caltopo_map_id: incident_caltopo_map_id, 
       watchduty_map_id: incident_watchduty_map_id,
-      coordinates: [incident_latitude, incident_longitude]
+      coordinates: incident_coordinates
     }});
     navigate(window.location.pathname + "/" + incident.slug);
   }
@@ -87,21 +87,21 @@ function Incident() {
         .then(response => {
           if (!unmounted) {
             let options = [];
-            response.data.forEach(incident => {
+            response.data.forEach(inc => {
               // Build incident option list.
-              if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
+              if (!inc.end_time || state.user.is_superuser || state.user.incident_perms) {
                 options.push({
-                  value: incident.id, 
-                  label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', 
-                  slug:incident.slug, 
-                  name:incident.name, 
-                  description:incident.description, 
-                  training:incident.training, 
-                  default_followup_days:incident.default_followup_days, 
-                  end_time:incident.end_time, 
-                  caltopo_map_id: incident.caltopo_map_id, 
-                  watchduty_map_id: incident.watchduty_map_id,
-                  coordinates: [incident.latitude, incident.longitude]
+                  value: inc.id, 
+                  label: inc.name + ' (' + moment(inc.start_time).format('MM/DD/YYYY') + (inc.end_time ? ' - ' + moment(inc.end_time).format('MM/DD/YYYY') : '') + ')', 
+                  slug:inc.slug, 
+                  name:inc.name, 
+                  description:inc.description, 
+                  training:inc.training, 
+                  default_followup_days:inc.default_followup_days, 
+                  end_time:inc.end_time, 
+                  caltopo_map_id: inc.caltopo_map_id, 
+                  watchduty_map_id: inc.watchduty_map_id,
+                  coordinates: [inc.latitude, inc.longitude]
                 });
               }
             });
@@ -144,7 +144,7 @@ function Incident() {
             default_followup_days:instance.default_followup_days, 
             caltopo_map_id:instance.caltopo_map_id, 
             watchduty_map_id: instance.watchduty_map_id,
-            coordinates: [instance.latitude, instance.longitude]
+            coordinates: instance.coordinates
           })}
         getOptionLabel={(props) => {
           return (
@@ -158,7 +158,7 @@ function Incident() {
         }}
                 />}
       </SimpleValue>
-      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.description, incident.training, incident.default_followup_days, incident.caltopo_map_id, incident.watchduty_map_id, incident.latitude, incident.longitude)} disabled={incident.id ? false : true} block>Select Incident</Button>
+      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.description, incident.training, incident.default_followup_days, incident.caltopo_map_id, incident.watchduty_map_id, incident.coordinates)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
         <Row>
           {state.user.is_superuser || state.user.incident_perms ? <Col style={{marginRight:"-23px"}}>

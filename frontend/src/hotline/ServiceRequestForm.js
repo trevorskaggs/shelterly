@@ -42,7 +42,7 @@ function ServiceRequestForm(props) {
   // Is submitting state for save/next workflow buttons.
   const [isButtonSubmitting, setIsButtonSubmitting] = useState(false);
 
-  const [initialLatLon, setInitialLatLon] = useState([0, 0]);
+  const [initialLatLon, setInitialLatLon] = useState(state.incident.coordinates);
 
   const updatePosition = (formikProps) => {
     const marker = markerRef.current;
