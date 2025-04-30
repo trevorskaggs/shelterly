@@ -943,7 +943,7 @@ const AnimalForm = (props) => {
                     </Col>
                   </BootstrapForm.Row>
                 </span> */}
-                <AddressSearch formikProps={formikProps} label="Search for Animal Found Location" hidden={is_intake ? !is_reporter : !Boolean(id)} incident={props.incident} error="Animal Found Location was not selected." />
+                <AddressSearch formikProps={formikProps} label="Search for Animal Found Location" hidden={is_intake ? !is_reporter : !Boolean(id)} incident={props.incident} initial_coordinates={state.incident.coordinates} error="Animal Found Location was not selected." />
                 <span hidden={is_workflow && !is_intake}>
                   <p className={"mb-0"}>Image Files</p>
                   <BootstrapForm.Row className="align-items-end">

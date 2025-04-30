@@ -185,7 +185,7 @@ const ShelterForm = ({ id, incident, organization }) => {
                     name="description"
                   />
                 </BootstrapForm.Row>
-                <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} error="Shelter Address was not selected." />
+                <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} initial_coordinates={state.incident.coordinates} error="Shelter Address was not selected." />
                 {/* {id && data.animal_count > 0 ?
                 <OverlayTrigger
                   key={"active"}

@@ -671,6 +671,7 @@ const AddressSearch = (props) => {
   const markerRef = useRef(null);
   const mapRef = useRef(null);
   const { setFieldValue } = useFormikContext();
+  console.log(props)
   const [initialLatLon, setInitialLatLon] = useState(props.initial_coordinates);
 
   const [fadeIn, setFadeIn] = useState(!(props.initialData && props.initialData.address === props.formikProps.values.address) ? false : true);
