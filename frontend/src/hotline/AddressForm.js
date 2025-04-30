@@ -26,7 +26,7 @@ const AddressForm = (props) => {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const initial_coordinates = state.incident.coordinates ?? [0, 0];
+  const initial_coordinates = state.incident?.coordinates ?? [0, 0];
 
   useNavigationPrompt(true, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
 

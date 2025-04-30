@@ -28,7 +28,7 @@ function ServiceRequestForm(props) {
 
   const id = props.id;
   const incident = props.incident;
-  const initial_coordinates = state.incident.coordinates ?? [0, 0];
+  const initial_coordinates = state.incident?.coordinates ?? [0, 0];
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
