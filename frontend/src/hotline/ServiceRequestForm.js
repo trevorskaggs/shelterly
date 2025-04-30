@@ -28,6 +28,7 @@ function ServiceRequestForm(props) {
 
   const id = props.id;
   const incident = props.incident;
+  const initial_coordinates = state.incident.coordinates ?? [0, 0];
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
@@ -302,7 +303,7 @@ function ServiceRequestForm(props) {
                 </Col>
               </span>
             :
-              <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} disabled={is_workflow ? true : false} incident={props.incident} initial_coordinates={state.incident.coordinates} error="Service Request Address was not selected." />
+              <AddressSearch formikProps={formikProps} label="Search for Service Request Address" show_apt={true} disabled={is_workflow ? true : false} incident={props.incident} initial_coordinates={initial_coordinates} error="Service Request Address was not selected." />
             }
             <BootstrapForm.Row className="mb-3">
               <Col xs={"2"}>

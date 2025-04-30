@@ -165,9 +165,6 @@ export const initialWorkflowData = {
       owner_objects: [],
       organization_slug: '',
     },
-  },
-  incident: {
-    coordinates: [0, 0]
   }
 }
 

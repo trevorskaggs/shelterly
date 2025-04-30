@@ -20,6 +20,8 @@ const ShelterForm = ({ id, incident, organization }) => {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
+  const initial_coordinates = state.incident.coordinates ?? [0, 0];
+
   // Initial shelter data.
   const [data, setData] = useState({
     name: '',
@@ -185,7 +187,7 @@ const ShelterForm = ({ id, incident, organization }) => {
                     name="description"
                   />
                 </BootstrapForm.Row>
-                <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} initial_coordinates={state.incident.coordinates} error="Shelter Address was not selected." />
+                <AddressSearch formikProps={props} label="Search for Shelter Address" show_apt={false} incident={incident} initial_coordinates={initial_coordinates} error="Shelter Address was not selected." />
                 {/* {id && data.animal_count > 0 ?
                 <OverlayTrigger
                   key={"active"}
