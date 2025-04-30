@@ -11,6 +11,7 @@ import {
   faChevronCircleDown,
   faChevronCircleRight,
   faStethoscope,
+  faInfoCircle,
   faVial,
   faSyringe,
   faSoap,
@@ -89,6 +90,13 @@ function VetRequestSearch({ incident, organization }) {
     { value: 'Completed', label: 'Completed' },
   ];
 
+  const tooltipDict = {
+    'vet_requests': 'id, animal id, animal name, concern, and complaint name',
+    'treatments': 'id, treatment name, animal name, assignee first name, and assignee last name',
+    'diagnostics': 'id, diagnostic name, and animal name',
+    'procedures': 'id, procedure name, animal name, performer first name, and performer last name'
+  }
+
   const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], isFetching:false});
   const [shelters, setShelters] = useState({options:[], isFetching:false});
   const [speciesChoices, setSpeciesChoices] = useState([]);
@@ -144,6 +152,7 @@ function VetRequestSearch({ incident, organization }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const { markInstances } = useMark();
+  const [tooltip, setTooltip] = useState(tooltipDict['vet_requests']);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -228,6 +237,10 @@ function VetRequestSearch({ incident, organization }) {
       setNumPages(Math.ceil(filtered_procedures.length / ITEMS_PER_PAGE));
     }
   };
+
+  function updateTooltip(search_tab) {
+    setTooltip(tooltipDict[search_tab]);
+  }
 
   const handleClear = () => {
     if (vetObject === 'vet_requests') {
@@ -588,7 +601,19 @@ function VetRequestSearch({ incident, organization }) {
             }}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{height:"36px", borderRadius:"0 5px 5px 0"}}>Search</Button>
+            <Button variant="outline-light" type="submit" style={{height:"36px", borderRadius:"0 5px 5px 0"}}>Search
+              <OverlayTrigger
+                key={"search-information"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-search-information`}>
+                    Searchable fields: {tooltip}.
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+              </OverlayTrigger>
+            </Button>
           </InputGroup.Append>
           <Col className="pl-2 pr-1" style={{maxWidth:"200px"}}>
           <Select
@@ -599,7 +624,8 @@ function VetRequestSearch({ incident, organization }) {
             styles={customStyles}
             isClearable={false}
             onChange={(instance) => {
-              setVetObject(instance.value)
+              setVetObject(instance.value);
+              updateTooltip(instance.value);
             }}
             defaultValue={{value:tab, label:labelLookup[tab]}}
           />
