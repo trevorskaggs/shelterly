@@ -20,7 +20,7 @@ const ShelterForm = ({ id, incident, organization }) => {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const initial_coordinates = state.incident?.coordinates ?? [0, 0];
+  const initial_coordinates = state?.incident?.coordinates ?? [0, 0];
 
   // Initial shelter data.
   const [data, setData] = useState({

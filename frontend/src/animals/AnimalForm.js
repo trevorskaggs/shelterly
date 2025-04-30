@@ -42,7 +42,7 @@ const AnimalForm = (props) => {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const initial_coordinates = state.incident?.coordinates ?? [0, 0];
+  const initial_coordinates = state?.incident?.coordinates ?? [0, 0];
 
   const id = props.id;
   const incident = '/' + props.incident;
