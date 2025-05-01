@@ -19,8 +19,29 @@ from hotline.models import ServiceRequest, ServiceRequestImage, ServiceRequestNo
 from incident.models import Incident
 from evac.models import AssignedRequest
 
-from rest_framework import filters, permissions, serializers, viewsets
+from rest_framework import filters, permissions, response, serializers, viewsets
 from rest_framework.decorators import action as drf_action
+from rest_framework.pagination import PageNumberPagination
+
+class ListModelMixin(object):
+    """
+    List a queryset.
+    """
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
@@ -32,6 +53,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     light_serializer_class = BarebonesServiceRequestSerializer
     detail_serializer_class = ServiceRequestSerializer
     map_serializer_class = MapServiceRequestSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

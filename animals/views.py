@@ -9,7 +9,7 @@ from functools import reduce
 from django.shortcuts import get_object_or_404
 from copy import deepcopy
 from datetime import datetime
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, permissions, response, viewsets
 from actstream import action
 
 from animals.models import Animal, AnimalImage, Species
@@ -51,6 +51,17 @@ class MultipleFieldLookupMixin(object):
                 filter[field] = self.kwargs[field]
         obj = get_object_or_404(queryset, **filter)
         return obj
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
 
 class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = Animal.objects.with_images().exclude(status="CANCELED")

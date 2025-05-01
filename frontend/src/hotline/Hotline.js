@@ -71,6 +71,7 @@ function Hotline({ incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
+          console.log(response.data)
           setData({service_requests: response.data, isFetching: false, bounds:L.latLngBounds([[0,0]])});
           const map_dict = {};
           const bounds = [];

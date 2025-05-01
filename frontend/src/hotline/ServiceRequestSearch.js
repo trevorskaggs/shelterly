@@ -176,9 +176,9 @@ function ServiceRequestSearch({ incident, organization }) {
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = () => {
-      setData({service_requests: [], isFetching: true});
+      setData(prevState => ({ ...prevState, isFetching: true}));
       // Fetch ServiceRequest data.
-      axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
+      axios.get('/hotline/api/servicerequests/?page=' + page + '&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
         params: {
           status: options.status,
@@ -189,10 +189,12 @@ function ServiceRequestSearch({ incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
-          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
-          setData({service_requests: response.data, isFetching: false});
-          let search_state = {};
-					response.data.forEach(service_request => {
+          console.log(response.data)
+          // setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
+          setNumPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
+
+          let search_state = {...searchState};
+					response.data.results.filter(request => !data.service_requests.map(request => request.id).includes(request.id)).forEach(service_request => {
 						let species = [];
 						service_request.animals.forEach(animal => {
 							if (!species.includes(animal.species_string)) {
@@ -204,6 +206,7 @@ function ServiceRequestSearch({ incident, organization }) {
             });
 						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
 					});
+          setData({service_requests: [...data.service_requests, ...response.data.results.filter(request => !data.service_requests.map(request => request.id).includes(request.id))], isFetching: false});
 					setSearchState(search_state);
 
           // highlight search terms
@@ -225,7 +228,7 @@ function ServiceRequestSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, incident, triggerRefresh]);
+  }, [searchTerm, incident, triggerRefresh, page]);
 
   return (
     <div className="ml-2 mr-2">
@@ -375,8 +378,9 @@ function ServiceRequestSearch({ incident, organization }) {
           </div>
         </Collapse>
       </Form>
+      {/* here */}
       {data.service_requests.map((service_request, index) => (
-        <div key={service_request.id} className="mt-3 border rounded" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+        <div key={service_request.id} className="mt-3">
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
               <OverlayTrigger
