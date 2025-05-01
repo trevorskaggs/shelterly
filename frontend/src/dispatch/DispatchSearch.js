@@ -40,7 +40,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
   const openDateRef = useRef(null);
   const dispatchDateRef = useRef(null);
 
-  const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
+  const [data, setData] = useState({evacuation_assignments: [], total_count: 0, isFetching: false});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
@@ -121,9 +121,9 @@ function DispatchAssignmentSearch({ incident, organization }) {
     let source = axios.CancelToken.source();
 
     const fetchDispatchAssignments = async () => {
-      setData({evacuation_assignments: [], isFetching: true});
+      setData({evacuation_assignments: [], total_count: 0, isFetching: true});
       // Fetch DispatchAssignment data.
-      await axios.get('/evac/api/evacassignment/?map=true&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
+      await axios.get('/evac/api/evacassignment/?page_size=1&page=' + page + '&map=true&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
         params: {
           status: options.status,
@@ -135,10 +135,10 @@ function DispatchAssignmentSearch({ incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
-          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
-          setData({evacuation_assignments: response.data, isFetching: false});
+          setNumPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
+          setData({evacuation_assignments: response.data.results, total_count: response.data.count, isFetching: false});
           let map_dict = {};
-          for (const dispatch_assignment of response.data) {
+          for (const dispatch_assignment of response.data.results) {
             for (const assigned_request of dispatch_assignment.assigned_requests) {
               const [species_matches, status_matches] = countDictMatches(assigned_request.animals, true);
               map_dict[assigned_request.service_request_object.id] = {species_matches:species_matches, status_matches:status_matches};
@@ -152,7 +152,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setData({evacuation_assignments: [], isFetching: false});
+          setData({evacuation_assignments: [], total_count: 0, isFetching: false});
           setShowSystemError(true);
         }
       });
@@ -163,7 +163,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [incident, searchTerm, triggerRefresh]);
+  }, [incident, searchTerm, triggerRefresh, page]);
 
   // Hook handling option changes.
   useEffect(() => {
@@ -218,8 +218,8 @@ function DispatchAssignmentSearch({ incident, organization }) {
                   </OverlayTrigger>
                 </Button>
               </InputGroup.Append>
-              <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.evacuation_assignments.length}` + ")"} search={true} disabled={data.isFetching || data.evacuation_assignments.length === 0}>
+              <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.evacuation_assignments.length === 0}>
                 <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                   <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
                   Dispatch Assignments as a PDF

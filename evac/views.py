@@ -21,6 +21,12 @@ from hotline.models import ServiceRequest, VisitNote
 from incident.models import Incident, Organization
 from people.models import OwnerContact, Person
 from shelter.models import Room, Shelter
+from rest_framework.pagination import PageNumberPagination
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 25
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
@@ -106,6 +112,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     serializer_class = EvacAssignmentSerializer
     deploy_serializer_class = DeployEvacAssignmentSerializer
     map_serializer_class = MapEvacAssignmentSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
         if self.request.query_params.get('deploy_map', False):
@@ -146,6 +153,9 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
+
+        if self.request.GET.get('show'):
+            queryset = queryset.filter(show=True)
 
         status = self.request.query_params.get('status', '')
         if status == "open":

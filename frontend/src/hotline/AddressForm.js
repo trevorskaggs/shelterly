@@ -53,7 +53,7 @@ const AddressForm = (props) => {
             service_requests.push(...response.data.results);
             nextUrl = response.data.next;
             if (nextUrl) {
-              nextUrl = '/hotline' + response.data.next.split('/hotline')[1];
+              nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
             }
         } while(nextUrl != null)
 

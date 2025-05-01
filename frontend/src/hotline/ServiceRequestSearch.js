@@ -189,11 +189,10 @@ function ServiceRequestSearch({ incident, organization }) {
       })
       .then(response => {
         if (!unmounted) {
-          console.log(response.data)
           setNumPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
 
-          let search_state = {...searchState};
-					response.data.results.filter(request => !data.service_requests.map(request => request.id).includes(request.id)).forEach(service_request => {
+          let search_state = {};
+					response.data.results.forEach(service_request => {
 						let species = [];
 						service_request.animals.forEach(animal => {
 							if (!species.includes(animal.species_string)) {
@@ -277,7 +276,7 @@ function ServiceRequestSearch({ incident, organization }) {
                 </OverlayTrigger>
               </Button>
             </InputGroup.Append>
-            <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+            <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
             <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.service_requests.length === 0}>
               <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                 <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />

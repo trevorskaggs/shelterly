@@ -18,6 +18,7 @@ from incident.models import Incident
 from shelter.models import IntakeSummary
 from people.serializers import SimplePersonSerializer
 from vet.models import MedicalRecord, VetRequest
+from rest_framework.pagination import PageNumberPagination
 
 def distance(lat1, lon1, lat2, lon2):
     # Radius of the Earth in miles
@@ -40,6 +41,11 @@ def distance(lat1, lon1, lat2, lon2):
 def is_within_radius(lat1, lon1, lat2, lon2, radius_miles=1):
     return distance(lat1, lon1, lat2, lon2) <= radius_miles
 
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 25
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class MultipleFieldLookupMixin(object):
     def get_object(self):
@@ -71,6 +77,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ModestAnimalSerializer
     detail_serializer_class = AnimalSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

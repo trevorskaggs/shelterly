@@ -216,19 +216,9 @@ function PersonSearch({ incident, organization }) {
             <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.owners.length}` + ")"} search={true} disabled={data.isFetching || data.owners.length === 0}>
               <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                 <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
-                PDF
+                Owners as a PDF
               </LoadingLink>
             </ActionsDropdown>
-            {/* <ButtonSpinner
-              variant="outline-light"
-              className="ml-1 print-all-btn-icon"
-              onClick={handlePrintAllClick}
-              isSubmitting={isSubmittingById()}
-              isSubmittingText={submittingLabel}
-            >
-              Print All ({`${data.owners.length}`})
-              <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-            </ButtonSpinner> */}
           </InputGroup>
         </Col>
       </Row>

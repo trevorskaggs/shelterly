@@ -283,66 +283,47 @@ function Deploy({ incident, organization }) {
       await axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
-      .then(memberResponse => {
+      .then(async (memberResponse) => {
         if (!unmounted) {
           let options = [];
           let team_names = [];
-          // let team_name = '';
           memberResponse.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
             options.push({id:[teammember.id], da_id:null, label:teammember.display_name, is_assigned:teammember.is_assigned})
           });
           setAssignedTeamMembers(memberResponse.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
-          axios.get('/evac/api/evacassignment/', {
-            params: {
-              deploy_map: true,
-              status: 'active',
-              incident,
-              organization,
-            },
-            cancelToken: source.token,
-          })
-          .then(response => {
-            response.data
-              .filter(({ team_object }) => team_object.show === true) 
-              .forEach(function(da) {
-                // Only add to option list if team has members and team name isn't already in the list.
-                if (da.team_object.team_member_objects.length && !team_names.includes(da.team_object.name)) {
-                  options.unshift({id:da.team_object.team_members, da_id:da.id, label:"DA#" + da.id_for_incident + " (" + da.team_object.name + "): " + da.team_object.display_name, is_assigned:da.team_object.is_assigned});
-                  team_names.push(da.team_object.name);
-                }
-              });
-            // Provide a default "TeamN" team name that hasn't already be used.
-            // let i = 1;
-            // let name = preplan ? "Preplanned " : "Team "
-            // // Sort team_names to ensure we start with the lowest available number for default team name
-            // team_names = team_names.filter(n => n.startsWith(name)).sort((a, b) => {
-            //   let numA = parseInt(a.replace(/^\D+/g, ''), 10);
-            //   let numB = parseInt(b.replace(/^\D+/g, ''), 10);
-            //   return numA - numB;
-            // });
-            // // Find the lowest available number for the new team name
-            // while (team_names.includes(name + i)) {
-            //   i++;
-            // }
-            // team_name = name + i;
-            setTeamData({teams:response.data, members:memberResponse.data, options:options, isFetching:false});
-            // setTeamName(team_name);
-          })
-          .catch(error => {
-            if (!unmounted) {
-              setTeamData({teams:[], members:[], options:[], isFetching:false});
+          let dispatch_assignments = [];
+          let nextUrl = '/evac/api/evacassignment/?page=1&page_size=100';
+          do {
+            const response = await axios.get(nextUrl, {
+              params: {
+                deploy_map: true,
+                status: 'active',
+                incident,
+                organization,
+              },
+              cancelToken: source.token,
+            })
+            .catch(error => {
               setShowSystemError(true);
+            });
+
+            response.data.results.forEach(function(da) {
+              // Only add to option list if team has members and team name isn't already in the list.
+              if (da.team_object.team_member_objects.length && !team_names.includes(da.team_object.name)) {
+                options.unshift({id:da.team_object.team_members, da_id:da.id, label:"DA#" + da.id_for_incident + " (" + da.team_object.name + "): " + da.team_object.display_name, is_assigned:da.team_object.is_assigned});
+                team_names.push(da.team_object.name);
+              }
+            });
+            dispatch_assignments.push(...response.data.results);
+            nextUrl = response.data.next;
+            if (nextUrl) {
+              nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
             }
-          });
+          } while(nextUrl != null)
+          setTeamData({teams:dispatch_assignments, members:memberResponse.data, options:options, isFetching:false});
         }
       })
-      .catch(error => {
-        if (!unmounted) {
-          setTeamData({teams: [], members:[], options: [], isFetching: false});
-          setShowSystemError(true);
-        }
-      });
     };
 
     const fetchServiceRequests = async () => {
@@ -385,7 +366,7 @@ function Deploy({ incident, organization }) {
           service_requests.push(...response.data.results);
           nextUrl = response.data.next;
           if (nextUrl) {
-            nextUrl = '/hotline' + response.data.next.split('/hotline')[1];
+            nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
           }
         } while(nextUrl != null)
 

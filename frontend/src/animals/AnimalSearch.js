@@ -67,7 +67,7 @@ function AnimalSearch({ incident, organization }) {
     { value: 5, label: '5 Miles' },
   ];
 
-  const [data, setData] = useState({animals: [], isFetching: false});
+  const [data, setData] = useState({animals: [], total_count: 0, isFetching: false});
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [speciesChoices, setSpeciesChoices] = useState([]);
   const [options, setOptions] = useState({id:null, species:'', status:null, sex:null, owned:null, pcolor:'', fixed:null, latlng:null, radius:1, shelter:''});
@@ -248,65 +248,6 @@ function AnimalSearch({ incident, organization }) {
     };
     fetchSpecies();
 
-    const fetchAnimals = async () => {
-      setNumPages(0);
-      setData({animals: [], isFetching: true});
-      console.log(options)
-      // Fetch ServiceRequest data.
-      await axios.get('/animals/api/animal/?search=' + searchTerm +'&incident=' + incident + '&organization=' + organization, {
-        cancelToken: source.token,
-        params: {
-          status: options.status,
-          species: options.species,
-          sex: options.sex,
-          owned: options.owned,
-          pcolor: options.pcolor,
-          scolor: options.scolor,
-          shelter: options.shelter,
-          latlng: options.latlng,
-          radius: options.radius,
-        },
-      })
-      .then(async (response) => {
-        if (!unmounted) {
-          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
-          setData({animals: response.data, isFetching: false});
-
-          // highlight search terms
-          markInstances(searchTerm);
-
-          let bounds_array = [];
-          if (options.latlng) {
-            console.log(options.latlng)
-            bounds_array.push([options.latlng['Lat'], options.latlng['Lng']]);
-          }
-          for (const animal of response.data) {
-            if (!options.latlng && animal.latitude && animal.longitude) {
-              bounds_array.push([animal.latitude, animal.longitude]);
-            }
-
-            // lazy load animal front_image
-            const lazyAnimalImage = findLazyAnimalImage(animal.id);
-            if (lazyAnimalImage?.image) {
-              animal.lazyImage = lazyAnimalImage.image
-            } else if (animal.front_image) {
-              const imgData = await promiseImage(animal.front_image);
-              animal.lazyImage = imgData;
-              addLazyAnimalImage(animal.id, imgData);
-            }
-          }
-          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setData({animals: [], isFetching: false});
-          setShowSystemError(true);
-        }
-      });
-    };
-    fetchAnimals();
-
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
       // Fetch Shelter data.
@@ -336,7 +277,76 @@ function AnimalSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [incident, searchTerm, triggerRefresh]);
+  }, []);
+
+  // Hook for initializing data.
+  useEffect(() => {
+    let unmounted = false;
+    let source = axios.CancelToken.source();
+
+    const fetchAnimals = async () => {
+      setNumPages(0);
+      setData({animals: [], total_count: 0, isFetching: true});
+      // Fetch ServiceRequest data.
+      await axios.get('/animals/api/animal/?page=' + page + '&search=' + searchTerm +'&incident=' + incident + '&organization=' + organization, {
+        cancelToken: source.token,
+        params: {
+          status: options.status,
+          species: options.species,
+          sex: options.sex,
+          owned: options.owned,
+          pcolor: options.pcolor,
+          scolor: options.scolor,
+          shelter: options.shelter,
+          latlng: options.latlng,
+          radius: options.radius,
+        },
+      })
+      .then(async (response) => {
+        if (!unmounted) {
+          setNumPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
+          setData({animals: response.data.results, total_count: response.data.count, isFetching: false});
+
+          // highlight search terms
+          markInstances(searchTerm);
+
+          let bounds_array = [];
+          if (options.latlng) {
+            bounds_array.push([options.latlng['Lat'], options.latlng['Lng']]);
+          }
+          for (const animal of response.data.results) {
+            if (!options.latlng && animal.latitude && animal.longitude) {
+              bounds_array.push([animal.latitude, animal.longitude]);
+            }
+
+            // lazy load animal front_image
+            const lazyAnimalImage = findLazyAnimalImage(animal.id);
+            if (lazyAnimalImage?.image) {
+              animal.lazyImage = lazyAnimalImage.image
+            } else if (animal.front_image) {
+              const imgData = await promiseImage(animal.front_image);
+              animal.lazyImage = imgData;
+              addLazyAnimalImage(animal.id, imgData);
+            }
+          }
+          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setData({animals: [], total_count: 0, isFetching: false});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchAnimals();
+
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
+  }, [incident, searchTerm, triggerRefresh, page]);
 
   // Hook handling option changes.
   useEffect(() => {
@@ -391,23 +401,13 @@ function AnimalSearch({ incident, organization }) {
                   </OverlayTrigger>
                 </Button>
               </InputGroup.Append>
-              <Button variant="outline-light" className="ml-1 mr-1" style={{color:"white"}} onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.animals.length}` + ")"} search={true} disabled={data.isFetching || data.animals.length === 0}>
+              <Button variant="outline-light" className="ml-1 mr-1" style={{color:"white"}} onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} className="fa-move-up" size="sm" />}</Button>
+              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.animals.length === 0}>
                 <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                   <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
                   Animals as a PDF
                 </LoadingLink>
               </ActionsDropdown>
-              {/* <ButtonSpinner
-                variant="outline-light"
-                className="ml-1 print-all-btn-icon"
-                onClick={handlePrintAllClick}
-                isSubmitting={isSubmitting}
-                isSubmittingText={submittingLabel}
-              >
-                Print All ({`${animals.length}`})
-                <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-              </ButtonSpinner> */}
             </InputGroup>
           </Col>
         </Row>
@@ -578,9 +578,7 @@ function AnimalSearch({ incident, organization }) {
         </Collapse>
       </Form>
       {data.animals.map((animal, index) => (
-        <span key={animal.id}>
-        {page === Math.ceil((index+1)/ITEMS_PER_PAGE) ?
-        <div className="mt-3 border rounded">
+        <div key={animal.id} className="mt-3 border rounded">
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
               <OverlayTrigger
@@ -845,8 +843,7 @@ function AnimalSearch({ incident, organization }) {
               </Card.Body>
             </Card>
           </CardGroup>
-        </div> : ""}
-        </span>
+        </div>
       ))}
       <p style={{marginTop:"15px"}}>{data.isFetching ? 'Fetching Animals...' : <span>{data.animals.length === 0 ? 'No animals found.' : ''}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
