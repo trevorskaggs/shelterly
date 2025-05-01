@@ -79,7 +79,7 @@ const useStyles = makeStyles({
 const DateRangePicker = React.forwardRef((props, ref) => {
   let options = {};
   if (props["data-enable-time"] === false) {
-    options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
+    options = {enableTime: false, allowInput: true, dateFormat: props.mode === "single" ? "M d, Y" : "m-d-Y", mode: props.mode === "single" ? "single" : "range"}
   }
   else {
     options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y H:i" : "m-d-Y H:i", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0, altFormat: "F j, Y H:i"}

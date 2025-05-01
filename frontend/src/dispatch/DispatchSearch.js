@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
-import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, OverlayTrigger, Pagination, Row, Tooltip } from "react-bootstrap";
+import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from "react-bootstrap";
 import { Link, navigate, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -9,20 +9,20 @@ import {
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faCircleBolt, faHomeAlt } from '@fortawesome/pro-solid-svg-icons';
+import { faHomeAlt, faChevronDoubleDown, faChevronDoubleUp } from '@fortawesome/pro-solid-svg-icons';
 import L from "leaflet";
-import { Marker, Tooltip as MapTooltip } from "react-leaflet";
-import { useMark, useSubmitting, useDateRange } from '../hooks';
-import Map, { countMatches, countDictMatches, prettyText, reportedMarkerIcon, reportedEvacMarkerIcon, reportedSIPMarkerIcon, SIPMarkerIcon, UTLMarkerIcon, operationsMarkerIcon, closedMarkerIcon } from "../components/Map";
+import Select from 'react-select';
+import { useMark, useSubmitting } from '../hooks';
 import Moment from "react-moment";
-import moment from 'moment';
 import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
 import { DateRangePicker } from '../components/Form';
 import { SystemErrorContext } from '../components/SystemError';
-import ButtonSpinner from '../components/ButtonSpinner';
+import { countDictMatches, prettyText } from "../components/Map";
 import { printAllDispatchResolutions } from './Utils';
+import LoadingLink from "../components/LoadingLink";
+import ActionsDropdown from '../components/ActionsDropdown';
 
 function DispatchAssignmentSearch({ incident, organization }) {
 
@@ -32,19 +32,23 @@ function DispatchAssignmentSearch({ incident, organization }) {
   const [queryParams] = useQueryParams();
   const {
     search = '',
-    status = 'active',
+    status = '',
   } = queryParams;
+
+  const tempSearchTerm = useRef(null);
+  const statusRef = useRef(null);
+  const openDateRef = useRef(null);
+  const dispatchDateRef = useRef(null);
 
   const [data, setData] = useState({evacuation_assignments: [], isFetching: false});
   const [searchTerm, setSearchTerm] = useState(search);
-  const tempSearchTerm = useRef(null);
-  const dateRef = useRef(null);
-  const [statusOptions, setStatusOptions] = useState(status);
+  const [showFilters, setShowFilters] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [options, setOptions] = useState({id:null, status:status, open_start:null, open_end:null, dispatch_start:null, dispatch_end:null});
+  const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [matches, setMatches] = useState({});
-  const [bounds, setBounds] = useState({});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
-  const [isDateSet, setIsDateSet] = useState(false);
   const [goToID, setGoToID] = useState('');
   const { markInstances } = useMark();
   const {
@@ -53,11 +57,6 @@ function DispatchAssignmentSearch({ incident, organization }) {
     submittingComplete,
     submittingLabel
   } = useSubmitting();
-  const { startDate, endDate, parseDateRange } = useDateRange();
-  const [
-    filteredEvacAssignments,
-    setFilteredEvacAssignments
-  ] = useState(data.evacuation_assignments);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -75,11 +74,19 @@ function DispatchAssignmentSearch({ incident, organization }) {
     setPage(1);
   }
 
+  const handleClear = () => {
+    statusRef.current.select.clearValue();
+    openDateRef.current.flatpickr.clear();
+    dispatchDateRef.current.flatpickr.clear();
+    setOptions({id:null, status:status, open_start:null, open_end:null, dispatch_start:null, dispatch_end:null});
+    setTriggerRefresh(!triggerRefresh);
+  };
+
   const handlePrintAllClick = (e) => {
     e.preventDefault();
 
     handleSubmitting()
-      .then(() => printAllDispatchResolutions(filteredEvacAssignments))
+      .then(() => printAllDispatchResolutions(data.evacuation_assignments))
       .then(submittingComplete);
   }
 
@@ -89,20 +96,24 @@ function DispatchAssignmentSearch({ incident, organization }) {
     }
   }
 
-  // Hook for filtering evacuation assignments
-  useEffect(() => {
-    if (data.isFetching) return;
-    if (isDateSet) {
-      const srSubset = data.evacuation_assignments.filter((ea) => 
-        moment(startDate) <= moment(ea.start_time) && moment(endDate) >= moment(ea.start_time)
-      )
-      setFilteredEvacAssignments(srSubset);
-      setNumPages(Math.ceil(srSubset.length / ITEMS_PER_PAGE));
-    } else {
-      setFilteredEvacAssignments(data.evacuation_assignments);
-      setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
-    }
-  }, [data, isDateSet, startDate, endDate])
+  const customStyles = {
+    // For the select it self, not the options of the select
+    control: (styles, { isDisabled}) => {
+      return {
+        ...styles,
+        color: '#FFF',
+        cursor: isDisabled ? 'not-allowed' : 'default',
+        backgroundColor: isDisabled ? '#DFDDDD' : 'white',
+        height: 35,
+        minHeight: 35,
+        marginBottom: "15px"
+      }
+    },
+    option: provided => ({
+      ...provided,
+      color: 'black'
+    }),
+  };
 
   // Hook for initializing data.
   useEffect(() => {
@@ -112,26 +123,28 @@ function DispatchAssignmentSearch({ incident, organization }) {
     const fetchDispatchAssignments = async () => {
       setData({evacuation_assignments: [], isFetching: true});
       // Fetch DispatchAssignment data.
-      await axios.get('/evac/api/evacassignment/?map=true&search=' + searchTerm + '&status=' + statusOptions +'&incident=' + incident + '&organization=' + organization, {
+      await axios.get('/evac/api/evacassignment/?map=true&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
+        params: {
+          status: options.status,
+          open_start: options.open_start,
+          open_end: options.open_end,
+          dispatch_start: options.dispatch_start,
+          dispatch_end: options.dispatch_end,
+        },
       })
       .then(response => {
         if (!unmounted) {
           setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setData({evacuation_assignments: response.data, isFetching: false});
           let map_dict = {};
-          let bounds_dict = {};
           for (const dispatch_assignment of response.data) {
-            let sr_bounds = [];
             for (const assigned_request of dispatch_assignment.assigned_requests) {
               const [species_matches, status_matches] = countDictMatches(assigned_request.animals, true);
               map_dict[assigned_request.service_request_object.id] = {species_matches:species_matches, status_matches:status_matches};
-              sr_bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
             }
-            bounds_dict[dispatch_assignment.id] = sr_bounds.length > 0 ? L.latLngBounds(sr_bounds).pad(.1) : L.latLngBounds([[0,0]]);
           }
           setMatches(map_dict);
-          setBounds(bounds_dict);
 
           // highlight search terms
           markInstances(searchTerm);
@@ -150,7 +163,12 @@ function DispatchAssignmentSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, statusOptions, incident]);
+  }, [incident, searchTerm, triggerRefresh]);
+
+  // Hook handling option changes.
+  useEffect(() => {
+    setIsDisabled(!(options.id || options.status || options.open_start || options.open_end || options.dispatch_start || options.dispatch_end));
+  }, [options]);
 
   return (
     <div className="ml-2 mr-2">
@@ -167,7 +185,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                 onChange={handleIDChange}
               />
               <InputGroup.Append>
-                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/dispatch/summary/" + goToID)}}>Go</Button>
+                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0", color:"white"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/dispatch/summary/" + goToID)}}>Go</Button>
               </InputGroup.Append>
             </InputGroup>
           </Col>
@@ -186,7 +204,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                   ref={tempSearchTerm}
               />
               <InputGroup.Append>
-                <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+                <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0", color:"white"}}>Search
                   <OverlayTrigger
                     key={"search-information"}
                     placement="top"
@@ -196,48 +214,93 @@ function DispatchAssignmentSearch({ incident, organization }) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                    <FontAwesomeIcon icon={faInfoCircle} className="ml-1 fa-move-up" size="sm" inverse />
                   </OverlayTrigger>
                 </Button>
               </InputGroup.Append>
-              <ButtonGroup className="ml-1">
-                <Button variant={statusOptions === "preplanned" ? "primary" : "secondary"} onClick={statusOptions !== "preplanned" ? () => {setPage(1);setStatusOptions("preplanned")} : () => {setPage(1);setStatusOptions("")}}>Preplanned</Button>
-                <Button variant={statusOptions === "active" ? "primary" : "secondary"} onClick={statusOptions !== "active" ? () => {setPage(1);setStatusOptions("active")} : () => {setPage(1);setStatusOptions("")}}>Active</Button>
-                <Button variant={statusOptions === "resolved" ? "primary" : "secondary"} onClick={statusOptions !== "resolved" ? () => {setPage(1);setStatusOptions("resolved")} : () => {setPage(1);setStatusOptions("")}}>Closed</Button>
-              </ButtonGroup>
-              <DateRangePicker
-                name={`date_range_picker`}
-                id={`date_range_picker`}
-                placeholder={"Filter by Date Range"}
-                style={{width:"210px", marginLeft:"0.25rem"}}
-                ref={dateRef}
-                onChange={(dateRange) => {
-                  if (dateRange.length) {
-                    setIsDateSet(true)
-                    parseDateRange(dateRange)
-                    setNumPages(Math.ceil(filteredEvacAssignments.length / ITEMS_PER_PAGE));
-                  } else {
-                    setIsDateSet(false)
-                    setNumPages(Math.ceil(data.evacuation_assignments.length / ITEMS_PER_PAGE));
-                  }
-                }}
-              />
-              <ButtonSpinner
-                variant="outline-light"
-                className="ml-1 print-all-btn-icon"
-                onClick={handlePrintAllClick}
-                isSubmitting={isSubmittingById()}
-                isSubmittingText={submittingLabel}
-              >
-                Print All ({`${filteredEvacAssignments.length}`})
-                <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-              </ButtonSpinner>
+              <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.evacuation_assignments.length}` + ")"} search={true} disabled={data.isFetching || data.evacuation_assignments.length === 0}>
+                <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
+                  <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
+                  PDF
+                </LoadingLink>
+              </ActionsDropdown>
             </InputGroup>
           </Col>
         </Row>
+        <Collapse in={showFilters}>
+          <div>
+          <Card className="border rounded d-flex mt-3" style={{width:"100%"}}>
+            <Card.Body style={{marginBottom:"-16px"}}>
+              <Row>
+                <Col xs={"4"} style={{textTransform:"capitalize"}}>
+                  <Select
+                    label="Status"
+                    id="statusDropdown"
+                    name="Status"
+                    type="text"
+                    placeholder="Select Status"
+                    options={[{ value: 'preplanned', label: 'Preplanned' },{ value: 'active', label: 'Active' },{ value: 'resolved', label: 'Closed' },]}
+                    styles={customStyles}
+                    isClearable={true}
+                    ref={statusRef}
+                    onChange={(instance) => {
+                      setOptions({...options, status: instance ? instance.value : null});
+                    }}
+                  />
+                </Col>
+                <Col xs="5">
+                  <Row style={{marginBottom:"0px"}}>
+                    <Col style={{marginLeft:"-15px", paddingRight:"0px"}}>
+                      <DateRangePicker
+                        name={`open_date`}
+                        id={`open_date`}
+                        placeholder={"Filter by Open Date"}
+                        style={{height:"36px"}}
+                        data-enable-time={false}
+                        ref={openDateRef}
+                        onChange={(dateRange) => {
+                          if (dateRange.length > 1) {
+                            setOptions({...options, open_start: dateRange[0], open_end:dateRange[1]});
+                          } else {
+                            setOptions({...options, open_start: dateRange[0], open_end:dateRange[1]});
+                          }
+                        }}
+                      />
+                    </Col>
+                  </Row>
+                  <Row className="mt-3" style={{maxHeight:"37px"}}>
+                    <Col style={{marginLeft:"-15px", paddingRight:"0px", marginTop:"-2px"}}>
+                      <DateRangePicker
+                        name={`dispatch_date`}
+                        id={`dispatch_date`}
+                        placeholder={"Filter by Dispatch Date"}
+                        style={{height:"36px"}}
+                        ref={dispatchDateRef}
+                        data-enable-time={false}
+                        onChange={(dateRange) => {
+                           if (dateRange.length > 1) {
+                            setOptions({...options, dispatch_start: dateRange[0], dispatch_end:dateRange[1]});
+                          } else {
+                            setOptions({...options, dispatch_start: dateRange[0], dispatch_end:dateRange[1]});
+                          }
+                        }}
+                      />
+                    </Col>
+                  </Row>
+                </Col>
+                <Col className="flex-grow-1 pl-0" xs="3">
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : setTriggerRefresh(!triggerRefresh);}} disabled={isDisabled}>Apply</Button>
+                  <Button className="mb-3" variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+          </div>
+        </Collapse>
       </Form>
-      {filteredEvacAssignments.map((evacuation_assignment, index) => (
-        <div key={evacuation_assignment.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+      {data.evacuation_assignments.map((evacuation_assignment, index) => (
+        <div key={evacuation_assignment.id} className="mt-3 border rounded" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
           <div className="card-header d-flex hide-scrollbars" style={{whiteSpace:'nowrap', overflow:"hidden"}}>
             <h4 style={{marginBottom:"-2px", marginLeft:"-12px", whiteSpace:'nowrap', overflow:"hidden", textOverflow:"ellipsis"}}>
               <OverlayTrigger
@@ -252,9 +315,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                 <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + evacuation_assignment.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               DA#{evacuation_assignment.id_for_incident} -&nbsp;
-              <Moment format="L">{evacuation_assignment.start_time}</Moment>
-              &nbsp;|&nbsp;
-              <span title={evacuation_assignment.team ? evacuation_assignment.team_name + ": " : ""}>
+              <span title={evacuation_assignment.team ? evacuation_assignment.team_name + ": " + evacuation_assignment.team_member_names : ""}>
                 {(evacuation_assignment.team && evacuation_assignment.team_name) || "Preplanned"}
                 {evacuation_assignment.team_member_names ?
                 <OverlayTrigger
@@ -271,8 +332,22 @@ function DispatchAssignmentSearch({ incident, organization }) {
               </span>
             </h4>
           </div>
-          <CardGroup style={{overflowX:"hidden"}}>
-            <Card style={{maxWidth:"206px", height:"206px"}}>
+          <CardGroup style={{overflowX:"hidden", marginBottom:"-6px"}}>
+            <Card style={{marginBottom:"6px", maxWidth:"300px"}}>
+              <Card.Body>
+                <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
+                <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
+                  <ListGroup>
+                    <ListGroup.Item><b>Status: </b>{evacuation_assignment.end_time ? 'Closed' : evacuation_assignment.end_time === null && evacuation_assignment.team_member_names ? 'Active' : 'Preplanned'}</ListGroup.Item>
+                    <ListGroup.Item><b>Opened: </b><Moment format="L">{evacuation_assignment.start_time}</Moment></ListGroup.Item>
+                    {evacuation_assignment.dispatch_date ?
+                      <ListGroup.Item><b>Dispatched: </b><Moment format="L">{evacuation_assignment.dispatch_date}</Moment></ListGroup.Item>
+                    : ""}
+                  </ListGroup>
+                </Scrollbar>
+              </Card.Body>
+            </Card>
+            {/* <Card style={{maxWidth:"206px", height:"206px"}} className="border rounded">
               <Card.Body className="p-0 m-0">
                 <Map className="d-block da-search-leaflet-container" bounds={bounds[evacuation_assignment.id]} zoomControl={false} legend_position="topleft">
                   {evacuation_assignment.assigned_requests.map(assigned_request => (
@@ -301,7 +376,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                 ))}
                 </Map>
               </Card.Body>
-            </Card>
+            </Card> */}
             <Card style={{maxHeight:"206px"}}>
               <Scrollbar style={{height:"204px"}} renderView={props => <div {...props} style={{...props.style, overflow:"auto"}}/>} renderThumbHorizontal={props => <div {...props} style={{...props.style, display:"none"}} />}>
                 <Card.Body style={{marginBottom:"0px"}}>
@@ -414,7 +489,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
           </CardGroup>
         </div>
       ))}
-      <p className="mt-3">{data.isFetching ? 'Fetching dispatch assignments...' : <span>{filteredEvacAssignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
+      <p className="mt-3">{data.isFetching ? 'Fetching dispatch assignments...' : <span>{data.evacuation_assignments.length ? '' : 'No dispatch assignments found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

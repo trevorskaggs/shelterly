@@ -61,7 +61,8 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
             # Notify maps that there is new data.
             channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
 
     def perform_update(self, serializer):
         from evac.models import AssignedRequest
@@ -142,6 +143,12 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None)).exclude(status='canceled')
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
+        if self.request.GET.get('priority'):
+            queryset = queryset.filter(priority=self.request.GET.get('priority'))
+        if self.request.GET.get('open_start'):
+            queryset = queryset.filter(timestamp__gte=self.request.GET.get('open_start'))
+        if self.request.GET.get('open_end'):
+            queryset = queryset.filter(timestamp__lte=self.request.GET.get('open_end'))
         return queryset
 
     @drf_action(detail=True, methods=['GET'], name='Download GeoJSON')

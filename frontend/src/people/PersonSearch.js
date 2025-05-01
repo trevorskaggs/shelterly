@@ -19,6 +19,8 @@ import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
 import { printAllOwnersDetails } from './Utils';
+import LoadingLink from "../components/LoadingLink";
+import ActionsDropdown from '../components/ActionsDropdown';
 
 function PersonSearch({ incident, organization }) {
 
@@ -43,6 +45,7 @@ function PersonSearch({ incident, organization }) {
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
 	const tempSearchTerm = useRef(null);
+  // const [triggerRefresh, setTriggerRefresh] = useState(false);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [goToID, setGoToID] = useState('');
@@ -173,7 +176,7 @@ function PersonSearch({ incident, organization }) {
               onChange={handleIDChange}
             />
             <InputGroup.Append>
-              <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/people/owner/" + goToID)}}>Go</Button>
+              <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0", color:"white"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/people/owner/" + goToID)}}>Go</Button>
             </InputGroup.Append>
           </InputGroup>
         </Col>
@@ -192,7 +195,7 @@ function PersonSearch({ incident, organization }) {
               }}
               />
             <InputGroup.Append>
-              <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+              <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0", color:"white"}}>Search
                 <OverlayTrigger
                   key={"search-information"}
                   placement="top"
@@ -202,15 +205,21 @@ function PersonSearch({ incident, organization }) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                  <FontAwesomeIcon icon={faInfoCircle} className="ml-1 fa-move-up" size="sm" inverse />
                 </OverlayTrigger>
               </Button>
             </InputGroup.Append>
-            <ButtonGroup className="ml-1">
-              <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}}>Owners</Button>
-              <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}}>Reporters</Button>
+            <ButtonGroup className="ml-1 mr-1 border rounded" style={{height:"36px"}}>
+              <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}} style={{paddingTop:"5px"}}>Owners</Button>
+              <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}} style={{paddingTop:"5px"}}>Reporters</Button>
             </ButtonGroup>
-            <ButtonSpinner
+            <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.owners.length}` + ")"} search={true} disabled={data.isFetching || data.owners.length === 0}>
+              <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
+                <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
+                PDF
+              </LoadingLink>
+            </ActionsDropdown>
+            {/* <ButtonSpinner
               variant="outline-light"
               className="ml-1 print-all-btn-icon"
               onClick={handlePrintAllClick}
@@ -219,13 +228,13 @@ function PersonSearch({ incident, organization }) {
             >
               Print All ({`${data.owners.length}`})
               <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-            </ButtonSpinner>
+            </ButtonSpinner> */}
           </InputGroup>
         </Col>
       </Row>
     </Form>
     {data.owners.map((owner, index) => (
-      <div key={owner.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+      <div key={owner.id} className="mt-3 border rounded" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
         <div className="card-header"> {owner.first_name ?
           <h4 style={{marginBottom: "-2px",  marginLeft:"-12px"}}>
             {statusOptions === 'owners' ?
@@ -257,7 +266,7 @@ function PersonSearch({ incident, organization }) {
             {owner.agency ? <span> ({owner.agency})</span> : ""}
           </h4> : "Unknown"}
         </div>
-        <CardGroup>
+        <CardGroup style={{marginBottom:"-6px"}}>
           <Card style={{marginBottom:"6px"}}>
             <Card.Body>
               <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information</Card.Title>
@@ -268,9 +277,9 @@ function PersonSearch({ incident, organization }) {
                   {owner.full_address ?
                     <ListGroup.Item><b>Address: </b>{owner.full_address}</ListGroup.Item>
                   : ""}
-                  {owner.requests && owner.requests.map(request => (
+                  {/* {owner.requests && owner.requests.map(request => (
                     <ListGroup.Item key={request.id}><b>SR#{request.id_for_incident}: </b><Link href={"/" + organization + "/" + incident + "/hotline/servicerequest/" + request.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{request.full_address}</Link></ListGroup.Item>
-                  ))}
+                  ))} */}
                 </ListGroup>
               </Scrollbar>
             </Card.Body>
@@ -293,19 +302,6 @@ function PersonSearch({ incident, organization }) {
                   {owner.animals.filter(animal => animal.species_string === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
                       <b><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id} className="text-link" style={{textDecoration:"none", color:"white"}}>#{animal.id}</Link>:</b>&nbsp;&nbsp;{Number(animal.animal_count) === 1 ? <span>{animal.name || "Unknown"}</span> : <span>{animal.animal_count} {titleCase(animal.species_string)}{["cattle", "sheep"].includes(animal.species_string) ? "" : "s"}</span>}
-                      {animal.color_notes ?
-                      <OverlayTrigger
-                        key={"animal-color-notes"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-animal-color-notes`}>
-                            {animal.color_notes}
-                          </Tooltip>
-                        }
-                      >
-                        <FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
-                      </OverlayTrigger>
-                      : ""}
                       &nbsp;- {animal.status}
                     </ListGroup.Item>
                   ))}
@@ -318,19 +314,6 @@ function PersonSearch({ incident, organization }) {
                   {owner.reporter_animals.filter(animal => animal.species_string === searchState[owner.id].selectedSpecies).map((animal, i) => (
                     <ListGroup.Item key={animal.id}>
                       <b>A#{animal.id_for_incident}:</b>&nbsp;&nbsp;<Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>{animal.name || "Unknown"}</Link>
-                      {animal.color_notes ?
-                      <OverlayTrigger
-                        key={"animal-color-notes"}
-                        placement="top"
-                        overlay={
-                          <Tooltip id={`tooltip-animal-color-notes`}>
-                            {animal.color_notes}
-                          </Tooltip>
-                        }
-                      >
-                        <FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
-                      </OverlayTrigger>
-                      : ""}
                       &nbsp;- {animal.status}
                     </ListGroup.Item>
                   ))}
