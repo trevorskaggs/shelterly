@@ -222,7 +222,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
               <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.evacuation_assignments.length}` + ")"} search={true} disabled={data.isFetching || data.evacuation_assignments.length === 0}>
                 <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                   <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
-                  PDF
+                  Dispatch Assignments as a PDF
                 </LoadingLink>
               </ActionsDropdown>
             </InputGroup>

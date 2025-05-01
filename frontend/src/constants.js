@@ -1,4 +1,4 @@
-export const ITEMS_PER_PAGE = 10;
+export const ITEMS_PER_PAGE = 25;
 
 export const STATE_OPTIONS = [
   { value: '', label: ''},

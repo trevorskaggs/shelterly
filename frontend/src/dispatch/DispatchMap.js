@@ -347,22 +347,25 @@ function Deploy({ incident, organization }) {
 
     const fetchServiceRequests = async () => {
       setData({...data, isFetching: true});
-      // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?incident=' + incident + '&organization=' + organization, {
-        params: {
-          status: 'open',
-          when: 'today',
-          landingmap: true
-        },
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          setData(prevState => ({ ...prevState, service_requests: response.data, isFetching: false}));
-          const map_dict = {...mapState};
-          let bounds_copy = [...bounds];
+      let service_requests = [];
+      const map_dict = {...mapState};
+      let bounds_copy = [...bounds];
+      let nextUrl = '/hotline/api/servicerequests/?page=1&page_size=100&incident=' + incident + '&organization=' + organization;
+      if (!unmounted) {
+        do {
+          const response = await axios.get(nextUrl, {
+            params: {
+            status: 'open',
+            when: 'today',
+            landingmap: true
+          },
+            cancelToken: source.token,})
+          .catch(error => {
+            setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+            setShowSystemError(true);
+          });
           const current_ids = Object.keys(mapState);
-          for (const service_request of response.data) {
+          for (const service_request of response.data.results) {
             // Only add initial settings if we don't already have them.
             if (!current_ids.includes(String(service_request.id))) {
               if (Object.keys(mapState).length >= 1) {
@@ -379,40 +382,42 @@ function Deploy({ incident, organization }) {
               bounds_copy.push([service_request.latitude, service_request.longitude]);
             }
           }
-          setMapState(map_dict);
-          setBounds(bounds_copy);
-
-          var status_matches = {'ANIMALLESS':{}, 'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
-          var matches = {};
-          var total = 0;
-          // Recount the total state tracker for selected SRs on refresh.
-          Object.keys(map_dict).filter(key => map_dict[key].checked === true && response.data.map(sr => sr.id).includes(Number(key))).forEach(id => {
-            for (var select_status in map_dict[id].status_matches) {
-              matches = {...status_matches[select_status]};
-              for (var select_key in map_dict[id].status_matches[select_status]){
-                if (!status_matches[select_status][select_key]) {
-                  total = map_dict[id].status_matches[select_status][select_key];
-                } else {
-                  total = status_matches[select_status][select_key] += map_dict[id].status_matches[select_status][select_key];
-                }
-                matches[select_key] = total;
-              }
-              status_matches[select_status] = matches;
-            }
-          })
-          setTotalSelectedState(status_matches);
-
-          if (bounds_copy.length > 0) {
-            setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds_copy) }));
+          service_requests.push(...response.data.results);
+          nextUrl = response.data.next;
+          if (nextUrl) {
+            nextUrl = '/hotline' + response.data.next.split('/hotline')[1];
           }
+        } while(nextUrl != null)
+
+        setData(prevState => ({ ...prevState, service_requests: service_requests, isFetching: false}));
+        setMapState(map_dict);
+        setBounds(bounds_copy);
+
+        var status_matches = {'ANIMALLESS':{}, 'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+        var matches = {};
+        var total = 0;
+        // Recount the total state tracker for selected SRs on refresh.
+        Object.keys(map_dict).filter(key => map_dict[key].checked === true && service_requests.map(sr => sr.id).includes(Number(key))).forEach(id => {
+          for (var select_status in map_dict[id].status_matches) {
+            matches = {...status_matches[select_status]};
+            for (var select_key in map_dict[id].status_matches[select_status]){
+              if (!status_matches[select_status][select_key]) {
+                total = map_dict[id].status_matches[select_status][select_key];
+              } else {
+                total = status_matches[select_status][select_key] += map_dict[id].status_matches[select_status][select_key];
+              }
+              matches[select_key] = total;
+            }
+            status_matches[select_status] = matches;
+          }
+        })
+        setTotalSelectedState(status_matches);
+
+        if (bounds_copy.length > 0) {
+          setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds_copy) }));
         }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-          setShowSystemError(true);
-        }
-      });
+      }
+      // })
     };
 
     // Only fetch team member data first time.

@@ -40,17 +40,25 @@ const AddressForm = (props) => {
     let source = axios.CancelToken.source();
 
     const fetchExistingServiceRequestData = async () => {
-      axios.get('/hotline/api/servicerequests/?incident=' + props.incident + '&organization='+ props.organization + '&exclude_status=canceled&light=true')
-      .then(existingRequestsResponse => {
-        if (!unmounted) {
-          setExistingRequests(existingRequestsResponse.data);
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShowSystemError(true);
-        }
-      });
+      let service_requests = [];
+      if (!unmounted) {
+        let nextUrl = '/hotline/api/servicerequests/?page=1&page_size=100&incident=' + props.incident + '&organization='+ props.organization + '&exclude_status=canceled&light=true';
+        do {
+            const response = await axios.get(nextUrl, {
+              cancelToken: source.token,})
+            .catch(error => {
+              setShowSystemError(true);
+            });
+
+            service_requests.push(...response.data.results);
+            nextUrl = response.data.next;
+            if (nextUrl) {
+              nextUrl = '/hotline' + response.data.next.split('/hotline')[1];
+            }
+        } while(nextUrl != null)
+
+        setExistingRequests(service_requests);
+      }
     }
     fetchExistingServiceRequestData();
 

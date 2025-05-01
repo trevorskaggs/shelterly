@@ -395,7 +395,7 @@ function AnimalSearch({ incident, organization }) {
               <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.animals.length}` + ")"} search={true} disabled={data.isFetching || data.animals.length === 0}>
                 <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                   <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
-                  PDF
+                  Animals as a PDF
                 </LoadingLink>
               </ActionsDropdown>
               {/* <ButtonSpinner

@@ -250,7 +250,7 @@ const Radio = (props) => {
       type="checkbox"
       className={classes.radio}
       disableRipple
-      color="white"
+      color="default"
       inputProps={{ 'aria-label': 'decorative radio' }}
       {...props}
     />

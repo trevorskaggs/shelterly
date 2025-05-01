@@ -59,7 +59,7 @@ function ServiceRequestSearch({ incident, organization }) {
     }),
   };
 
-  const [data, setData] = useState({service_requests: [], isFetching: false});
+  const [data, setData] = useState({service_requests: [], total_count:0, isFetching: false});
   const [searchState, setSearchState] = useState({});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
@@ -176,7 +176,7 @@ function ServiceRequestSearch({ incident, organization }) {
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = () => {
-      setData(prevState => ({ ...prevState, isFetching: true}));
+      setData({service_requests: [], total_count: 0, isFetching: true});
       // Fetch ServiceRequest data.
       axios.get('/hotline/api/servicerequests/?page=' + page + '&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
@@ -190,7 +190,6 @@ function ServiceRequestSearch({ incident, organization }) {
       .then(response => {
         if (!unmounted) {
           console.log(response.data)
-          // setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
           setNumPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
 
           let search_state = {...searchState};
@@ -206,7 +205,7 @@ function ServiceRequestSearch({ incident, organization }) {
             });
 						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
 					});
-          setData({service_requests: [...data.service_requests, ...response.data.results.filter(request => !data.service_requests.map(request => request.id).includes(request.id))], isFetching: false});
+          setData({service_requests: response.data.results, total_count: response.data.count, isFetching: false});
 					setSearchState(search_state);
 
           // highlight search terms
@@ -215,7 +214,7 @@ function ServiceRequestSearch({ incident, organization }) {
       })
       .catch(error => {
         if (!unmounted) {
-          setData({service_requests: [], isFetching: false});
+          setData({service_requests: [], total_count:0, isFetching: false});
           setShowSystemError(true);
         }
       });
@@ -279,14 +278,14 @@ function ServiceRequestSearch({ incident, organization }) {
               </Button>
             </InputGroup.Append>
             <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-            <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.service_requests.length}` + ")"} search={true} disabled={data.isFetching || data.service_requests.length === 0}>
+            <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.service_requests.length === 0}>
               <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                 <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
-                PDF
+                Service Requests as a PDF
               </LoadingLink>
               <LoadingLink onClick={handleGeoJsonDownload} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                 <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
-                GeoJSON
+                Service Requests as GeoJSON
               </LoadingLink>
             </ActionsDropdown>
           </InputGroup>
@@ -380,7 +379,7 @@ function ServiceRequestSearch({ incident, organization }) {
       </Form>
       {/* here */}
       {data.service_requests.map((service_request, index) => (
-        <div key={service_request.id} className="mt-3">
+        <div key={service_request.id} className="mt-3 border rounded">
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
               <OverlayTrigger
