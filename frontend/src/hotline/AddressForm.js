@@ -44,17 +44,17 @@ const AddressForm = (props) => {
       if (!unmounted) {
         let nextUrl = '/hotline/api/servicerequests/?page=1&page_size=100&incident=' + props.incident + '&organization='+ props.organization + '&exclude_status=canceled&light=true';
         do {
-            const response = await axios.get(nextUrl, {
-              cancelToken: source.token,})
-            .catch(error => {
-              setShowSystemError(true);
-            });
+          const response = await axios.get(nextUrl, {
+            cancelToken: source.token,})
+          .catch(error => {
+            setShowSystemError(true);
+          });
 
-            service_requests.push(...response.data.results);
-            nextUrl = response.data.next;
-            if (nextUrl) {
-              nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
-            }
+          service_requests.push(...response.data.results);
+          nextUrl = response.data.next;
+          if (nextUrl) {
+            nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+          }
         } while(nextUrl != null)
 
         setExistingRequests(service_requests);
@@ -64,19 +64,26 @@ const AddressForm = (props) => {
 
     const fetchExistingOwnerData = async () => {
       // Fetch all owners data.
-      await axios.get('/people/api/person/?light=true&incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training, {
-        cancelToken: source.token,
-      })
-      .then(existingOwnersResponse => {
-        if (!unmounted) {
-          setExistingOwners(existingOwnersResponse.data);
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShowSystemError(true);
-        }
-      });
+      let owners = [];
+      if (!unmounted) {
+        let nextUrl = '/people/api/person/?page=1&page_size=100&light=true&incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training;
+        do {
+          const response = await axios.get(nextUrl, {
+            cancelToken: source.token,
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+
+          owners.push(...response.data.results);
+          nextUrl = response.data.next;
+          if (nextUrl) {
+            nextUrl = '/people/' + response.data.next.split('/people/')[1];
+          }
+        } while(nextUrl != null)
+
+        setExistingOwners(owners);
+      }
     }
     fetchExistingOwnerData();
 

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
-import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Spinner, Tooltip } from 'react-bootstrap';
 import moment from 'moment';
 import Select from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -63,6 +63,7 @@ function ServiceRequestSearch({ incident, organization }) {
   const [searchState, setSearchState] = useState({});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
+  const [isLoading, setIsLoading] = useState(false);
   const tempSearchTerm = useRef(null);
   const priorityRef = useRef(null);
   const statusRef = useRef(null);
@@ -98,12 +99,37 @@ function ServiceRequestSearch({ incident, organization }) {
     setPage(1);
   }
 
-  const handlePrintAllClick = (e) => {
+  const handlePrintAllClick = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    // Fetch all service_requests data.
+    let service_requests = [];
+    let nextUrl = '/hotline/api/servicerequests/?page=1&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization;
+    do {
+      const response = await axios.get(nextUrl, {
+        params: {
+          status: options.status,
+          priority: options.priority,
+          open_start: options.open_start,
+          open_end: options.open_end,
+        },
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+
+      service_requests.push(...response.data.results);
+      nextUrl = response.data.next;
+      if (nextUrl) {
+        nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+      }
+    } while(nextUrl != null)
 
     handleSubmitting()
-      .then(() => printAllServiceRequests(data.service_requests))
-      .then(submittingComplete);
+      .then(() => printAllServiceRequests(service_requests))
+      .then(submittingComplete)
+      .finally(() => setIsLoading(false));
   }
 
   function setFocus(pageNum) {
@@ -114,16 +140,42 @@ function ServiceRequestSearch({ incident, organization }) {
 
   const handleGeoJsonDownload = (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     handleSubmitting()
     .then(() => downloadGeoJson()
       )
     .then(submittingComplete)
+    .finally(() => setIsLoading(false));
   }
 
-  const downloadGeoJson= () => {
+  const downloadGeoJson = async () => {
+
+    // Fetch all service_requests data.
+    let service_requests = [];
+    let nextUrl = '/hotline/api/servicerequests/?page=1&search=' + searchTerm + '&light=true&incident=' + incident + '&organization=' + organization;
+    do {
+      const response = await axios.get(nextUrl, {
+        params: {
+          status: options.status,
+          priority: options.priority,
+          open_start: options.open_start,
+          open_end: options.open_end,
+        },
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+
+      service_requests.push(...response.data.results);
+      nextUrl = response.data.next;
+      if (nextUrl) {
+        nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+      }
+    } while(nextUrl != null)
+
     var params = '';
-    data.service_requests.forEach(sr => params = params + "id=" + sr.id + "&")
+    service_requests.forEach(sr => params = params + "id=" + sr.id + "&")
     var fileDownload = require('js-file-download');
     axios.get('/hotline/api/servicerequests/download_all/', { 
             params: {
@@ -277,16 +329,36 @@ function ServiceRequestSearch({ incident, organization }) {
               </Button>
             </InputGroup.Append>
             <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-            <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.service_requests.length === 0}>
-              <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
-                <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
-                Service Requests as a PDF
-              </LoadingLink>
-              <LoadingLink onClick={handleGeoJsonDownload} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
-                <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
-                Service Requests as GeoJSON
-              </LoadingLink>
-            </ActionsDropdown>
+            {isLoading ? (
+              <div className="d-flex" style={{width:"148px", justifyContent:"center"}}>
+                <Spinner
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '2rem',
+                      width: '2rem',
+                      marginBottom: '0.25rem'
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.service_requests.length === 0}>
+                <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
+                  <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
+                  Service Requests as a PDF
+                </LoadingLink>
+                <LoadingLink onClick={handleGeoJsonDownload} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
+                  <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
+                  Service Requests as GeoJSON
+                </LoadingLink>
+              </ActionsDropdown>
+            )}
           </InputGroup>
           </Col>
         </Row>

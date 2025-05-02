@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
+import { Button, ButtonGroup, Card, CardGroup, Col, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Spinner, Tooltip } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faClipboardList, faInfoCircle,
@@ -14,7 +14,6 @@ import { useMark, useSubmitting } from '../hooks';
 import Header from '../components/Header';
 import { titleCase } from '../components/Utils';
 import Scrollbar from '../components/Scrollbars';
-import ButtonSpinner from '../components/ButtonSpinner';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -34,7 +33,7 @@ function PersonSearch({ incident, organization }) {
     person = 'owners',
   } = queryParams;
 
-	const [data, setData] = useState({owners: [], isFetching: false});
+	const [data, setData] = useState({owners: [], total_count: 0, isFetching: false});
   const [organizationData, setOrganizationData] = useState({
     name: '',
     short_name: '',
@@ -45,6 +44,7 @@ function PersonSearch({ incident, organization }) {
 	const [statusOptions, setStatusOptions] = useState(person);
 	const [searchTerm, setSearchTerm] = useState(search);
 	const tempSearchTerm = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
   // const [triggerRefresh, setTriggerRefresh] = useState(false);
 	const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
@@ -73,12 +73,31 @@ function PersonSearch({ incident, organization }) {
 		setPage(1);
   }
 
-  function handlePrintAllClick(e) {
+  const handlePrintAllClick = async e => {
     e.preventDefault();
+    setIsLoading(true);
+    let owners = [];
+
+    // Fetch all owners data.
+    let nextUrl = '/people/api/person/?page_size=1&page=1&search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training);
+    do {
+      const response = await axios.get(nextUrl, {
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+
+      owners.push(...response.data.results);
+      nextUrl = response.data.next;
+      if (nextUrl) {
+        nextUrl = '/people/' + response.data.next.split('/people/')[1];
+      }
+    } while(nextUrl != null)
 
     handleSubmitting()
-      .then(() => printAllOwnersDetails(data.owners, organizationData))
-      .then(submittingComplete);
+      .then(() => printAllOwnersDetails(owners, organizationData))
+      .then(submittingComplete)
+      .finally(() => setIsLoading(false));
   }
 
 	function setFocus(pageNum) {
@@ -87,23 +106,53 @@ function PersonSearch({ incident, organization }) {
     }
   }
 
+  	// Hook for initializing data.
+	useEffect(() => {
+		let unmounted = false;
+		let source = axios.CancelToken.source();
+
+    const fetchOrganizationData = async () => {
+      // Fetch Organization data.
+      await axios.get('/incident/api/organization/', {
+        cancelToken: source.token,
+      })
+      .then(response => {
+        if (!unmounted) {
+          setOrganizationData(response.data[0]);
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchOrganizationData();
+
+		// Cleanup.
+		return () => {
+			unmounted = true;
+			source.cancel();
+		};
+	}, []);
+
 	// Hook for initializing data.
 	useEffect(() => {
 		let unmounted = false;
 		let source = axios.CancelToken.source();
 
 		const fetchOwners = () => {
-			setData({owners: [], isFetching: true});
+			setData({owners: [], total_count: 0, isFetching: true});
 			// Fetch People data.
-			axios.get('/people/api/person/?search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
+			axios.get('/people/api/person/?page_size=1&page=' + page + '&search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
 				cancelToken: source.token,
 			})
 			.then(response => {
 				if (!unmounted) {
-					setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
-					setData({owners: response.data, isFetching: false});
+					setNumPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
+					setData({owners: response.data.results, total_count:response.data.count, isFetching: false});
 					let search_state = {};
-					response.data.forEach(owner => {
+					response.data.results.forEach(owner => {
 						let species = [];
 						owner.animals.forEach(animal => {
 							if (!species.includes(animal.species_string)) {
@@ -133,33 +182,14 @@ function PersonSearch({ incident, organization }) {
 				}
 			});
 		};
-
     fetchOwners();
-
-    const fetchOrganizationData = async () => {
-      // Fetch Organization data.
-      await axios.get('/incident/api/organization/', {
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          setOrganizationData(response.data[0]);
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShowSystemError(true);
-        }
-      });
-    };
-    fetchOrganizationData();
 
 		// Cleanup.
 		return () => {
 			unmounted = true;
 			source.cancel();
 		};
-	}, [searchTerm, statusOptions, incident]);
+	}, [searchTerm, statusOptions, incident, page]);
 
 	return (
     <div className="ml-2 mr-2">
@@ -213,18 +243,38 @@ function PersonSearch({ incident, organization }) {
               <Button variant={statusOptions === "owners" ? "primary" : "secondary"} onClick={statusOptions !== "owners" ? () => {setPage(1);setStatusOptions("owners")} : () => {setPage(1);setStatusOptions("")}} style={{paddingTop:"5px"}}>Owners</Button>
               <Button variant={statusOptions === "reporters" ? "primary" : "secondary"} onClick={statusOptions !== "reporters" ? () => {setPage(1);setStatusOptions("reporters")} : () => {setPage(1);setStatusOptions("")}} style={{paddingTop:"5px"}}>Reporters</Button>
             </ButtonGroup>
-            <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.owners.length}` + ")"} search={true} disabled={data.isFetching || data.owners.length === 0}>
-              <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
-                <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
-                Owners as a PDF
-              </LoadingLink>
-            </ActionsDropdown>
+            {isLoading ? (
+              <div className="d-flex" style={{width:"148px", justifyContent:"center"}}>
+                <Spinner
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '2rem',
+                      width: '2rem',
+                      marginBottom: '0.25rem'
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.owners.length === 0}>
+                <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
+                  <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
+                  Owners as a PDF
+                </LoadingLink>
+              </ActionsDropdown>
+            )}
           </InputGroup>
         </Col>
       </Row>
     </Form>
     {data.owners.map((owner, index) => (
-      <div key={owner.id} className="mt-3 border rounded" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+      <div key={owner.id} className="mt-3 border rounded">
         <div className="card-header"> {owner.first_name ?
           <h4 style={{marginBottom: "-2px",  marginLeft:"-12px"}}>
             {statusOptions === 'owners' ?

@@ -70,26 +70,27 @@ function Hotline({ incident, organization }) {
         const bounds = [];
         let nextUrl = '/hotline/api/servicerequests/?page=1&page_size=100&incident=' + incident + '&organization=' + organization;
         do {
-            const response = await axios.get(nextUrl, {
-              params: {
-                landingmap: true
-              },
-              cancelToken: source.token,})
-            .catch(error => {
-              setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-              setShowSystemError(true);
-            });
+          const response = await axios.get(nextUrl, {
+            params: {
+              landingmap: true
+            },
+            cancelToken: source.token,
+          })
+          .catch(error => {
+            setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+            setShowSystemError(true);
+          });
 
-            for (const service_request of response.data.results) {
-              const matches = countMatches(service_request.animals)[0];
-              map_dict[service_request.id] = {matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
-              bounds.push([service_request.latitude, service_request.longitude]);
-            }
-            service_requests.push(...response.data.results);
-            nextUrl = response.data.next;
-            if (nextUrl) {
-              nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
-            }
+          for (const service_request of response.data.results) {
+            const matches = countMatches(service_request.animals)[0];
+            map_dict[service_request.id] = {matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
+            bounds.push([service_request.latitude, service_request.longitude]);
+          }
+          service_requests.push(...response.data.results);
+          nextUrl = response.data.next;
+          if (nextUrl) {
+            nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+          }
         } while(nextUrl != null)
 
         setMapState(map_dict);

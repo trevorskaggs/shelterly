@@ -76,6 +76,7 @@ function AnimalSearch({ incident, organization }) {
   const [isDisabled, setIsDisabled] = useState(true);
   const [goToID, setGoToID] = useState('');
   const [triggerRefresh, setTriggerRefresh] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const tempSearchTerm = useRef(null);
   const speciesRef = useRef(null);
   const statusRef = useRef(null);
@@ -161,16 +162,44 @@ function AnimalSearch({ incident, organization }) {
     printAnimalCareSchedule(animal);
   }
 
-  const handlePrintAllClick = (e) => {
-    e.preventDefault();
+  const handlePrintAllClick = async () => {
+    setIsLoading(true);
+
+    let animals = [];
+    let nextUrl = '/animals/api/animal/?page=1&search=' + searchTerm +'&incident=' + incident + '&organization=' + organization
+    do {
+      const response = await axios.get(nextUrl, {
+        params: {
+          status: options.status,
+          species: options.species,
+          sex: options.sex,
+          owned: options.owned,
+          pcolor: options.pcolor,
+          scolor: options.scolor,
+          shelter: options.shelter,
+          latlng: options.latlng,
+          radius: options.radius,
+        },
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+
+      animals.push(...response.data.results);
+      nextUrl = response.data.next;
+      if (nextUrl) {
+        nextUrl = '/animals/' + response.data.next.split('/animals/')[1];
+      }
+    } while(nextUrl != null)
 
     handleSubmitting()
-      .then(() => data.animals.map((animal) => ({
+      .then(() => animals.map((animal) => ({
         ...animal,
         url: buildAnimalUrl(animal)
       })))
       .then((supplementedAnimals) => printAllAnimalCareSchedules(supplementedAnimals))
-      .then(submittingComplete);
+      .then(submittingComplete)
+      .finally(() => setIsLoading(false));
   }
 
   function setFocus(pageNum) {
@@ -402,12 +431,37 @@ function AnimalSearch({ incident, organization }) {
                 </Button>
               </InputGroup.Append>
               <Button variant="outline-light" className="ml-1 mr-1" style={{color:"white"}} onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} className="fa-move-up" size="sm" />}</Button>
+              {isLoading ? (
+                <div className="d-flex" style={{width:"148px", justifyContent:"center"}}>
+                <Spinner
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '2rem',
+                      width: '2rem',
+                      marginBottom: '0.25rem'
+                    }
+                  }}
+                />
+                </div>
+              ) : (
               <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.animals.length === 0}>
-                <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
-                  <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
-                  Animals as a PDF
-                </LoadingLink>
+                <ShelterlyPrintifyButton
+                  id="animal-details-animal-care-schedule"
+                  spinnerSize={2.0}
+                  tooltipPlacement='right'
+                  tooltipText='Animal data as a PDF'
+                  printFunc={(event) => handlePrintAllClick(event)}
+                  disabled={data.isFetching}
+                  noOverlay={true}
+                />
               </ActionsDropdown>
+            )}
             </InputGroup>
           </Col>
         </Row>
@@ -593,14 +647,15 @@ function AnimalSearch({ incident, organization }) {
                 <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               A#{animal.id_for_incident} - {animal.animal_count > 1 ? <span>{animal.animal_count} {titleCase(animal.species_string)}{(animal.animal_count) !== 1 && !["sheep", "cattle"].includes(animal.species_string) ? "s" : ""}</span> : <span>{animal.name ? titleCase(animal.name) : "Unknown"}</span>}
-
-              <ShelterlyPrintifyButton
-                id="animal-search-animal-schedules"
-                spinnerSize={1.5}
-                tooltipPlacement='top'
-                tooltipText='Print Animal Care Schedule'
-                printFunc={() => handleDownloadPdfClick(animal.id)}
-              />
+              <div className="float-right d-flex" style={{marginRight:"-5px"}}>
+                <ShelterlyPrintifyButton
+                  id="animal-search-animal-schedules"
+                  spinnerSize={1.5}
+                  tooltipPlacement='top'
+                  tooltipText='Print Animal Care Schedule'
+                  printFunc={() => handleDownloadPdfClick(animal.id)}
+                />
+              </div>
             </h4>
           </div>
           <CardGroup style={{marginBottom:"-6px"}}>

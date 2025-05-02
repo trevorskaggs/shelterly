@@ -7,7 +7,12 @@ from hotline.models import ServiceRequest
 from incident.models import Incident, Organization
 from people.models import OwnerContact, Person, PersonChange, PersonImage
 from people.serializers import OwnerContactSerializer, PersonSerializer, HeavyPersonSerializer, SimplePersonSerializer
+from rest_framework.pagination import PageNumberPagination
 
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 25
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 # Provides view for Person API calls.
 class PersonViewSet(viewsets.ModelViewSet):
@@ -18,6 +23,7 @@ class PersonViewSet(viewsets.ModelViewSet):
     serializer_class = PersonSerializer
     light_serializer_class = SimplePersonSerializer
     detail_serializer_class = HeavyPersonSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

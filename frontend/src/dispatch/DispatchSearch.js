@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
-import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from "react-bootstrap";
+import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Spinner, Tooltip } from "react-bootstrap";
 import { Link, navigate, useQueryParams } from "raviger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -46,6 +46,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
   const [isDisabled, setIsDisabled] = useState(true);
   const [options, setOptions] = useState({id:null, status:status, open_start:null, open_end:null, dispatch_start:null, dispatch_end:null});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [matches, setMatches] = useState({});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
@@ -82,12 +83,37 @@ function DispatchAssignmentSearch({ incident, organization }) {
     setTriggerRefresh(!triggerRefresh);
   };
 
-  const handlePrintAllClick = (e) => {
+  const handlePrintAllClick = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    let dispatch_assignments = [];
+    let nextUrl = '/evac/api/evacassignment/?page=' + page + '&map=true&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization;
+    do {
+      const response = await axios.get(nextUrl, {
+        params: {
+          status: options.status,
+          open_start: options.open_start,
+          open_end: options.open_end,
+          dispatch_start: options.dispatch_start,
+          dispatch_end: options.dispatch_end,
+        },
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+
+      dispatch_assignments.push(...response.data.results);
+      nextUrl = response.data.next;
+      if (nextUrl) {
+        nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
+      }
+    } while(nextUrl != null)
 
     handleSubmitting()
-      .then(() => printAllDispatchResolutions(data.evacuation_assignments))
-      .then(submittingComplete);
+      .then(() => printAllDispatchResolutions(dispatch_assignments))
+      .then(submittingComplete)
+      .finally(() => setIsLoading(false));
   }
 
   function setFocus(pageNum) {
@@ -123,7 +149,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
     const fetchDispatchAssignments = async () => {
       setData({evacuation_assignments: [], total_count: 0, isFetching: true});
       // Fetch DispatchAssignment data.
-      await axios.get('/evac/api/evacassignment/?page_size=1&page=' + page + '&map=true&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
+      await axios.get('/evac/api/evacassignment/?page=' + page + '&map=true&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
         params: {
           status: options.status,
@@ -219,12 +245,32 @@ function DispatchAssignmentSearch({ incident, organization }) {
                 </Button>
               </InputGroup.Append>
               <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+              {isLoading ? (
+              <div className="d-flex" style={{width:"148px", justifyContent:"center"}}>
+                <Spinner
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '2rem',
+                      width: '2rem',
+                      marginBottom: '0.25rem'
+                    }
+                  }}
+                />
+              </div>
+            ) : (
               <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.evacuation_assignments.length === 0}>
                 <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
                   <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
                   Dispatch Assignments as a PDF
                 </LoadingLink>
               </ActionsDropdown>
+            )}
             </InputGroup>
           </Col>
         </Row>
