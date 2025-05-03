@@ -93,6 +93,9 @@ function Hotline({ incident, organization }) {
               nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
             }
           }
+          else {
+            nextUrl = null
+          }
         } while(nextUrl != null)
 
         setMapState(map_dict);

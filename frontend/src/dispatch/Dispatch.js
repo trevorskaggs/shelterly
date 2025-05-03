@@ -103,6 +103,9 @@ function Dispatch({ incident, organization }) {
                 nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
               }
           }
+          else {
+            nextUrl = null
+          }
         } while(nextUrl != null)
 
         setMapState(map_dict);
