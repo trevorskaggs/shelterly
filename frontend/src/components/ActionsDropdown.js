@@ -12,8 +12,8 @@ const ActionsDropdown = ({
   disabled = false
 }) => {
   return (
-    <Dropdown size={size} alignRight={true} style={{paddingTop: search ? "" : "5px", height: search ? '36px' : '39px'}}>
-      <Dropdown.Toggle className={search ? 'border rounded' : className} variant={search ? '' : variant} id={id} disabled={disabled}>
+    <Dropdown size={size} alignRight={true} className={className} style={{paddingTop: search ? "" : "5px", height: search ? '36px' : '39px'}}>
+      <Dropdown.Toggle className={search ? 'border rounded ' : ''} variant={search ? '' : variant} id={id} disabled={disabled}>
         {title}
       </Dropdown.Toggle>
       <Dropdown.Menu>

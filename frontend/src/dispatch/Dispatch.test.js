@@ -1,14 +1,17 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import Dispatch from "./Dispatch";
 import DispatchTeamMemberForm from "./DispatchTeamMemberForm";
 import DispatchSearch from "./DispatchSearch";
 import { SystemErrorProvider } from '../components/SystemError';
 
 describe("Render evac", () => {
-  it("Render Dispatch", () => {
-    const { getByText } = render(<SystemErrorProvider><Dispatch /></SystemErrorProvider>);
-    expect(getByText(/DEPLOY TEAMS/)).toBeTruthy();
+
+  it("Render Dispatch", async () => {
+    await act(async () => {
+      const { getByText } = render(<SystemErrorProvider><Dispatch /></SystemErrorProvider>);
+      expect(await getByText(/DEPLOY TEAMS/)).toBeTruthy();
+    })
   });
 
   it("Render new dispatch team member form", async () => {

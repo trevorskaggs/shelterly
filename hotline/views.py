@@ -149,6 +149,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             .select_related('reporter')
             .prefetch_related('assignedrequest_set')
             .prefetch_related(Prefetch('evacuation_assignments', EvacAssignment.objects.select_related('team').prefetch_related('team__team_members')))
+            .order_by('-timestamp')
         )
 
         # Status filter.

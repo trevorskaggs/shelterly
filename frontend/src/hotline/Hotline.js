@@ -81,15 +81,17 @@ function Hotline({ incident, organization }) {
             setShowSystemError(true);
           });
 
-          for (const service_request of response.data.results) {
-            const matches = countMatches(service_request.animals)[0];
-            map_dict[service_request.id] = {matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
-            bounds.push([service_request.latitude, service_request.longitude]);
-          }
-          service_requests.push(...response.data.results);
-          nextUrl = response.data.next;
-          if (nextUrl) {
-            nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+          if (response) {
+            for (const service_request of response.data.results) {
+              const matches = countMatches(service_request.animals)[0];
+              map_dict[service_request.id] = {matches:matches, latitude:service_request.latitude, longitude:service_request.longitude};
+              bounds.push([service_request.latitude, service_request.longitude]);
+            }
+            service_requests.push(...response.data.results);
+            nextUrl = response.data.next;
+            if (nextUrl) {
+              nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+            }
           }
         } while(nextUrl != null)
 

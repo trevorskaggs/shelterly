@@ -244,7 +244,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                   </OverlayTrigger>
                 </Button>
               </InputGroup.Append>
-              <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+              <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} className="fa-move-up" size="sm" />}</Button>
               {isLoading ? (
               <div className="d-flex" style={{width:"148px", justifyContent:"center"}}>
                 <Spinner

@@ -87,19 +87,21 @@ function Dispatch({ incident, organization }) {
             setShowSystemError(true);
           });
 
-          response.data.results.forEach((dispatch_assignment, index) => {
-            let sr_dict = {}
-            for (const assigned_request of dispatch_assignment.assigned_requests) {
-              const matches = countDictMatches(assigned_request.animals);
-              sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
-              bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
-            }
-            map_dict[dispatch_assignment.id] = {service_requests:sr_dict}
-          });
-          dispatch_assignments.push(...response.data.results);
-          nextUrl = response.data.next;
-          if (nextUrl) {
-            nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
+          if (response) {
+            response.data.results.forEach((dispatch_assignment, index) => {
+              let sr_dict = {}
+              for (const assigned_request of dispatch_assignment.assigned_requests) {
+                const matches = countDictMatches(assigned_request.animals);
+                sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
+                bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
+              }
+              map_dict[dispatch_assignment.id] = {service_requests:sr_dict}
+            });
+            dispatch_assignments.push(...response.data.results);
+            nextUrl = response.data.next;
+              if (nextUrl) {
+                nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
+              }
           }
         } while(nextUrl != null)
 
