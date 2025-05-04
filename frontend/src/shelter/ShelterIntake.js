@@ -255,7 +255,7 @@ function AnimalStatus(props) {
             props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.presenting_complaints`, instance === null ? [] : values);
           }}
         />
-        {props.formikProps.errors['sr_updates'] && props.formikProps.errors['sr_updates'][props.index] && props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints}</div> : ""}
+        {props.formikProps.errors['sr_updates'] && props.formikProps.errors['sr_updates'][props.index] && props.formikProps.errors['sr_updates'][props.index].animals[props.inception] && props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints}</div> : ""}
       </Col>
     </BootstrapForm.Row>: ""}
     {props.presentingComplaintChoices.length && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints.includes(props.presentingComplaintChoices.filter(option => option.label === 'Other')[0].value) ?

@@ -49,6 +49,11 @@ function Incident() {
     }),
   };
 
+  // Custom filter option to provide a searchable string to filter on.
+  const filterOption = (option, inputValue) => {
+    return (option.data.slug + ' ' + moment(option.data.start_time).format('MM/DD/YYYY') + (option.data.end_time ? ' - ' + moment(option.data.end_time).format('MM/DD/YYYY') : '')).toLocaleLowerCase().includes(inputValue.toLocaleLowerCase());
+  };
+
   // Handle opening and closing an incident.
   const handleOpenCloseSubmit = async () => {
     await axios.patch('/incident/api/incident/' + incident.id + '/?organization=' + state.organization.id, {change_lock:true})
@@ -105,10 +110,6 @@ function Incident() {
       source.cancel();
     };
   }, [state.user.is_superuser, state.user.incident_perms, org_slug]);
-
-  const filterOption = (option, inputValue) => {
-    return (option.data.slug + ' ' + moment(option.data.start_time).format('MM/DD/YYYY') + (option.data.end_time ? ' - ' + moment(option.data.end_time).format('MM/DD/YYYY') : '')).toLocaleLowerCase().includes(inputValue.toLocaleLowerCase());
-  };
 
   return (
     <>
