@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import Select from 'react-select';
+import Select, { createFilter } from 'react-select';
 import { useCookies } from 'react-cookie';
 import SimpleValue from 'react-select-simple-value';
 import { Button, Col, Row } from 'react-bootstrap';
@@ -81,7 +81,7 @@ function Incident() {
             response.data.forEach(incident => {
               // Build incident option list.
               if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
-                options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, description:incident.description, training:incident.training, default_followup_days:incident.default_followup_days, end_time:incident.end_time, caltopo_map_id: incident.caltopo_map_id, watchduty_map_id: incident.watchduty_map_id});
+                options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, description:incident.description, training:incident.training, default_followup_days:incident.default_followup_days, start_time:incident.start_time, end_time:incident.end_time, caltopo_map_id: incident.caltopo_map_id, watchduty_map_id: incident.watchduty_map_id});
               }
             });
             setOptions(options)
@@ -106,6 +106,10 @@ function Incident() {
     };
   }, [state.user.is_superuser, state.user.incident_perms, org_slug]);
 
+  const filterOption = (option, inputValue) => {
+    return (option.data.slug + ' ' + moment(option.data.start_time).format('MM/DD/YYYY') + (option.data.end_time ? ' - ' + moment(option.data.end_time).format('MM/DD/YYYY') : '')).toLocaleLowerCase().includes(inputValue.toLocaleLowerCase());
+  };
+
   return (
     <>
     <Row className='ml-auto mr-auto mt-5 align-bottom'>
@@ -114,17 +118,18 @@ function Incident() {
     <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{minWidth:"572px"}}>
       <SimpleValue options={options}>
         {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, description:instance.description, training:instance.training, default_followup_days:instance.default_followup_days, caltopo_map_id:instance.caltopo_map_id, watchduty_map_id: instance.watchduty_map_id})}
-        getOptionLabel={(props) => {
-          return (
-            <div tw="flex items-center gap-2">
-              {props.training ? <FontAwesomeIcon icon={faCircleT} className="mr-1" /> : ""}
-              {props.caltopo_map_id ? <FontAwesomeIcon icon={faCircleC} className="mr-1" /> : ""}
-              {props.watchduty_map_id ? <FontAwesomeIcon icon={faCircleW} className="mr-1" /> : ""}
-              <span>{props.label}</span>
-            </div>
-          );
-        }}
-                />}
+          getOptionLabel={(props) => {
+            return (
+              <div tw="flex items-center gap-2">
+                {props.training ? <FontAwesomeIcon icon={faCircleT} className="mr-1" /> : ""}
+                {props.caltopo_map_id ? <FontAwesomeIcon icon={faCircleC} className="mr-1" /> : ""}
+                {props.watchduty_map_id ? <FontAwesomeIcon icon={faCircleW} className="mr-1" /> : ""}
+                <span>{props.label}</span>
+              </div>
+            );
+          }}
+          filterOption={filterOption}
+        />}
       </SimpleValue>
       <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.description, incident.training, incident.default_followup_days, incident.caltopo_map_id, incident.watchduty_map_id)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
