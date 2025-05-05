@@ -56,7 +56,7 @@ function Organization() {
           let options = [];
           response.data.forEach(organization => {
             // Build organization option list.
-            options.push({value: organization.id, label: organization.name, slug:organization.slug, watchduty_enabled:organization.watchduty_enabled, caltopo_enabled:organization.caltopo_enabled});
+            options.push({value: organization.id, label: organization.name, slug:organization.slug, watchduty_enabled:organization.watchduty_enabled, caltopo_enabled:organization.caltopo_enabled, });
           });
           setOptions(options)
         }

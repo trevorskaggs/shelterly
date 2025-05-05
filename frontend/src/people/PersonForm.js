@@ -22,6 +22,7 @@ const PersonForm = (props) => {
 
   const id = props.id;
   const incident = "/" + props.incident
+  const initial_coordinates = state?.incident?.coordinates ?? [0, 0];
 
   // Determine if we're in the hotline workflow.
   var is_workflow = window.location.pathname.includes("workflow");
@@ -420,7 +421,7 @@ const PersonForm = (props) => {
                 name="agency"
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} stepIndex={props.state.ownerIndex} label={"Search for " + (isOwner ? "Owner" : "Reporter") + " Address"} incident={props.incident} show_apt={true} show_same={(is_intake || animal_id || servicerequest_id) ? false : true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={isOwner ? existingOwner : existingReporter} matchingAddress={data.address === props.state.steps.initial.address && data.apartment === props.state.steps.initial.apartment} animal_id={animal_id} servicerequest_id={servicerequest_id} isOwner={isOwner} />
+            <AddressSearch formikProps={formikProps} stepIndex={props.state.ownerIndex} label={"Search for " + (isOwner ? "Owner" : "Reporter") + " Address"} incident={props.incident} show_apt={true} show_same={(is_intake || animal_id || servicerequest_id) ? false : true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={isOwner ? existingOwner : existingReporter} matchingAddress={data.address === props.state.steps.initial.address && data.apartment === props.state.steps.initial.apartment} initial_coordinates={initial_coordinates} animal_id={animal_id} servicerequest_id={servicerequest_id} isOwner={isOwner} />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"

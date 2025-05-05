@@ -26,6 +26,8 @@ const AddressForm = (props) => {
   const { state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
+  const initial_coordinates = state?.incident?.coordinates ?? [0, 0];
+
   useNavigationPrompt(true, "Are you sure you would like to leave the animal intake workflow? No data will be saved.");
 
   const [data, setData] = useState(props.state.steps.initial);
@@ -136,7 +138,7 @@ const AddressForm = (props) => {
             <Card.Header as="h5" className="pl-3"><span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>Lookup Address</Card.Header>
             <Card.Body>
               <BootstrapForm noValidate>
-                <AddressSearch formikProps={formikProps} initialData={props.state.steps.initial} label="Search for Service Request Address" incident={props.incident} show_apt={true} address_form={true} error="Address was not selected." />
+                <AddressSearch formikProps={formikProps} initialData={props.state.steps.initial} label="Search for Service Request Address" incident={props.incident} initial_coordinates={initial_coordinates} show_apt={true} address_form={true} error="Address was not selected." />
               </BootstrapForm>
               <h4>Use Matching Service Request</h4>
               <Col xs={9} className="border rounded" style={{marginLeft:"1px", height:existingRequests.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "59px" : "169px", overflowY:"auto", paddingRight:"-1px"}}>
@@ -196,6 +198,7 @@ const AddressForm = (props) => {
                   </div> : ""}
                 </Scrollbar>
               </Col>
+              {is_owner ? <>
               <h4 className="mt-3">Use Matching Owner</h4>
               <Col xs={9} className="border rounded" style={{marginLeft:"1px", height:existingOwners.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "59px" : "169px", overflowY:"auto", paddingRight:"-1px"}}>
                 <Scrollbar no_shadow="true" style={{height:existingOwners.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "57px" : "167px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
@@ -227,6 +230,7 @@ const AddressForm = (props) => {
                   </div> : ""}
                 </Scrollbar>
               </Col>
+              </>: ""}
             </Card.Body>
             <ButtonGroup size="lg" >
               <ButtonSpinner isSubmitting={formikProps.isSubmitting} disabled={!formikProps.values.address} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { formikProps.submitForm(); }}>
