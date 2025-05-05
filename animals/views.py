@@ -321,13 +321,13 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
         if self.request.GET.get('species'):
-            queryset = queryset.filter(species=self.request.GET.get('species'))
+            queryset = queryset.filter(species__name=self.request.GET.get('species'))
         if self.request.GET.get('status'):
             queryset = queryset.filter(status=self.request.GET.get('status'))
         if self.request.GET.get('sex'):
             queryset = queryset.filter(sex=self.request.GET.get('sex'))
-        if self.request.GET.get('owned'):
-            queryset = queryset.filter(owned=self.request.GET.get('owned'))
+        if self.request.GET.get('owned', '') == 'no':
+            queryset = queryset.filter(owners=None)
         if self.request.GET.get('pcolor'):
             queryset = queryset.filter(pcolor=self.request.GET.get('pcolor'))
         if self.request.GET.get('scolor'):

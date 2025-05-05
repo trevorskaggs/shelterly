@@ -143,10 +143,10 @@ function VetRequestSearch({ incident, organization }) {
   const [treatments, setTreatments] = useState([]);
   const [diagnostics, setDiagnostics] = useState([]);
   const [procedures, setProcedures] = useState([]);
-  const [options, setOptions] = useState({species: '', status:'Open', priority:null, open:null, assignee:null, shelter: ''});
-  const [treatmentOptions, setTreatmentOptions] = useState({species: '', status:'Pending', treatment:'', scheduled:null, administered:null, assignee:null, shelter: '', not_administered:null});
-  const [diagnosticOptions, setDiagnosticOptions] = useState({species: '', status:'Pending', diagnostic:'', ordered:null, complete:null, shelter: ''});
-  const [procedureOptions, setProcedureOptions] = useState({species: '', status:'Pending', procedure:'', ordered:null, complete:null, performer:null, shelter: ''});
+  const [options, setOptions] = useState({species: '', status:null, priority:null, open:null, assignee:null, shelter: ''});
+  const [treatmentOptions, setTreatmentOptions] = useState({species: '', status:null, treatment:'', scheduled:null, administered:null, assignee:null, shelter: '', not_administered:null});
+  const [diagnosticOptions, setDiagnosticOptions] = useState({species: '', status:null, diagnostic:'', ordered:null, complete:null, shelter: ''});
+  const [procedureOptions, setProcedureOptions] = useState({species: '', status:null, procedure:'', ordered:null, complete:null, performer:null, shelter: ''});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [startDate, setStartDate] = useState(null);
@@ -664,7 +664,7 @@ function VetRequestSearch({ incident, organization }) {
                     onChange={(instance) => {
                       setOptions({...options, priority: instance ? instance.value : null});
                     }}
-                    value={options.priority ? {value:options.priority, label:options.priority} : null}
+                    value={options.priority ? {value:options.priority, label:priorityText[options.priority]} : null}
                   />
                   <Select
                     id="assigneeDropdown"
@@ -984,7 +984,7 @@ function VetRequestSearch({ incident, organization }) {
                         if (dateRange) {
                           parseDateRange(dateRange);
                         }
-                        setDiagnosticOptions({...diagnosticOptions, open: dateRange ? true : null});
+                        setDiagnosticOptions({...diagnosticOptions, ordered: dateRange ? true : null});
                       }}
                     />
                   </Col>
@@ -1106,7 +1106,7 @@ function VetRequestSearch({ incident, organization }) {
                         if (dateRange) {
                           parseDateRange(dateRange);
                         }
-                        setProcedureOptions({...procedureOptions, open: dateRange ? true : null});
+                        setProcedureOptions({...procedureOptions, ordered: dateRange ? true : null});
                       }}
                     />
                   </Col>
@@ -1223,11 +1223,11 @@ function VetRequestSearch({ incident, organization }) {
       {vetObject === 'procedures' && procedures.map((procedure, index) => (
         <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} animal_object={procedure.animal_object} />
       ))}
-      <p>{data.isFetching ? <span>{'Fetching ' + (vetObject === 'vet_requests' ? 'veterinary requests' : vetObject === 'treatments' ? 'treatments' : vetObject === 'diagnostics' ? 'diagnostics' : 'procedures') + '...'}</span> : ""}</p>
-      {!data.isFetching && vetObject === 'vet_requests' && vetRequests.length === 0 ? <p style={{marginTop:"-15px"}}>No veterinary requests found.</p> : ""}
-      {!data.isFetching && vetObject === 'treatments' && treatments.length === 0 ? <p style={{marginTop:"-15px"}}>No treatments found.</p> : ""}
-      {!data.isFetching && vetObject === 'diagnostics' && diagnostics.length === 0 ? <p style={{marginTop:"-15px"}}>No diagnostics found.</p> : ""}
-      {!data.isFetching && vetObject === 'procedures' && procedures.length === 0 ? <p style={{marginTop:"-15px"}}>No procedures found.</p> : ""}
+      {data.isFetching ? <p>{'Fetching ' + (vetObject === 'vet_requests' ? 'veterinary requests' : vetObject === 'treatments' ? 'treatments' : vetObject === 'diagnostics' ? 'diagnostics' : 'procedures') + '...'}</p> : ""}
+      {!data.isFetching && vetObject === 'vet_requests' && vetRequests.length === 0 ? <p>No veterinary requests found.</p> : ""}
+      {!data.isFetching && vetObject === 'treatments' && treatments.length === 0 ? <p>No treatments found.</p> : ""}
+      {!data.isFetching && vetObject === 'diagnostics' && diagnostics.length === 0 ? <p>No diagnostics found.</p> : ""}
+      {!data.isFetching && vetObject === 'procedures' && procedures.length === 0 ? <p>No procedures found.</p> : ""}
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

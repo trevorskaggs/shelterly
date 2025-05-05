@@ -144,7 +144,7 @@ function PersonSearch({ incident, organization }) {
 		const fetchOwners = () => {
 			setData({owners: [], total_count: 0, isFetching: true});
 			// Fetch People data.
-			axios.get('/people/api/person/?page_size=1&page=' + page + '&search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
+			axios.get('/people/api/person/?page=' + page + '&search=' + searchTerm + '&status=' + statusOptions + '&incident=' + incident + '&organization=' + organization +'&training=' + (state && state.incident.training), {
 				cancelToken: source.token,
 			})
 			.then(response => {
