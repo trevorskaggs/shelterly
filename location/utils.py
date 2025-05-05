@@ -19,4 +19,4 @@ def build_action_string(obj):
         name = obj.action_object.name or 'Unknown'
         return f'{obj.actor} {obj.verb} {name} {obj.timesince()} ago.'
     custom_verb = obj.verb.replace('ed ','ed this ') if 'transfer' not in obj.verb else obj.verb
-    return f'{obj.actor} {custom_verb} {obj.timesince()} ago.'
+    return f'{obj.timestamp.strftime("%b-%d-%Y, %I:%M %p")}. {obj.actor} {custom_verb}. ({obj.timesince()} ago)'
