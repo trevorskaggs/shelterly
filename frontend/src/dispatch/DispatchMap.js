@@ -1215,7 +1215,7 @@ function Deploy({ incident, organization }) {
                       placement="top"
                       overlay={
                         <Tooltip id={`tooltip-add-to-dispatch`}>
-                          Assign service request to an open dispatch assignment
+                          Assign service request to a dispatch assignment
                         </Tooltip>
                       }
                     >

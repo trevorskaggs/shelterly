@@ -156,7 +156,7 @@ class ReportViewSet(viewsets.ViewSet):
       followup_start_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').earliest('date')['date']
       followup_end_date = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).exclude(followup_date__isnull=True).exclude(status__in=['closed', 'canceled']).filter(incident__slug=incident_slug).annotate(date=TruncDay('followup_date')).values('date').latest('date')['date']
       while followup_end_date >= followup_start_date:
-          srs = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).filter(incident__slug=incident_slug, followup_date__date=followup_end_date).exclude(status__in=['closed', 'canceled']).distinct()
+          srs = ServiceRequest.objects.filter(animal__status__in=['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'SHELTERED IN PLACE', 'UNABLE TO LOCATE']).filter(incident__slug=incident_slug, followup_date=followup_end_date).exclude(status__in=['closed', 'canceled']).distinct()
           total = srs.count()
           followup_data = {
             'date': followup_end_date.strftime('%m/%d/%Y'),
