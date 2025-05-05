@@ -19,15 +19,24 @@ function Incident() {
   const { dispatch, state } = useContext(AuthContext);
   const { setShowSystemError } = useContext(SystemErrorContext);
 
-  const [incident, setIncident] = useState({id: '', slug: '', name: '', description: '', training:false, default_followup_days: 2, caltopo_map_id: '', watchduty_map_id: ''});
+  const [incident, setIncident] = useState({id: '', slug: '', name: '', description: '', training:false, default_followup_days: 2, caltopo_map_id: '', watchduty_map_id: '', coordinates: []});
   const [options, setOptions] = useState([]);
   const [cookies, , removeCookie] = useCookies(['token']);
 
   const path = window.location.pathname;
   const org_slug = path.split('/')[1];
 
-  const handleSubmit = (incident_id, incident_name, incident_description, incident_training, incident_default_followup_days, incident_caltopo_map_id, incident_watchduty_map_id) => {
-    dispatch({type: "SET_INCIDENT", data: {id:incident_id, name:incident_name, description:incident_description, training:incident_training, default_followup_days: incident_default_followup_days, caltopo_map_id: incident_caltopo_map_id, watchduty_map_id: incident_watchduty_map_id}});
+  const handleSubmit = (incident_id, incident_name, incident_description, incident_training, incident_default_followup_days, incident_caltopo_map_id, incident_watchduty_map_id, incident_coordinates) => {
+    dispatch({type: "SET_INCIDENT", data: {
+      id:incident_id, 
+      name:incident_name, 
+      description:incident_description, 
+      training:incident_training, 
+      default_followup_days: incident_default_followup_days, 
+      caltopo_map_id: incident_caltopo_map_id, 
+      watchduty_map_id: incident_watchduty_map_id,
+      coordinates: incident_coordinates
+    }});
     navigate(window.location.pathname + "/" + incident.slug);
   }
 
@@ -78,10 +87,22 @@ function Incident() {
         .then(response => {
           if (!unmounted) {
             let options = [];
-            response.data.forEach(incident => {
+            response.data.forEach(inc => {
               // Build incident option list.
-              if (!incident.end_time || state.user.is_superuser || state.user.incident_perms) {
-                options.push({value: incident.id, label: incident.name + ' (' + moment(incident.start_time).format('MM/DD/YYYY') + (incident.end_time ? ' - ' + moment(incident.end_time).format('MM/DD/YYYY') : '') + ')', slug:incident.slug, name:incident.name, description:incident.description, training:incident.training, default_followup_days:incident.default_followup_days, end_time:incident.end_time, caltopo_map_id: incident.caltopo_map_id, watchduty_map_id: incident.watchduty_map_id});
+              if (!inc.end_time || state.user.is_superuser || state.user.incident_perms) {
+                options.push({
+                  value: inc.id, 
+                  label: inc.name + ' (' + moment(inc.start_time).format('MM/DD/YYYY') + (inc.end_time ? ' - ' + moment(inc.end_time).format('MM/DD/YYYY') : '') + ')', 
+                  slug:inc.slug, 
+                  name:inc.name, 
+                  description:inc.description, 
+                  training:inc.training, 
+                  default_followup_days:inc.default_followup_days, 
+                  end_time:inc.end_time, 
+                  caltopo_map_id: inc.caltopo_map_id, 
+                  watchduty_map_id: inc.watchduty_map_id,
+                  coordinates: [inc.latitude, inc.longitude]
+                });
               }
             });
             setOptions(options)
@@ -113,7 +134,18 @@ function Incident() {
     </Row>
     <Col xs={{ span:5 }} className="border rounded border-light shadow-sm ml-auto mr-auto mb-auto" style={{minWidth:"572px"}}>
       <SimpleValue options={options}>
-        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." onChange={(instance) => setIncident({id:instance.value, slug:instance.slug, name:instance.name, description:instance.description, training:instance.training, default_followup_days:instance.default_followup_days, caltopo_map_id:instance.caltopo_map_id, watchduty_map_id: instance.watchduty_map_id})}
+        {simpleProps => <Select styles={customStyles} {...simpleProps} className="mt-3" placeholder="Select incident..." 
+          onChange={(instance) => setIncident({
+            id:instance.value, 
+            slug:instance.slug, 
+            name:instance.name, 
+            description:instance.description, 
+            training:instance.training, 
+            default_followup_days:instance.default_followup_days, 
+            caltopo_map_id:instance.caltopo_map_id, 
+            watchduty_map_id: instance.watchduty_map_id,
+            coordinates: instance.coordinates
+          })}
         getOptionLabel={(props) => {
           return (
             <div tw="flex items-center gap-2">
@@ -126,7 +158,7 @@ function Incident() {
         }}
                 />}
       </SimpleValue>
-      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.description, incident.training, incident.default_followup_days, incident.caltopo_map_id, incident.watchduty_map_id)} disabled={incident.id ? false : true} block>Select Incident</Button>
+      <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.description, incident.training, incident.default_followup_days, incident.caltopo_map_id, incident.watchduty_map_id, incident.coordinates)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?
         <Row>
           {state.user.is_superuser || state.user.incident_perms ? <Col style={{marginRight:"-23px"}}>
