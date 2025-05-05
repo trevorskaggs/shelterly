@@ -34,7 +34,9 @@ function Home({ incident }) {
         </iframe>
       </div>
       : ""}
-      <h4>Incident Description: {state.incident.description}</h4>
+      <div style={{whiteSpace:"pre-line"}}>
+        <h4>Incident Description:<br/>{state.incident.description}</h4>
+      </div>
     </span>
     </>
   );
