@@ -302,6 +302,63 @@ function UserManagement({ organization }) {
         </div>
       </Card>
     ))}
+    <br/>
+    <Row className="flex-nowrap">
+      <Col style={{minWidth:"150px", maxWidth:"150px", marginLeft:"0px"}}>
+          Admin Last Name
+      </Col>
+      <Col style={{minWidth:"150px", maxWidth:"150px", marginLeft:"1px"}}>
+          Admin First Name
+      </Col>
+      <Col style={{minWidth:"325px", maxWidth:"325px"}}>
+          Admin Email
+      </Col>
+      <Col style={{minWidth:"150px", maxWidth:"150px"}}>
+          Phone
+      </Col>
+      <Col style={{minWidth:"100px", maxWidth:"100px"}}>
+          Agency ID
+      </Col>
+      <Col style={{minWidth:"75px", maxWidth:"75px"}}>
+          Actions
+      </Col>
+      <Col style={{paddingRight:"0px", minWidth:"125px", maxWidth:"125px"}}>
+          Access Expires
+      </Col>
+      <Col style={{minWidth:"75px"}}>
+          Perms
+      </Col>
+    </Row>
+    {filteredData.users.filter(user => user.is_superuser).map(user => (
+      <Card key={user.id} className="rounded w-100 mb-1" style={{height:"32px"}}>
+        <div className="row no-gutters flex-nowrap">
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", borderTopLeftRadius:"0.25rem", borderBottomLeftRadius:"0.25rem", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
+            {user.last_name}
+          </Col>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
+            {user.first_name}
+          </Col>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"325px", maxWidth:"325px", backgroundColor:"#615e5e"}}>
+            {user.email}
+          </Col>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"150px", maxWidth:"150px", backgroundColor:"#615e5e"}}>
+            N/A
+          </Col>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"100px", maxWidth:"100px", backgroundColor:"#615e5e"}}>
+            ADMIN
+          </Col>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"75px", maxWidth:"75px", backgroundColor:"#615e5e"}}>
+            N/A
+          </Col>
+          <Col className="border-top border-left border-bottom" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"125px", maxWidth:"125px", backgroundColor:"#615e5e"}}>
+            N/A
+          </Col>
+          <Col className="border" style={{height:"32px", paddingLeft:"3px", paddingTop:"5px", marginTop: "-1px", fontSize:"13px", minWidth:"75px", borderTopRightRadius:"0.25rem", borderBottomRightRadius:"0.25rem", backgroundColor:"#615e5e"}}>
+            ADMIN
+          </Col>
+        </div>
+      </Card>
+    ))}
     </span> : ""}
     <Modal show={showUserConfirm} onHide={handleUserClose}>
       <Modal.Header closeButton>
