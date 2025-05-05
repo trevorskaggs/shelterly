@@ -320,7 +320,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                       <DateRangePicker
                         name={`dispatch_date`}
                         id={`dispatch_date`}
-                        placeholder={"Filter by Dispatch Date"}
+                        placeholder={"Filter by Scheduled Date"}
                         style={{height:"36px"}}
                         ref={dispatchDateRef}
                         data-enable-time={false}
@@ -387,7 +387,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                     <ListGroup.Item><b>Status: </b>{evacuation_assignment.end_time ? 'Closed' : evacuation_assignment.end_time === null && evacuation_assignment.team_member_names ? 'Active' : 'Preplanned'}</ListGroup.Item>
                     <ListGroup.Item><b>Opened: </b><Moment format="L">{evacuation_assignment.start_time}</Moment></ListGroup.Item>
                     {evacuation_assignment.dispatch_date ?
-                      <ListGroup.Item><b>Dispatched: </b><Moment format="L">{evacuation_assignment.dispatch_date}</Moment></ListGroup.Item>
+                      <ListGroup.Item><b>Scheduled: </b><Moment format="L">{evacuation_assignment.dispatch_date}</Moment></ListGroup.Item>
                     : ""}
                   </ListGroup>
                 </Scrollbar>

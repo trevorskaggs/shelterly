@@ -486,7 +486,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                   ))}
                   <ListGroup.Item className="ml-0 pl-0">
                     <DateTimePicker
-                      label="Dispatch Date"
+                      label="Scheduled Date"
                       name={"dispatch_date"}
                       id={"dispatch_date"}
                       xs="4"
