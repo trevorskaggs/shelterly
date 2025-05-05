@@ -198,6 +198,7 @@ const AddressForm = (props) => {
                   </div> : ""}
                 </Scrollbar>
               </Col>
+              {is_owner ? <>
               <h4 className="mt-3">Use Matching Owner</h4>
               <Col xs={9} className="border rounded" style={{marginLeft:"1px", height:existingOwners.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "59px" : "169px", overflowY:"auto", paddingRight:"-1px"}}>
                 <Scrollbar no_shadow="true" style={{height:existingOwners.filter(request => formikProps.values.address && request.address === formikProps.values.address && request.city === formikProps.values.city && request.state === formikProps.values.state).length === 0 ? "57px" : "167px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
@@ -229,6 +230,7 @@ const AddressForm = (props) => {
                   </div> : ""}
                 </Scrollbar>
               </Col>
+              </>: ""}
             </Card.Body>
             <ButtonGroup size="lg" >
               <ButtonSpinner isSubmitting={formikProps.isSubmitting} disabled={!formikProps.values.address} isSubmittingText="Loading..." type="button" className="btn btn-primary border" onClick={() => { formikProps.submitForm(); }}>
