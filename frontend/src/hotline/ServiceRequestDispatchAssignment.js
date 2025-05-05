@@ -394,7 +394,7 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
                 }}
               />
               <FontAwesomeIcon icon={faRectanglePortrait} className="icon-thin mr-1" color={mapState[dispatch_assignment.id].color} style={{marginLeft:"-9px", marginBottom:"-2px"}} />
-              <span>Dispatch Assignment</span>
+              <span>DA#{dispatch_assignment.id}</span>
               <OverlayTrigger
                 key={"assignment-summary"}
                 placement="top"
