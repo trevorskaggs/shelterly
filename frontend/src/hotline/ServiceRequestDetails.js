@@ -637,7 +637,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", marginLeft:"-15px"}}>
-                {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
+                {/* {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Active Dispatch Assignment:</b>
                     &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.dispatch_date}</Moment></Link>&nbsp;|&nbsp;
@@ -665,7 +665,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id_for_incident}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </ListGroup.Item>
-                ))}
+                ))} */}
                 {data.assigned_requests.filter(assigned_request => assigned_request.visit_note && assigned_request.visit_note.date_completed).map((assigned_request) => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Dispatch Assignment:</b>
@@ -716,7 +716,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     : ""}
                   </ListGroup.Item>
                 ))}
-                {data.assigned_requests.length < 1 ? <div className="mt-2 mb-1 ml-3">Service Request has not been visited yet.</div> : ""}
+                {data.assigned_requests.filter(assigned_request => assigned_request.visit_note && assigned_request.visit_note.date_completed).length < 1 ? <div className="mt-2 mb-1 ml-3">Service Request has not been visited yet.</div> : ""}
               </ListGroup>
             </Card.Body>
           </Card>

@@ -840,15 +840,6 @@ function Deploy({ incident, organization }) {
               </h5>
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
-              <FormCheck
-                id="hide_pending"
-                className="mt-3"
-                name="hide_pending"
-                type="switch"
-                label={`Hide Pending (${data.service_requests.filter(sr => sr.pending).length || 0}) `}
-                checked={statusOptions.hide_pending}
-                onChange={handlePendingOnly}
-              />
             </div>
           </Col>
           <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"277px", overflowY:"auto", paddingRight:"-1px"}}>

@@ -484,7 +484,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       {team_member.first_name + " " + team_member.last_name}{team_member.agency_id ? <span>&nbsp;({team_member.agency_id})</span> : ""}
                     </ListGroup.Item>
                   ))}
-                  <ListGroup.Item className="ml-0 pl-0">
+                  {/* <ListGroup.Item className="ml-0 pl-0">
                     <DateTimePicker
                       label="Scheduled Date"
                       name={"dispatch_date"}
@@ -498,7 +498,7 @@ function DispatchResolutionForm({ id, incident, organization }) {
                       disabled={false}
                       // value={props.values.sr_updates[index] ? props.values.sr_updates[index].date_completed : new Date()}
                     />
-                  </ListGroup.Item>
+                  </ListGroup.Item> */}
                 </ListGroup>
               </Card.Body>
             </Card>

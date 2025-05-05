@@ -370,9 +370,9 @@ function DispatchSummary({ id, incident, organization }) {
                         <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
                       </OverlayTrigger>
                     </Col>
-                    <Col>
+                    {/* <Col>
                       <b>Scheduled: </b>{<Moment format="MMM Do YYYY">{data.dispatch_date || new Date()}</Moment>}
-                    </Col>
+                    </Col> */}
                   </Row>
                 </ListGroup.Item>
                 {data.team_member_objects && data.team_member_objects.length > 0 && data.team_member_objects.map(team_member => (

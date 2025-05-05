@@ -439,11 +439,13 @@ const AnimalForm = (props) => {
                 resetForm({values:animal_json});
                 setRedirectCheck(true);
                 setIsButtonSubmitting(false);
+                setEditMode(false);
               }
               else if (formdata && Object.keys(formdata).length) {
                 resetForm({values:formdata});
                 setRedirectCheck(true);
                 setIsButtonSubmitting(false);
+                setEditMode(false);
               }
               // Otherwise reset form with blank data.
               else {
@@ -452,6 +454,7 @@ const AnimalForm = (props) => {
                 setSideImage([]);
                 setRedirectCheck(true);
                 setIsButtonSubmitting(false);
+                setEditMode(false);
               }
             }
             // If we're in intake, then create objects and navigate to shelter page.
@@ -601,7 +604,7 @@ const AnimalForm = (props) => {
             <Card.Header as="h5" className="pl-3">{id || owner_id || reporter_id || servicerequest_id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); setEditMode(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
               <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owners' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}
               {is_workflow && props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id ? <Checkbox

@@ -301,7 +301,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                       <DateRangePicker
                         name={`open_date`}
                         id={`open_date`}
-                        placeholder={"Filter by Open Date"}
+                        placeholder={"Filter by Opened Date"}
                         style={{height:"36px"}}
                         data-enable-time={false}
                         ref={openDateRef}
@@ -315,7 +315,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                       />
                     </Col>
                   </Row>
-                  <Row className="mt-3" style={{maxHeight:"37px"}}>
+                  {/* <Row className="mt-3" style={{maxHeight:"37px"}}>
                     <Col style={{marginLeft:"-15px", paddingRight:"0px", marginTop:"-2px"}}>
                       <DateRangePicker
                         name={`dispatch_date`}
@@ -333,7 +333,7 @@ function DispatchAssignmentSearch({ incident, organization }) {
                         }}
                       />
                     </Col>
-                  </Row>
+                  </Row> */}
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
                   <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : setTriggerRefresh(!triggerRefresh);}} disabled={isDisabled}>Apply</Button>
@@ -386,8 +386,8 @@ function DispatchAssignmentSearch({ incident, organization }) {
                   <ListGroup>
                     <ListGroup.Item><b>Status: </b>{evacuation_assignment.end_time ? 'Closed' : evacuation_assignment.end_time === null && evacuation_assignment.team_member_names ? 'Active' : 'Preplanned'}</ListGroup.Item>
                     <ListGroup.Item><b>Opened: </b><Moment format="L">{evacuation_assignment.start_time}</Moment></ListGroup.Item>
-                    {evacuation_assignment.dispatch_date ?
-                      <ListGroup.Item><b>Scheduled: </b><Moment format="L">{evacuation_assignment.dispatch_date}</Moment></ListGroup.Item>
+                    {evacuation_assignment.end_time ?
+                      <ListGroup.Item><b>Closed: </b><Moment format="L">{evacuation_assignment.end_time}</Moment></ListGroup.Item>
                     : ""}
                   </ListGroup>
                 </Scrollbar>
