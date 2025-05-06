@@ -43,6 +43,8 @@ const IncidentForm = ({ id, organization }) => {
     organization: state.organization.id
   });
 
+  const [newSlug, setNewSlug] = useState("");
+
   const [bounds, setBounds] = useState(L.latLngBounds([[0, 0]]));
   const [names, setNames] = useState([]);
 
@@ -63,6 +65,16 @@ const IncidentForm = ({ id, organization }) => {
         setShowSystemError(true);
       });
   };
+
+  const get_slug = (incident_name) => {
+    const new_slug = incident_name
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')  // Replace any group of non-alphanumerics with a single dash
+    .replace(/^-+|-+$/g, '');
+    setNewSlug(new_slug);
+    return new_slug;
+  }
 
   const updatePosition = (setFieldValue) => {
     const marker = markerRef.current;
@@ -161,7 +173,7 @@ const IncidentForm = ({ id, organization }) => {
           .test('required-check', 'Name already in use.',
             function(value) {
               // Check against slug for dupes.
-              if (value && data.name !== value && names.includes(value.trim().toLowerCase().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0])) {
+              if (value && data.name !== value && names.includes(get_slug(value))) {
                 return false;
               }
               return true;
@@ -176,7 +188,7 @@ const IncidentForm = ({ id, organization }) => {
         watchduty_map_id: Yup.string().nullable()
       })}
       onSubmit={(values, { setSubmitting }) => {
-        values['slug'] = values.name.trim().toLowerCase().replaceAll(' ','').match(/[a-zA-Z0-9-]+/g)[0];
+        values['slug'] = get_slug(values.name);
         if (id) {
           axios.put('/incident/api/incident/' + id + '/?organization=' + state.organization.id, values)
           .then(function () {
@@ -240,6 +252,9 @@ const IncidentForm = ({ id, organization }) => {
                   xs="12"
                 />
               </BootstrapForm.Row>
+              Slug: { newSlug ? newSlug : data.slug }
+              <br/>
+              <br/>
               <BootstrapForm.Row>
                 <TextInput
                   type="text"
