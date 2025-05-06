@@ -67,39 +67,51 @@ function Dispatch({ incident, organization }) {
     const fetchDispatchAssignments = async () => {
       setData({dispatch_assignments: [], isFetching: true, bounds:L.latLngBounds([[0,0]])});
       // Fetch open DA data.
-      axios.get('/evac/api/evacassignment/', {
-        params: {
-          status: 'open',
-          incident: incident,
-          organization: organization,
-          map: true
-        },
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          const map_dict = {};
-          const bounds = [];
-          response.data.forEach((dispatch_assignment, index) => {
-            let sr_dict = {}
-            for (const assigned_request of dispatch_assignment.assigned_requests) {
-              const matches = countDictMatches(assigned_request.animals);
-              sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
-              bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
-            }
-            map_dict[dispatch_assignment.id] = {service_requests:sr_dict}
+      let dispatch_assignments = [];
+      if (!unmounted) {
+        const map_dict = {};
+        const bounds = [];
+        let nextUrl = '/evac/api/evacassignment/?page=1&page_size=100';
+        do {
+          const response = await axios.get(nextUrl, {
+            params: {
+              status: 'open',
+              incident: incident,
+              organization: organization,
+              map: true
+            },
+            cancelToken: source.token,
+          })
+          .catch(error => {
+            setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+            setShowSystemError(true);
           });
-          setMapState(map_dict);
-          setData({dispatch_assignments: response.data.sort((a, b) => a.team_name.localeCompare(b.team_name)), isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
-          setInitialBounds(bounds);
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-          setShowSystemError(true);
-        }
-      });
+
+          if (response) {
+            response.data.results.forEach((dispatch_assignment, index) => {
+              let sr_dict = {}
+              for (const assigned_request of dispatch_assignment.assigned_requests) {
+                const matches = countDictMatches(assigned_request.animals);
+                sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
+                bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
+              }
+              map_dict[dispatch_assignment.id] = {service_requests:sr_dict}
+            });
+            dispatch_assignments.push(...response.data.results);
+            nextUrl = response.data.next;
+              if (nextUrl) {
+                nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
+              }
+          }
+          else {
+            nextUrl = null
+          }
+        } while(nextUrl != null)
+
+        setMapState(map_dict);
+        setData({dispatch_assignments: dispatch_assignments.sort((a, b) => a.team_name.localeCompare(b.team_name)), isFetching: false, bounds:bounds.length > 0 ? bounds : L.latLngBounds([[0,0]])});
+        setInitialBounds(bounds);
+      }
     };
 
     fetchDispatchAssignments();

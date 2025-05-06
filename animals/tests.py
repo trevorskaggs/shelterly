@@ -20,7 +20,7 @@ class TestViews(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.get('/animals/api/animal/')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()[0].get('name'), 'bella')
+        self.assertEqual(response.data['results'][0].get('name'), 'bella')
 
     def test_get_animal(self):
         self.client.force_authenticate(self.user)

@@ -21,6 +21,12 @@ from hotline.models import ServiceRequest, VisitNote
 from incident.models import Incident, Organization
 from people.models import OwnerContact, Person
 from shelter.models import Room, Shelter
+from rest_framework.pagination import PageNumberPagination
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 25
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class EvacTeamMemberViewSet(viewsets.ModelViewSet):
 
@@ -106,6 +112,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     serializer_class = EvacAssignmentSerializer
     deploy_serializer_class = DeployEvacAssignmentSerializer
     map_serializer_class = MapEvacAssignmentSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
         if self.request.query_params.get('deploy_map', False):
@@ -147,6 +154,9 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
 
+        if self.request.GET.get('show'):
+            queryset = queryset.filter(show=True)
+
         status = self.request.query_params.get('status', '')
         if status == "open":
             return queryset.filter(end_time__isnull=True).distinct()
@@ -156,6 +166,14 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             return queryset.filter(end_time__isnull=True).filter(team__team_members__isnull=True).distinct()
         elif status == "resolved":
             return queryset.filter(end_time__isnull=False).distinct()
+        if self.request.GET.get('open_start'):
+            queryset = queryset.filter(start_time__gte=self.request.GET.get('open_start'))
+        if self.request.GET.get('open_end'):
+            queryset = queryset.filter(start_time__lte=self.request.GET.get('open_end'))
+        if self.request.GET.get('dispatch_start'):
+            queryset = queryset.filter(dispatch_date__gte=self.request.GET.get('dispatch_start').split('T')[0])
+        if self.request.GET.get('dispatch_end'):
+            queryset = queryset.filter(dispatch_date__lte=self.request.GET.get('dispatch_end').split('T')[0])
 
         return queryset
 
@@ -227,7 +245,8 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             email_on_creation(evac_assignment)
             # Notify maps that there is updated data.
             channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
 
     def perform_update(self, serializer):
         if serializer.is_valid():
@@ -415,7 +434,7 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
                     # Update shelter, room, and intake_date info.
                     Animal.objects.filter(id=id).update(status=new_status, shelter=new_shelter, room=new_room, intake_date=intake_date, sip_date=sip_date, animal_count=animal_dict.get("animal_count", 1))
                     # Update animal found location with SR location if blank.
-                    if not animal.address:
+                    if 'SHELTER' in new_status and not animal.address:
                         Animal.objects.filter(id=id).update(address=sr.address, city=sr.city, state=sr.state, zip_code=sr.zip_code, latitude=sr.latitude, longitude=sr.longitude)
 
                 # Update the relevant SR fields.

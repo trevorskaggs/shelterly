@@ -283,86 +283,70 @@ function Deploy({ incident, organization }) {
       await axios.get('/evac/api/evacteammember/?incident=' + incident + '&organization=' + organization +'&training=' + state.incident.training, {
         cancelToken: source.token,
       })
-      .then(memberResponse => {
+      .then(async (memberResponse) => {
         if (!unmounted) {
           let options = [];
           let team_names = [];
-          // let team_name = '';
           memberResponse.data.filter(teammember => teammember.show === true).forEach(function(teammember) {
             options.push({id:[teammember.id], da_id:null, label:teammember.display_name, is_assigned:teammember.is_assigned})
           });
           setAssignedTeamMembers(memberResponse.data.filter(teammember => teammember.is_assigned === true).map(teammember => teammember.id))
           // Then fetch all recent Teams.
-          axios.get('/evac/api/evacassignment/', {
-            params: {
-              deploy_map: true,
-              status: 'active',
-              incident,
-              organization,
-            },
-            cancelToken: source.token,
-          })
-          .then(response => {
-            response.data
-              .filter(({ team_object }) => team_object.show === true) 
-              .forEach(function(da) {
-                // Only add to option list if team has members and team name isn't already in the list.
-                if (da.team_object.team_member_objects.length && !team_names.includes(da.team_object.name)) {
-                  options.unshift({id:da.team_object.team_members, da_id:da.id, label:"DA#" + da.id_for_incident + " (" + da.team_object.name + "): " + da.team_object.display_name, is_assigned:da.team_object.is_assigned});
-                  team_names.push(da.team_object.name);
-                }
-              });
-            // Provide a default "TeamN" team name that hasn't already be used.
-            // let i = 1;
-            // let name = preplan ? "Preplanned " : "Team "
-            // // Sort team_names to ensure we start with the lowest available number for default team name
-            // team_names = team_names.filter(n => n.startsWith(name)).sort((a, b) => {
-            //   let numA = parseInt(a.replace(/^\D+/g, ''), 10);
-            //   let numB = parseInt(b.replace(/^\D+/g, ''), 10);
-            //   return numA - numB;
-            // });
-            // // Find the lowest available number for the new team name
-            // while (team_names.includes(name + i)) {
-            //   i++;
-            // }
-            // team_name = name + i;
-            setTeamData({teams:response.data, members:memberResponse.data, options:options, isFetching:false});
-            // setTeamName(team_name);
-          })
-          .catch(error => {
-            if (!unmounted) {
-              setTeamData({teams:[], members:[], options:[], isFetching:false});
+          let dispatch_assignments = [];
+          let nextUrl = '/evac/api/evacassignment/?page=1&page_size=100';
+          do {
+            const response = await axios.get(nextUrl, {
+              params: {
+                deploy_map: true,
+                status: 'active',
+                incident,
+                organization,
+              },
+              cancelToken: source.token,
+            })
+            .catch(error => {
               setShowSystemError(true);
+            });
+
+            response.data.results.forEach(function(da) {
+              // Only add to option list if team has members and team name isn't already in the list.
+              if (da.team_object.team_member_objects.length && !team_names.includes(da.team_object.name)) {
+                options.unshift({id:da.team_object.team_members, da_id:da.id, label:"DA#" + da.id_for_incident + " (" + da.team_object.name + "): " + da.team_object.display_name, is_assigned:da.team_object.is_assigned});
+                team_names.push(da.team_object.name);
+              }
+            });
+            dispatch_assignments.push(...response.data.results);
+            nextUrl = response.data.next;
+            if (nextUrl) {
+              nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
             }
-          });
+          } while(nextUrl != null)
+          setTeamData({teams:dispatch_assignments, members:memberResponse.data, options:options, isFetching:false});
         }
       })
-      .catch(error => {
-        if (!unmounted) {
-          setTeamData({teams: [], members:[], options: [], isFetching: false});
-          setShowSystemError(true);
-        }
-      });
     };
 
     const fetchServiceRequests = async () => {
       setData({...data, isFetching: true});
-      // Fetch ServiceRequest data.
-      await axios.get('/hotline/api/servicerequests/?incident=' + incident + '&organization=' + organization, {
-        params: {
-          status: 'open',
-          when: 'today',
-          landingmap: true
-        },
-        cancelToken: source.token,
-      })
-      .then(response => {
-        if (!unmounted) {
-          setData(prevState => ({ ...prevState, service_requests: response.data, isFetching: false}));
-          const map_dict = {...mapState};
-          let bounds_copy = [...bounds];
+      let service_requests = [];
+      const map_dict = {...mapState};
+      let bounds_copy = [...bounds];
+      let nextUrl = '/hotline/api/servicerequests/?page=1&page_size=100&incident=' + incident + '&organization=' + organization;
+      if (!unmounted) {
+        do {
+          const response = await axios.get(nextUrl, {
+            params: {
+            status: 'open',
+            when: 'today',
+            landingmap: true
+          },
+            cancelToken: source.token,})
+          .catch(error => {
+            setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+            setShowSystemError(true);
+          });
           const current_ids = Object.keys(mapState);
-          for (const service_request of response.data) {
+          for (const service_request of response.data.results) {
             // Only add initial settings if we don't already have them.
             if (!current_ids.includes(String(service_request.id))) {
               if (Object.keys(mapState).length >= 1) {
@@ -379,40 +363,42 @@ function Deploy({ incident, organization }) {
               bounds_copy.push([service_request.latitude, service_request.longitude]);
             }
           }
-          setMapState(map_dict);
-          setBounds(bounds_copy);
-
-          var status_matches = {'ANIMALLESS':{}, 'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
-          var matches = {};
-          var total = 0;
-          // Recount the total state tracker for selected SRs on refresh.
-          Object.keys(map_dict).filter(key => map_dict[key].checked === true && response.data.map(sr => sr.id).includes(Number(key))).forEach(id => {
-            for (var select_status in map_dict[id].status_matches) {
-              matches = {...status_matches[select_status]};
-              for (var select_key in map_dict[id].status_matches[select_status]){
-                if (!status_matches[select_status][select_key]) {
-                  total = map_dict[id].status_matches[select_status][select_key];
-                } else {
-                  total = status_matches[select_status][select_key] += map_dict[id].status_matches[select_status][select_key];
-                }
-                matches[select_key] = total;
-              }
-              status_matches[select_status] = matches;
-            }
-          })
-          setTotalSelectedState(status_matches);
-
-          if (bounds_copy.length > 0) {
-            setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds_copy) }));
+          service_requests.push(...response.data.results);
+          nextUrl = response.data.next;
+          if (nextUrl) {
+            nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
           }
+        } while(nextUrl != null)
+
+        setData(prevState => ({ ...prevState, service_requests: service_requests, isFetching: false}));
+        setMapState(map_dict);
+        setBounds(bounds_copy);
+
+        var status_matches = {'ANIMALLESS':{}, 'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}};
+        var matches = {};
+        var total = 0;
+        // Recount the total state tracker for selected SRs on refresh.
+        Object.keys(map_dict).filter(key => map_dict[key].checked === true && service_requests.map(sr => sr.id).includes(Number(key))).forEach(id => {
+          for (var select_status in map_dict[id].status_matches) {
+            matches = {...status_matches[select_status]};
+            for (var select_key in map_dict[id].status_matches[select_status]){
+              if (!status_matches[select_status][select_key]) {
+                total = map_dict[id].status_matches[select_status][select_key];
+              } else {
+                total = status_matches[select_status][select_key] += map_dict[id].status_matches[select_status][select_key];
+              }
+              matches[select_key] = total;
+            }
+            status_matches[select_status] = matches;
+          }
+        })
+        setTotalSelectedState(status_matches);
+
+        if (bounds_copy.length > 0) {
+          setData(prevState => ({ ...prevState, "bounds":L.latLngBounds(bounds_copy) }));
         }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-          setShowSystemError(true);
-        }
-      });
+      }
+      // })
     };
 
     // Only fetch team member data first time.
@@ -854,15 +840,6 @@ function Deploy({ incident, organization }) {
               </h5>
               <hr/>
               <FormCheck id="aco_required" name="aco_required" type="switch" label="ACO Required" checked={statusOptions.aco_required} onChange={handleACO} />
-              <FormCheck
-                id="hide_pending"
-                className="mt-3"
-                name="hide_pending"
-                type="switch"
-                label={`Hide Pending (${data.service_requests.filter(sr => sr.pending).length || 0}) `}
-                checked={statusOptions.hide_pending}
-                onChange={handlePendingOnly}
-              />
             </div>
           </Col>
           <Col xs={10} className="border rounded" style={{marginLeft:"1px", height:"277px", overflowY:"auto", paddingRight:"-1px"}}>

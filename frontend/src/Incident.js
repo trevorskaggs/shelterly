@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import Select from 'react-select';
+import Select, { createFilter } from 'react-select';
 import { useCookies } from 'react-cookie';
 import SimpleValue from 'react-select-simple-value';
 import { Button, Col, Row } from 'react-bootstrap';
@@ -58,6 +58,11 @@ function Incident() {
     }),
   };
 
+  // Custom filter option to provide a searchable string to filter on.
+  const filterOption = (option, inputValue) => {
+    return (option.data.slug + ' ' + moment(option.data.start_time).format('MM/DD/YYYY') + (option.data.end_time ? ' - ' + moment(option.data.end_time).format('MM/DD/YYYY') : '')).toLocaleLowerCase().includes(inputValue.toLocaleLowerCase());
+  };
+
   // Handle opening and closing an incident.
   const handleOpenCloseSubmit = async () => {
     await axios.patch('/incident/api/incident/' + incident.id + '/?organization=' + state.organization.id, {change_lock:true})
@@ -92,7 +97,7 @@ function Incident() {
               if (!inc.end_time || state.user.is_superuser || state.user.incident_perms) {
                 options.push({
                   value: inc.id, 
-                  label: inc.name + ' (' + moment(inc.start_time).format('MM/DD/YYYY') + (inc.end_time ? ' - ' + moment(inc.end_time).format('MM/DD/YYYY') : '') + ')', 
+                  label: inc.name + ' (' + moment(inc.start_time).format('MM/DD/YYYY') + (inc.end_time ? ' - ' + moment(inc.end_time).format('MM/DD/YYYY') : '') + ')',
                   slug:inc.slug, 
                   name:inc.name, 
                   description:inc.description, 
@@ -146,17 +151,18 @@ function Incident() {
             watchduty_map_id: instance.watchduty_map_id,
             coordinates: instance.coordinates
           })}
-        getOptionLabel={(props) => {
-          return (
-            <div tw="flex items-center gap-2">
-              {props.training ? <FontAwesomeIcon icon={faCircleT} className="mr-1" /> : ""}
-              {props.caltopo_map_id ? <FontAwesomeIcon icon={faCircleC} className="mr-1" /> : ""}
-              {props.watchduty_map_id ? <FontAwesomeIcon icon={faCircleW} className="mr-1" /> : ""}
-              <span>{props.label}</span>
-            </div>
-          );
-        }}
-                />}
+          getOptionLabel={(props) => {
+            return (
+              <div tw="flex items-center gap-2">
+                {props.training ? <FontAwesomeIcon icon={faCircleT} className="mr-1" /> : ""}
+                {props.caltopo_map_id ? <FontAwesomeIcon icon={faCircleC} className="mr-1" /> : ""}
+                {props.watchduty_map_id ? <FontAwesomeIcon icon={faCircleW} className="mr-1" /> : ""}
+                <span>{props.label}</span>
+              </div>
+            );
+          }}
+          filterOption={filterOption}
+        />}
       </SimpleValue>
       <Button size="lg" className="btn-primary mt-3" onClick={() => handleSubmit(incident.id, incident.name, incident.description, incident.training, incident.default_followup_days, incident.caltopo_map_id, incident.watchduty_map_id, incident.coordinates)} disabled={incident.id ? false : true} block>Select Incident</Button>
       {state.user.is_superuser || state.user.incident_perms ?

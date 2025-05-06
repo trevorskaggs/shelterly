@@ -7,11 +7,13 @@ const ActionsDropdown = ({
   id = 'actions-dropdown',
   size = 'sm',
   title = 'Actions',
-  variant = 'dark'
+  variant = 'dark',
+  search = false,
+  disabled = false
 }) => {
   return (
-    <Dropdown size={size} className={className} alignRight={true} style={{paddingTop:"5px"}}>
-      <Dropdown.Toggle variant={variant} id={id}>
+    <Dropdown size={size} alignRight={true} className={className} style={{paddingTop: search ? "" : "5px", height: search ? '36px' : '39px'}}>
+      <Dropdown.Toggle className={search ? 'border rounded ' : ''} variant={search ? '' : variant} id={id} disabled={disabled}>
         {title}
       </Dropdown.Toggle>
       <Dropdown.Menu>

@@ -28,7 +28,8 @@ import { AuthContext } from "../accounts/AccountsReducer";
 import { SystemErrorContext } from '../components/SystemError';
 import ButtonSpinner from '../components/ButtonSpinner';
 import ShelterlyPrintifyButton from '../components/ShelterlyPrintifyButton';
-
+import LoadingLink from "../components/LoadingLink";
+import ActionsDropdown from '../components/ActionsDropdown';
 import '../assets/styles.css';
 
 const NoOptionsMessage = props => {
@@ -61,23 +62,22 @@ function AnimalSearch({ incident, organization }) {
   ];
 
   const radiusChoices = [
-    { value: 1.60934, label: '1 Mile' },
-    { value: 3.21869, label: '2 Miles' },
-    { value: 8.04672, label: '5 Miles' },
+    { value: 1, label: '1 Mile' },
+    { value: 2, label: '2 Miles' },
+    { value: 5, label: '5 Miles' },
   ];
 
-  const [data, setData] = useState({animals: [], isFetching: false});
+  const [data, setData] = useState({animals: [], total_count: 0, isFetching: false});
   const [shelters, setShelters] = useState({options: [], isFetching: false});
   const [speciesChoices, setSpeciesChoices] = useState([]);
-  const [animals, setAnimals] = useState([]);
-  const [options, setOptions] = useState({id:null, species:'', status:null, sex:null, owned:null, pcolor:'', fixed:null, latlng:null, radius:1.60934, shelter:''});
+  const [options, setOptions] = useState({id:null, species:'', status:null, sex:null, owned:null, pcolor:'', fixed:null, latlng:null, radius:1, shelter:''});
   const [searchTerm, setSearchTerm] = useState(search);
   const [showFilters, setShowFilters] = useState(false);
   const [isDisabled, setIsDisabled] = useState(true);
   const [goToID, setGoToID] = useState('');
   const [triggerRefresh, setTriggerRefresh] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const tempSearchTerm = useRef(null);
-  const idSearchRef = useRef(null);
   const speciesRef = useRef(null);
   const statusRef = useRef(null);
   const sexRef = useRef(null);
@@ -125,11 +125,11 @@ function AnimalSearch({ incident, organization }) {
     setGoToID(event.target.value);
   };
 
-  // Use searchTerm to filter service_requests.
+  // Use searchTerm to filter animals.
   const handleSubmit = async event => {
     event.preventDefault();
     setSearchTerm(tempSearchTerm.current.value);
-    setTriggerRefresh(!triggerRefresh);
+    // setTriggerRefresh(!triggerRefresh);
     setPage(1);
   };
 
@@ -140,21 +140,6 @@ function AnimalSearch({ incident, organization }) {
     }, 1000);
   };
 
-  const handleApplyFilters = (animals) => {
-    setAnimals(animals.filter(animal => options.id ? Number(animal.id_for_incident) === Number(options.id) : animal)
-                      .filter(animal => options.species ? animal.species_string.toLowerCase() === options.species.toLowerCase() : animal)
-                      .filter(animal => options.status ? animal.status === options.status : animal)
-                      .filter(animal => options.owned === 'yes' ? animal.owners.length > 0 : animal)
-                      .filter(animal => options.owned === 'no' ? animal.owners.length === 0 : animal)
-                      .filter(animal => options.fixed ? animal.fixed === options.fixed : animal)
-                      .filter(animal => options.sex === 'unknown' ? animal.sex === '' : options.sex ? animal.sex === options.sex : animal)
-                      .filter(animal => options.pcolor ? animal.pcolor === options.pcolor || animal.scolor === options.pcolor : animal)
-                      .filter(animal => options.latlng ? arePointsNear({lat:animal.latitude, lng: animal.longitude}, options.latlng) : animal)
-                      .filter(animal => options.shelter ? animal.shelter === options.shelter : animal)
-                      .map((animal) => (animal.id))
-    )
-  }
-
   const handleClear = () => {
     speciesRef.current.select.clearValue();
     statusRef.current.select.clearValue();
@@ -163,9 +148,8 @@ function AnimalSearch({ incident, organization }) {
     fixedRef.current.select.clearValue();
     pcolorRef.current.select.clearValue();
     shelterRef.current.select.clearValue();
-    // idSearchRef.current.value = '';
-    setOptions({id:null, species:'', status:null, sex:null, owned:null, pcolor:'', fixed:null, latlng:null, radius:1.60934});
-    setAnimals(data.animals.map((animal) => (animal.id)));
+    setOptions({id:null, species:'', status:null, sex:null, owned:null, pcolor:'', fixed:null, latlng:null, radius:1});
+    setTriggerRefresh(!triggerRefresh);
   };
 
   function buildAnimalUrl(animal) {
@@ -178,16 +162,44 @@ function AnimalSearch({ incident, organization }) {
     printAnimalCareSchedule(animal);
   }
 
-  const handlePrintAllClick = (e) => {
-    e.preventDefault();
+  const handlePrintAllClick = async () => {
+    setIsLoading(true);
+
+    let animals = [];
+    let nextUrl = '/animals/api/animal/?page=1&search=' + searchTerm +'&incident=' + incident + '&organization=' + organization
+    do {
+      const response = await axios.get(nextUrl, {
+        params: {
+          status: options.status,
+          species: options.species,
+          sex: options.sex,
+          owned: options.owned,
+          pcolor: options.pcolor,
+          scolor: options.scolor,
+          shelter: options.shelter,
+          latlng: options.latlng,
+          radius: options.radius,
+        },
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+
+      animals.push(...response.data.results);
+      nextUrl = response.data.next;
+      if (nextUrl) {
+        nextUrl = '/animals/' + response.data.next.split('/animals/')[1];
+      }
+    } while(nextUrl != null)
 
     handleSubmitting()
-      .then(() => data.animals.filter(animal => animals.includes(animal.id)).map((animal) => ({
+      .then(() => animals.map((animal) => ({
         ...animal,
         url: buildAnimalUrl(animal)
       })))
       .then((supplementedAnimals) => printAllAnimalCareSchedules(supplementedAnimals))
-      .then(submittingComplete);
+      .then(submittingComplete)
+      .finally(() => setIsLoading(false));
   }
 
   function setFocus(pageNum) {
@@ -202,14 +214,6 @@ function AnimalSearch({ incident, organization }) {
 
   const clearMarker = () => {
     setOptions({...options, latlng: null})
-  };
-
-  function arePointsNear(checkPoint, centerPoint) {
-    var ky = 40000 / 360;
-    var kx = Math.cos(Math.PI * centerPoint.lat / 180.0) * ky;
-    var dx = Math.abs(centerPoint.lng - checkPoint.lng) * kx;
-    var dy = Math.abs(centerPoint.lat - checkPoint.lat) * ky;
-    return Math.sqrt(dx * dx + dy * dy) <= options.radius;
   };
 
   const customStyles = {
@@ -273,51 +277,6 @@ function AnimalSearch({ incident, organization }) {
     };
     fetchSpecies();
 
-    const fetchAnimals = async () => {
-      setNumPages(0);
-      setData({animals: [], isFetching: true});
-      // Fetch ServiceRequest data.
-      await axios.get('/animals/api/animal/?search=' + searchTerm +'&incident=' + incident + '&organization=' + organization, {
-        cancelToken: source.token,
-      })
-      .then(async (response) => {
-        if (!unmounted) {
-          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
-          setData({animals: response.data, isFetching: false});
-
-          // highlight search terms
-          markInstances(searchTerm);
-
-          let bounds_array = [];
-          setAnimals(response.data.map((animal) => (animal.id)));
-          handleApplyFilters(response.data);
-          for (const animal of response.data) {
-            if (animal.latitude && animal.longitude) {
-              bounds_array.push([animal.latitude, animal.longitude]);
-            }
-
-            // lazy load animal front_image
-            const lazyAnimalImage = findLazyAnimalImage(animal.id);
-            if (lazyAnimalImage?.image) {
-              animal.lazyImage = lazyAnimalImage.image
-            } else if (animal.front_image) {
-              const imgData = await promiseImage(animal.front_image);
-              animal.lazyImage = imgData;
-              addLazyAnimalImage(animal.id, imgData);
-            }
-          }
-          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setData({animals: [], isFetching: false});
-          setShowSystemError(true);
-        }
-      });
-    };
-    fetchAnimals();
-
     const fetchShelters = () => {
       setShelters({options: [], isFetching: true});
       // Fetch Shelter data.
@@ -347,18 +306,81 @@ function AnimalSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [incident, searchTerm]);
+  }, []);
+
+  // Hook for initializing data.
+  useEffect(() => {
+    let unmounted = false;
+    let source = axios.CancelToken.source();
+
+    const fetchAnimals = async () => {
+      setNumPages(0);
+      setData({animals: [], total_count: 0, isFetching: true});
+      // Fetch ServiceRequest data.
+      await axios.get('/animals/api/animal/?page=' + page + '&search=' + searchTerm +'&incident=' + incident + '&organization=' + organization, {
+        cancelToken: source.token,
+        params: {
+          status: options.status,
+          species: options.species,
+          sex: options.sex,
+          owned: options.owned,
+          pcolor: options.pcolor,
+          scolor: options.scolor,
+          shelter: options.shelter,
+          latlng: options.latlng,
+          radius: options.radius,
+        },
+      })
+      .then(async (response) => {
+        if (!unmounted) {
+          setNumPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
+          setData({animals: response.data.results, total_count: response.data.count, isFetching: false});
+
+          // highlight search terms
+          markInstances(searchTerm);
+
+          let bounds_array = [];
+          if (options.latlng) {
+            bounds_array.push([options.latlng['Lat'], options.latlng['Lng']]);
+          }
+          for (const animal of response.data.results) {
+            if (!options.latlng && animal.latitude && animal.longitude) {
+              bounds_array.push([animal.latitude, animal.longitude]);
+            }
+
+            // lazy load animal front_image
+            const lazyAnimalImage = findLazyAnimalImage(animal.id);
+            if (lazyAnimalImage?.image) {
+              animal.lazyImage = lazyAnimalImage.image
+            } else if (animal.front_image) {
+              const imgData = await promiseImage(animal.front_image);
+              animal.lazyImage = imgData;
+              addLazyAnimalImage(animal.id, imgData);
+            }
+          }
+          setBounds(bounds_array.length > 0 ? L.latLngBounds(bounds_array) : L.latLngBounds([[0,0]]));
+        }
+      })
+      .catch(error => {
+        if (!unmounted) {
+          setData({animals: [], total_count: 0, isFetching: false});
+          setShowSystemError(true);
+        }
+      });
+    };
+    fetchAnimals();
+
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
+  }, [incident, searchTerm, triggerRefresh, page]);
 
   // Hook handling option changes.
   useEffect(() => {
-    const handleDisabled = () => {
-      setIsDisabled(!(options.id || options.species || options.status || options.sex || options.owned || options.pcolor || options.fixed || options.latlng || options.shelter));
-    };
-
-    setNumPages(Math.ceil(animals.length / ITEMS_PER_PAGE));
-    setPage(1);
-    handleDisabled();
-  }, [options, animals.length]);
+    setIsDisabled(!(options.id || options.species || options.status || options.sex || options.owned || options.pcolor || options.fixed || options.latlng || options.shelter));
+  }, [options]);
 
   return (
     <div className="ml-2 mr-2">
@@ -375,7 +397,7 @@ function AnimalSearch({ incident, organization }) {
                 onChange={handleIDChange}
               />
               <InputGroup.Append>
-                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/animals/" + goToID)}}>Go</Button>
+                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0", color:"white"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/animals/" + goToID)}}>Go</Button>
               </InputGroup.Append>
             </InputGroup>
           </Col>
@@ -394,7 +416,7 @@ function AnimalSearch({ incident, organization }) {
                 }}
               />
               <InputGroup.Append>
-                <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+                <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0", color:"white"}}>Search
                   <OverlayTrigger
                     key={"search-information"}
                     placement="top"
@@ -404,21 +426,42 @@ function AnimalSearch({ incident, organization }) {
                       </Tooltip>
                     }
                   >
-                    <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                    <FontAwesomeIcon icon={faInfoCircle} className="ml-1 fa-move-up" size="sm" inverse />
                   </OverlayTrigger>
                 </Button>
               </InputGroup.Append>
-              <Button variant="outline-light" className="ml-1" onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-              <ButtonSpinner
-                variant="outline-light"
-                className="ml-1 print-all-btn-icon"
-                onClick={handlePrintAllClick}
-                isSubmitting={isSubmitting}
-                isSubmittingText={submittingLabel}
-              >
-                Print All ({`${animals.length}`})
-                <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-              </ButtonSpinner>
+              <Button variant="outline-light" className="ml-1 mr-1" style={{color:"white"}} onClick={handleShowFilters}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} className="fa-move-up" size="sm" />}</Button>
+              {isLoading ? (
+                <div className="d-flex" style={{width:"148px", justifyContent:"center"}}>
+                <Spinner
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '2rem',
+                      width: '2rem',
+                      marginBottom: '0.25rem'
+                    }
+                  }}
+                />
+                </div>
+              ) : (
+              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.animals.length === 0}>
+                <ShelterlyPrintifyButton
+                  id="animal-details-animal-care-schedule"
+                  spinnerSize={2.0}
+                  tooltipPlacement='right'
+                  tooltipText='Animal data as a PDF'
+                  printFunc={(event) => handlePrintAllClick(event)}
+                  disabled={data.isFetching}
+                  noOverlay={true}
+                />
+              </ActionsDropdown>
+            )}
             </InputGroup>
           </Col>
         </Row>
@@ -552,7 +595,7 @@ function AnimalSearch({ incident, organization }) {
                             </div>
                           </MapTooltip>
                         </Marker>
-                        <Circle center={options.latlng} color={'#ff4c4c'} radius={options.radius * 1000} interactive={false} />
+                        <Circle center={options.latlng} color={'#ff4c4c'} radius={(options.radius * 1609.34)/2} interactive={false} />
                         </span>
                         : ""}
                       </Map>
@@ -579,7 +622,7 @@ function AnimalSearch({ incident, organization }) {
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : handleApplyFilters(data.animals);}} disabled={isDisabled}>Apply</Button>
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : setTriggerRefresh(!triggerRefresh);}} disabled={isDisabled}>Apply</Button>
                   <Button variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
@@ -588,10 +631,8 @@ function AnimalSearch({ incident, organization }) {
           </div>
         </Collapse>
       </Form>
-      {data.animals.filter(animal => animals.includes(animal.id)).map((animal, index) => (
-        <span key={animal.id}>
-        {page === Math.ceil((index+1)/ITEMS_PER_PAGE) ?
-        <div className="mt-3">
+      {data.animals.map((animal, index) => (
+        <div key={animal.id} className="mt-3 border rounded">
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
               <OverlayTrigger
@@ -606,17 +647,18 @@ function AnimalSearch({ incident, organization }) {
                 <Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident}><FontAwesomeIcon icon={faDotCircle} className="mr-2" inverse /></Link>
               </OverlayTrigger>
               A#{animal.id_for_incident} - {animal.animal_count > 1 ? <span>{animal.animal_count} {titleCase(animal.species_string)}{(animal.animal_count) !== 1 && !["sheep", "cattle"].includes(animal.species_string) ? "s" : ""}</span> : <span>{animal.name ? titleCase(animal.name) : "Unknown"}</span>}
-
-              <ShelterlyPrintifyButton
-                id="animal-search-animal-schedules"
-                spinnerSize={1.5}
-                tooltipPlacement='top'
-                tooltipText='Print Animal Care Schedule'
-                printFunc={() => handleDownloadPdfClick(animal.id)}
-              />
+              <div className="float-right d-flex" style={{marginRight:"-5px"}}>
+                <ShelterlyPrintifyButton
+                  id="animal-search-animal-schedules"
+                  spinnerSize={1.5}
+                  tooltipPlacement='top'
+                  tooltipText='Print Animal Care Schedule'
+                  printFunc={() => handleDownloadPdfClick(animal.id)}
+                />
+              </div>
             </h4>
           </div>
-          <CardGroup>
+          <CardGroup style={{marginBottom:"-6px"}}>
             <Card style={{maxWidth:"206px", maxHeight:"206px"}}>
               <Card.Body className="p-0 m-0 d-flex justify-content-center align-items-center">
                 {animal.front_image && !animal.lazyImage
@@ -640,19 +682,6 @@ function AnimalSearch({ incident, organization }) {
             <Card style={{marginBottom:"6px", maxWidth:"335px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px"}}>Information
-                  {animal.color_notes ?
-                    <OverlayTrigger
-                      key={"animal-color-notes"}
-                      placement="top"
-                      overlay={
-                        <Tooltip id={`tooltip-animal-color-notes`}>
-                          {animal.color_notes}
-                        </Tooltip>
-                      }
-                    >
-                      <FontAwesomeIcon icon={faClipboardList} className="ml-1" size="sm" inverse />
-                    </OverlayTrigger>
-                  : ""}
                   {animal.owners.length < 1 ?
                     <OverlayTrigger
                       key={"stray"}
@@ -869,10 +898,9 @@ function AnimalSearch({ incident, organization }) {
               </Card.Body>
             </Card>
           </CardGroup>
-        </div> : ""}
-        </span>
+        </div>
       ))}
-      <p style={{marginTop:"15px"}}>{data.isFetching ? 'Fetching Animals...' : <span>{animals.length === 0 ? 'No animals found.' : ''}</span>}</p>
+      <p style={{marginTop:"15px"}}>{data.isFetching ? 'Fetching Animals...' : <span>{data.animals.length === 0 ? 'No animals found.' : ''}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

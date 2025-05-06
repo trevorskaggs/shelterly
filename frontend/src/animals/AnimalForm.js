@@ -6,7 +6,7 @@ import Select from 'react-select';
 import { ButtonGroup, Card, Col, Image, Form as BootstrapForm } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Switch } from 'formik-material-ui';
-import { AddressSearch, DateTimePicker, DropDown, FileUploader, ImageUploader, TextInput } from '../components/Form.js';
+import { AddressSearch, Checkbox, DateTimePicker, DropDown, FileUploader, ImageUploader, TextInput } from '../components/Form.js';
 import { catAgeChoices, dogAgeChoices, horseAgeChoices, otherAgeChoices, catColorChoices, dogColorChoices, horseColorChoices, otherColorChoices, sexChoices, dogSizeChoices, catSizeChoices, horseSizeChoices, otherSizeChoices, reportedStatusChoices, statusChoicesNFA, unknownChoices, otherAgeChoice } from './constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft, faMinusSquare, faTimes } from '@fortawesome/free-solid-svg-icons';
@@ -88,6 +88,8 @@ const AnimalForm = (props) => {
 
   // Dynamic placeholder value for options.
   const [placeholder, setPlaceholder] = useState("Select a species...");
+
+  const [editMode, setEditMode] = useState(false);
 
   const initialData = {
     new_owner: owner_id,
@@ -437,11 +439,13 @@ const AnimalForm = (props) => {
                 resetForm({values:animal_json});
                 setRedirectCheck(true);
                 setIsButtonSubmitting(false);
+                setEditMode(false);
               }
               else if (formdata && Object.keys(formdata).length) {
                 resetForm({values:formdata});
                 setRedirectCheck(true);
                 setIsButtonSubmitting(false);
+                setEditMode(false);
               }
               // Otherwise reset form with blank data.
               else {
@@ -450,6 +454,7 @@ const AnimalForm = (props) => {
                 setSideImage([]);
                 setRedirectCheck(true);
                 setIsButtonSubmitting(false);
+                setEditMode(false);
               }
             }
             // If we're in intake, then create objects and navigate to shelter page.
@@ -599,9 +604,24 @@ const AnimalForm = (props) => {
             <Card.Header as="h5" className="pl-3">{id || owner_id || reporter_id || servicerequest_id ?
               <span style={{cursor:'pointer'}} onClick={() => window.history.back()} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
+              <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); setEditMode(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
-              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owners' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}</Card.Header>
+              <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owners' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}
+              {is_workflow && props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id ? <Checkbox
+                id={'edit-mode'}
+                name={'edit-mode'}
+                front_label={"Edit Mode"}
+                className={"float-right"}
+                checked={editMode}
+                style={{
+                  transform: "scale(1.25)",
+                  marginRight: "-5px",
+                  marginTop: "-5px",
+                  marginBottom: "-5px"
+                }}
+                onChange={() => setEditMode(!editMode)}
+              /> : ""}
+            </Card.Header>
             <Card.Body>
             <BootstrapForm as={Form}>
                 <BootstrapForm.Row>
@@ -611,6 +631,7 @@ const AnimalForm = (props) => {
                     type="text"
                     label="Animal Name"
                     xs="4"
+                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                   />
                   <Col xs="4" style={{textTransform:'capitalize'}}>
                     <DropDown
@@ -632,6 +653,7 @@ const AnimalForm = (props) => {
                         formikProps.setFieldValue("species", instance ? instance.value : '');
                         formikProps.setFieldValue("species_string", instance ? instance.label : '');
                       }}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                   <Col xs="4">
@@ -646,6 +668,7 @@ const AnimalForm = (props) => {
                       options={Object.keys(sizeChoices).includes(formikProps.values.species_string) ? sizeChoices[formikProps.values.species_string] : sizeChoices['other']}
                       value={formikProps.values.size||''}
                       placeholder={placeholder}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                 </BootstrapForm.Row>
@@ -662,6 +685,7 @@ const AnimalForm = (props) => {
                       options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
                       value={formikProps.values.pcolor||''}
                       placeholder={placeholder}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                     <DropDown
                       label="Secondary Color"
@@ -674,6 +698,7 @@ const AnimalForm = (props) => {
                       options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
                       value={formikProps.values.scolor||''}
                       placeholder={placeholder}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                   <TextInput
@@ -683,6 +708,7 @@ const AnimalForm = (props) => {
                     rows={5}
                     label="Breed / Description"
                     xs="8"
+                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mb-3">
@@ -694,7 +720,7 @@ const AnimalForm = (props) => {
                         type="text"
                         key={`my_unique_requested_service_select_key__${formikProps.values.status}`}
                         options={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) ? reportedStatusChoices : statusChoicesNFA}
-                        disabled={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) && !data.active_dispatch ? false : true}
+                        disabled={(props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode) || (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) && !data.active_dispatch ? false : true)}
                         value={formikProps.values.status||''}
                         isClearable={false}
                     />
@@ -709,6 +735,7 @@ const AnimalForm = (props) => {
                       ref={sexRef}
                       options={sexChoices}
                       value={formikProps.values.sex||''}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                   <Col xs="3">
@@ -721,6 +748,7 @@ const AnimalForm = (props) => {
                       handleValueChange={(value) => formikProps.setFieldValue('age', value)}
                       optionsKey={formikProps.values.species_string || ''}
                       formValidationName="age"
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                   <Col xs="3">
@@ -732,6 +760,7 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.fixed||'unknown'}
                       isClearable={false}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                 </BootstrapForm.Row>
@@ -749,6 +778,7 @@ const AnimalForm = (props) => {
                         formikProps.setFieldValue("aggressive", instance === null ? '' : instance.value);
                         formikProps.setFieldValue("aco_required", instance && instance.value === 'yes' ? 'yes' : formikProps.values.aco_required);
                       }}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                   <Col xs="3">
@@ -760,6 +790,7 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.aco_required||'unknown'}
                       isClearable={false}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                   <Col xs="3" hidden={is_intake}>
@@ -771,6 +802,7 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.confined||'unknown'}
                       isClearable={false}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                   <Col xs="3">
@@ -782,6 +814,7 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.injured||'unknown'}
                       isClearable={false}
+                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                     />
                   </Col>
                 </BootstrapForm.Row>
@@ -793,6 +826,7 @@ const AnimalForm = (props) => {
                     as="textarea"
                     rows={5}
                     xs="12"
+                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
@@ -803,6 +837,7 @@ const AnimalForm = (props) => {
                     as="textarea"
                     rows={5}
                     xs="12"
+                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                   />
                 </BootstrapForm.Row>
                 {is_intake ? <BootstrapForm.Row>
@@ -886,16 +921,17 @@ const AnimalForm = (props) => {
                     }}
                     value={formikProps.values.last_seen||null}
                     hidden={is_intake}
-                    disabled={false}
+                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                   />
                 </BootstrapForm.Row>
-                <BootstrapForm.Row className="mt-3" hidden={is_intake || id ? false : true}>
+                <BootstrapForm.Row className="mt-3">
                   <TextInput
                     id="microchip"
                     name="microchip"
                     type="text"
                     label="Microchip Number"
                     xs="6"
+                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
@@ -905,7 +941,7 @@ const AnimalForm = (props) => {
                     type="text"
                     xs="2"
                     label="No. of Animals"
-                    disabled={data instanceof FormData ? data.get('medical_record') : data.medical_record ? true : false}
+                    disabled={(props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode) || (data instanceof FormData ? data.get('medical_record') : data.medical_record ? true : false)}
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}

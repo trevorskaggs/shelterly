@@ -77,7 +77,7 @@ class UserViewSet(CreateUserMixin, viewsets.ModelViewSet):
             queryset = queryset.exclude(organizations=self.request.GET.get('exclude_organization'))
 
         if self.request.GET.get('vet') == 'true':
-            queryset = queryset.filter(perms__organization=self.request.GET.get('organization'), perms__vet_perms=True)
+            queryset = queryset.exclude(is_superuser=True).filter(perms__organization=self.request.GET.get('organization'), perms__vet_perms=True)
     
         return queryset
 

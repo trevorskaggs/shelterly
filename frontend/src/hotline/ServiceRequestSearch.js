@@ -1,17 +1,17 @@
 import React, { useContext, useEffect, useState, useRef } from 'react';
 import axios from "axios";
 import { Link, navigate, useQueryParams } from 'raviger';
-import { Button, ButtonGroup, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap';
+import { Button, Card, CardGroup, Col, Collapse, Form, FormControl, InputGroup, ListGroup, OverlayTrigger, Pagination, Row, Spinner, Tooltip } from 'react-bootstrap';
 import moment from 'moment';
-import Select, { components } from 'react-select';
+import Select from 'react-select';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faBan, faCar, faChevronDown, faChevronUp, faDownload, faUpload, faEquals, faClipboardList, faEnvelope, faInfoCircle, faKey, faTrailer, faPrint
+  faBan, faCar, faChevronDown, faChevronUp, faDownload, faUpload, faEquals, faEnvelope, faInfoCircle, faKey, faTrailer, faPrint
 } from '@fortawesome/free-solid-svg-icons';
 import {
   faDotCircle
 } from '@fortawesome/free-regular-svg-icons';
-import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faHammerCrash, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
+import { faChevronDoubleDown, faChevronDoubleUp, faCommentSmile, faPhoneRotary } from '@fortawesome/pro-solid-svg-icons';
 import Moment from 'react-moment';
 import { DATE_FORMAT } from '../constants';
 import { AuthContext } from "../accounts/AccountsReducer";
@@ -20,11 +20,11 @@ import Header from '../components/Header';
 import Scrollbar from '../components/Scrollbars';
 import { ITEMS_PER_PAGE } from '../constants';
 import { SystemErrorContext } from '../components/SystemError';
-import ButtonSpinner from '../components/ButtonSpinner';
 import { DateRangePicker } from '../components/Form';
 import { printAllServiceRequests } from './Utils';
 import { titleCase } from '../components/Utils';
-import { DownloadButton } from '../components/DownloadButton';
+import LoadingLink from "../components/LoadingLink";
+import ActionsDropdown from '../components/ActionsDropdown';
 
 function ServiceRequestSearch({ incident, organization }) {
 
@@ -59,12 +59,12 @@ function ServiceRequestSearch({ incident, organization }) {
     }),
   };
 
-  const [data, setData] = useState({service_requests: [], isFetching: false});
+  const [data, setData] = useState({service_requests: [], total_count:0, isFetching: false});
   const [searchState, setSearchState] = useState({});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [searchTerm, setSearchTerm] = useState(search);
+  const [isLoading, setIsLoading] = useState(false);
   const tempSearchTerm = useRef(null);
-  const idSearchRef = useRef(null);
   const priorityRef = useRef(null);
   const statusRef = useRef(null);
   const openStartRef = useRef(null);
@@ -82,7 +82,6 @@ function ServiceRequestSearch({ incident, organization }) {
     submittingComplete,
     submittingLabel
   } = useSubmitting();
-  const [filteredServiceRequests, setFilteredServiceRequests] = useState(data.service_requests.map((request) => (request.id)));
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -100,12 +99,37 @@ function ServiceRequestSearch({ incident, organization }) {
     setPage(1);
   }
 
-  const handlePrintAllClick = (e) => {
+  const handlePrintAllClick = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    // Fetch all service_requests data.
+    let service_requests = [];
+    let nextUrl = '/hotline/api/servicerequests/?page=1&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization;
+    do {
+      const response = await axios.get(nextUrl, {
+        params: {
+          status: options.status,
+          priority: options.priority,
+          open_start: options.open_start,
+          open_end: options.open_end,
+        },
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+
+      service_requests.push(...response.data.results);
+      nextUrl = response.data.next;
+      if (nextUrl) {
+        nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+      }
+    } while(nextUrl != null)
 
     handleSubmitting()
-      .then(() => printAllServiceRequests(data.service_requests.filter(request => (filteredServiceRequests.includes(request.id)))))
-      .then(submittingComplete);
+      .then(() => printAllServiceRequests(service_requests))
+      .then(submittingComplete)
+      .finally(() => setIsLoading(false));
   }
 
   function setFocus(pageNum) {
@@ -116,17 +140,42 @@ function ServiceRequestSearch({ incident, organization }) {
 
   const handleGeoJsonDownload = (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     handleSubmitting()
     .then(() => downloadGeoJson()
       )
     .then(submittingComplete)
+    .finally(() => setIsLoading(false));
   }
 
-  const downloadGeoJson= () => {
+  const downloadGeoJson = async () => {
+
+    // Fetch all service_requests data.
+    let service_requests = [];
+    let nextUrl = '/hotline/api/servicerequests/?page=1&search=' + searchTerm + '&light=true&incident=' + incident + '&organization=' + organization;
+    do {
+      const response = await axios.get(nextUrl, {
+        params: {
+          status: options.status,
+          priority: options.priority,
+          open_start: options.open_start,
+          open_end: options.open_end,
+        },
+      })
+      .catch(error => {
+        setShowSystemError(true);
+      });
+
+      service_requests.push(...response.data.results);
+      nextUrl = response.data.next;
+      if (nextUrl) {
+        nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+      }
+    } while(nextUrl != null)
+
     var params = '';
-    filteredServiceRequests.forEach(id => params = params + "id=" + id + "&")
-    // params.append("foo", 5);
+    service_requests.forEach(sr => params = params + "id=" + sr.id + "&")
     var fileDownload = require('js-file-download');
     axios.get('/hotline/api/servicerequests/download_all/', { 
             params: {
@@ -149,7 +198,7 @@ function ServiceRequestSearch({ incident, organization }) {
 
   async function pushData(){
     var params = '';
-    filteredServiceRequests.forEach(id => params = params + "id=" + id + "&")
+    data.service_requests.forEach(sr => params = params + "id=" + sr.id + "&")
     const response = await axios.get('/hotline/api/servicerequests/push_all/', { 
             params: {
               ids: params
@@ -159,36 +208,19 @@ function ServiceRequestSearch({ incident, organization }) {
     })
   }
 
-  // Hook handling option changes.
-  useEffect(() => {
-    const handleDisabled = () => {
-      setIsDisabled(!(options.id || options.priority || options.status || options.open_start || options.open_end));
-    };
-
-    setNumPages(Math.ceil(filteredServiceRequests.length / ITEMS_PER_PAGE));
-    setPage(1);
-    handleDisabled();
-  }, [options, filteredServiceRequests.length]);
-
-  const handleApplyFilters = (service_requests) => {
-    setFilteredServiceRequests(service_requests.filter(service_request => options.id ? Number(service_request.id_for_incident) === Number(options.id) : service_request)
-                      .filter(service_request => options.priority ? service_request.priority === options.priority : service_request)
-                      .filter(service_request => options.status ? service_request.status === options.status : service_request)
-                      .filter(service_request => options.open_start ? moment(options.open_start) <= moment(service_request.timestamp) : service_request)
-                      .filter(service_request => options.open_end ? moment(options.open_end) >= moment(service_request.timestamp) : service_request)
-                      .map((service_request) => (service_request.id))
-    )
-  }
-
   const handleClear = () => {
     priorityRef.current.select.clearValue();
     statusRef.current.select.clearValue();
     openStartRef.current.flatpickr.clear();
     openEndRef.current.flatpickr.clear();
-    // idSearchRef.current.value = '';
     setOptions({id:null, priority:null, status:null, open_start:null, open_end:null});
-    setFilteredServiceRequests(data.service_requests.map((service_request) => (service_request.id)));
+    setTriggerRefresh(!triggerRefresh);
   };
+
+  // Hook handling option changes.
+  useEffect(() => {
+    setIsDisabled(!(options.id || options.priority || options.status || options.open_start || options.open_end));
+  }, [options]);
 
   // Hook for initializing data.
   useEffect(() => {
@@ -196,17 +228,23 @@ function ServiceRequestSearch({ incident, organization }) {
     let source = axios.CancelToken.source();
 
     const fetchServiceRequests = () => {
-      setData({service_requests: [], isFetching: true});
+      setData({service_requests: [], total_count: 0, isFetching: true});
       // Fetch ServiceRequest data.
-      axios.get('/hotline/api/servicerequests/?search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
+      axios.get('/hotline/api/servicerequests/?page=' + page + '&search=' + searchTerm + '&incident=' + incident + '&organization=' + organization, {
         cancelToken: source.token,
+        params: {
+          status: options.status,
+          priority: options.priority,
+          open_start: options.open_start,
+          open_end: options.open_end,
+        },
       })
       .then(response => {
         if (!unmounted) {
-          setNumPages(Math.ceil(response.data.length / ITEMS_PER_PAGE));
-          setData({service_requests: response.data, isFetching: false});
+          setNumPages(Math.ceil(response.data.count / ITEMS_PER_PAGE));
+
           let search_state = {};
-					response.data.forEach(service_request => {
+					response.data.results.forEach(service_request => {
 						let species = [];
 						service_request.animals.forEach(animal => {
 							if (!species.includes(animal.species_string)) {
@@ -218,18 +256,16 @@ function ServiceRequestSearch({ incident, organization }) {
             });
 						search_state[service_request.id] = {species:species, selectedSpecies:species[0]};
 					});
+          setData({service_requests: response.data.results, total_count: response.data.count, isFetching: false});
 					setSearchState(search_state);
 
           // highlight search terms
           markInstances(searchTerm);
-
-          setFilteredServiceRequests(response.data.map((request) => (request.id)));
-          handleApplyFilters(response.data);
         }
       })
       .catch(error => {
         if (!unmounted) {
-          setData({service_requests: [], isFetching: false});
+          setData({service_requests: [], total_count:0, isFetching: false});
           setShowSystemError(true);
         }
       });
@@ -242,7 +278,7 @@ function ServiceRequestSearch({ incident, organization }) {
       unmounted = true;
       source.cancel();
     };
-  }, [searchTerm, incident]);
+  }, [searchTerm, incident, triggerRefresh, page]);
 
   return (
     <div className="ml-2 mr-2">
@@ -257,14 +293,9 @@ function ServiceRequestSearch({ incident, organization }) {
                 placeholder="ID #"
                 name="searchIDTerm"
                 onChange={handleIDChange}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSubmit(e);
-                  }
-                }}
               />
               <InputGroup.Append>
-                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/hotline/servicerequest/" + goToID)}}>Go</Button>
+                <Button variant="outline-light" type="submit" disabled={!goToID} style={{borderRadius:"0 5px 5px 0", color:"white"}} onClick={(e) => {navigate("/" + organization + "/" + incident + "/hotline/servicerequest/" + goToID)}}>Go</Button>
               </InputGroup.Append>
             </InputGroup>
           </Col>
@@ -275,10 +306,15 @@ function ServiceRequestSearch({ incident, organization }) {
               placeholder="Search"
               name="searchTerm"
               onChange={handleChange}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSubmit(e);
+                }
+              }}
               ref={tempSearchTerm}
             />
             <InputGroup.Append>
-              <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0"}}>Search
+              <Button variant="outline-light" type="submit" style={{borderRadius:"0 5px 5px 0", height:"36px", color:"white"}}>Search
                 <OverlayTrigger
                   key={"search-information"}
                   placement="top"
@@ -288,31 +324,41 @@ function ServiceRequestSearch({ incident, organization }) {
                     </Tooltip>
                   }
                 >
-                  <FontAwesomeIcon icon={faInfoCircle} className="ml-1" size="sm" inverse />
+                  <FontAwesomeIcon icon={faInfoCircle} className="ml-1 fa-move-up" size="sm" inverse />
                 </OverlayTrigger>
               </Button>
             </InputGroup.Append>
-            <Button variant="outline-light" className="ml-1" onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
-            <ButtonSpinner
-              variant="outline-light"
-              className="ml-1 mr-1 print-all-btn-icon"
-              onClick={handlePrintAllClick}
-              isSubmitting={isSubmittingById()}
-              isSubmittingText={submittingLabel}
-            >
-              Print All ({`${filteredServiceRequests.length}`})
-              <FontAwesomeIcon icon={faPrint} className="ml-2 text-light" inverse />
-            </ButtonSpinner>
-            <ButtonSpinner
-              variant="outline-light"
-              className="ml-1 mr-1 print-all-btn-icon"
-              onClick={handleGeoJsonDownload}
-              isSubmitting={isSubmittingById()}
-              isSubmittingText={submittingLabel}
-            >
-              Download All ({`${filteredServiceRequests.length}`})
-              <FontAwesomeIcon icon={faDownload} className="ml-2 text-light" inverse />
-            </ButtonSpinner>
+            <Button variant="outline-light" className="ml-1 mr-1" style={{height:"36px", color:"white"}} onClick={() => {setShowFilters(!showFilters)}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} className="fa-move-up" size="sm" />}</Button>
+            {isLoading ? (
+              <div className="d-flex" style={{width:"148px", justifyContent:"center"}}>
+                <Spinner
+                  {...{
+                    as: 'span',
+                    animation: 'border',
+                    size: undefined,
+                    role: 'status',
+                    'aria-hidden': 'true',
+                    variant: 'light',
+                    style: {
+                      height: '2rem',
+                      width: '2rem',
+                      marginBottom: '0.25rem'
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <ActionsDropdown alignRight={true} variant="dark" title={"Download All" + " (" + `${data.total_count}` + ")"} search={true} disabled={data.isFetching || data.service_requests.length === 0}>
+                <LoadingLink onClick={handlePrintAllClick} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
+                  <FontAwesomeIcon icon={faPrint} className="mr-1"  inverse />
+                  Service Requests as a PDF
+                </LoadingLink>
+                <LoadingLink onClick={handleGeoJsonDownload} isLoading={data.isFetching} className="text-white d-block py-1 px-3">
+                  <FontAwesomeIcon icon={faDownload} className="mr-1"  inverse />
+                  Service Requests as GeoJSON
+                </LoadingLink>
+              </ActionsDropdown>
+            )}
           </InputGroup>
           </Col>
         </Row>
@@ -368,8 +414,6 @@ function ServiceRequestSearch({ incident, organization }) {
                         ref={openStartRef}
                         onChange={(dateRange) => {
                           setOptions({...options, open_start: dateRange.length ? dateRange[0] : null})
-                          // setStartDate(dateRange.length ? dateRange[0] : null)
-                          setTriggerRefresh(!triggerRefresh)
                         }}
                       />
                     </Col>
@@ -388,16 +432,14 @@ function ServiceRequestSearch({ incident, organization }) {
                         style={{height:"36px"}}
                         ref={openEndRef}
                         onChange={(dateRange) => {
-                          // setEndDate(dateRange.length ? dateRange[0] : null)
                           setOptions({...options, open_end: dateRange.length ? dateRange[0] : null})
-                          setTriggerRefresh(!triggerRefresh)
                         }}
                       />
                     </Col>
                   </Row>
                 </Col>
                 <Col className="flex-grow-1 pl-0" xs="3">
-                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : handleApplyFilters(data.service_requests);}} disabled={isDisabled}>Apply</Button>
+                  <Button className="btn btn-primary" style={{maxHeight:"35px", width:"100%"}} onClick={() => {tempSearchTerm.current.value !== searchTerm ? setSearchTerm(tempSearchTerm.current.value) : setTriggerRefresh(!triggerRefresh);}} disabled={isDisabled}>Apply</Button>
                   <Button className="mb-3" variant="outline-light" style={{maxHeight:"35px", width:"100%", marginTop:"15px"}} onClick={handleClear}>Clear</Button>
                 </Col>
               </Row>
@@ -406,8 +448,9 @@ function ServiceRequestSearch({ incident, organization }) {
           </div>
         </Collapse>
       </Form>
-      {data.service_requests.filter(request => filteredServiceRequests.includes(request.id)).map((service_request, index) => (
-        <div key={service_request.id} className="mt-3" hidden={page !== Math.ceil((index+1)/ITEMS_PER_PAGE)}>
+      {/* here */}
+      {data.service_requests.map((service_request, index) => (
+        <div key={service_request.id} className="mt-3 border rounded">
           <div className="card-header">
             <h4 style={{marginBottom:"-2px",  marginLeft:"-12px"}}>
               <OverlayTrigger
@@ -423,10 +466,9 @@ function ServiceRequestSearch({ incident, organization }) {
               </OverlayTrigger>
               SR#{service_request.id_for_incident}
               &nbsp;-&nbsp;{service_request.full_address}
-              &nbsp;| <span style={{textTransform:"capitalize"}}>{service_request.status}</span>
             </h4>
           </div>
-          <CardGroup>
+          <CardGroup style={{marginBottom:"-6px"}}>
             <Card style={{marginBottom:"6px"}}>
               <Card.Body>
                 <Card.Title style={{marginTop:"-9px", marginBottom:"8px", marginLeft:"0px"}} className="row">
@@ -591,32 +633,11 @@ function ServiceRequestSearch({ incident, organization }) {
                 </Card.Title>
                 <Scrollbar style={{height:"144px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
                   <ListGroup>
-                    <ListGroup.Item>
-                      <b>Opened: </b><Moment format="LLL">{service_request.timestamp}</Moment>
-                    {/* {service_request.evacuation_assignments.filter(da => da.start_time === service_request.evacuation_assignments.map(da => da.start_time).sort().reverse()[0]).map(dispatch_assignment =>
-                      <span key={dispatch_assignment.id}>
-                        <b>Dispatch Assignment: </b>
-                        <Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + dispatch_assignment.id} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="L">{dispatch_assignment.start_time}</Moment></Link>&nbsp;
-                        |&nbsp;{dispatch_assignment.team_name}
-                        <OverlayTrigger
-                          key={"team-names"}
-                          placement="top"
-                          overlay={
-                            <Tooltip id={`tooltip-team-names`}>
-                              {dispatch_assignment.team_member_names}
-                            </Tooltip>
-                          }
-                        >
-                          <FontAwesomeIcon icon={faUsers} className="ml-1 fa-move-down" />
-                        </OverlayTrigger>
-                      </span>
-                    )}
-                    {service_request.evacuation_assignments.length === 0 ?
-                      <span>
-                        <b>Dispatch Assignment: </b>
-                        Never Serviced
-                      </span>
-                    : ""} */}
+                    <ListGroup.Item style={{textTransform:"capitalize"}}>
+                      <Row>
+                        <Col xs="4"><b>Status: </b>{service_request.status}</Col>
+                        <Col xs="8" className="text-right"><b>Opened: </b><Moment format="LLL">{service_request.timestamp}</Moment></Col>
+                     </Row>
                     </ListGroup.Item>
                     {service_request.owner_objects.map(owner => (
                       <ListGroup.Item key={owner.id}>
@@ -672,19 +693,6 @@ function ServiceRequestSearch({ incident, organization }) {
                       {service_request.animals.filter(animal => animal.species_string === searchState[service_request.id].selectedSpecies).map((animal, i) => (
                         <ListGroup.Item key={animal.id}>
                           <b><Link href={"/" + organization + "/" + incident + "/animals/" + animal.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}>A#{animal.id_for_incident}</Link>:</b>&nbsp;&nbsp;{Number(animal.animal_count) === 1 ? <span>{animal.name || "Unknown"}</span> : <span>{animal.animal_count} {titleCase(animal.species_string)}{["cattle", "sheep"].includes(animal.species_string) ? "" : "s"}</span>}
-                          {animal.color_notes ?
-                          <OverlayTrigger
-                            key={"animal-color-notes"}
-                            placement="top"
-                            overlay={
-                              <Tooltip id={`tooltip-animal-color-notes`}>
-                                {animal.color_notes}
-                              </Tooltip>
-                            }
-                          >
-                            <FontAwesomeIcon icon={faClipboardList} style={{marginLeft:"3px"}} size="sm" inverse />
-                          </OverlayTrigger>
-                          : ""}
                           &nbsp;- {animal.status}
                         </ListGroup.Item>
                       ))}
@@ -697,7 +705,7 @@ function ServiceRequestSearch({ incident, organization }) {
           </CardGroup>
         </div>
       ))}
-      <p className="mt-3">{data.isFetching ? 'Fetching service requests...' : <span>{filteredServiceRequests && filteredServiceRequests.length ? '' : 'No Service Requests found.'}</span>}</p>
+      <p className="mt-3">{data.isFetching ? 'Fetching service requests...' : <span>{data.service_requests.length ? '' : 'No service requests found.'}</span>}</p>
       <Pagination className="custom-page-links" size="lg" onClick={(e) => {setFocus(parseInt(e.target.innerText));setPage(parseInt(e.target.innerText))}}>
         {[...Array(numPages).keys()].map(x =>
         <Pagination.Item key={x+1} active={x+1 === page}>

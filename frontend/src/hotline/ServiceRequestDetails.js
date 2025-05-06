@@ -97,7 +97,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const handleClose = () => setShow(false);
   const [showModal, setShowModal] = useState(false);
   const [showTransfer, setShowTransfer] = useState(false);
-  const handleCloseTransfer = () => setShowTransfer(false);
+  const handleCloseTransfer = () => {setShowTransfer(false);setIsLoading(false);};
   const [transferData, setTransferData] = useState({'new_request_id':null, 'new_request_id_for_incident': null, 'animal_ids':[]});
   const [showNoteModal, setShowNoteModal] = useState(false);
   const handleCloseNoteModal = () => {setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});setShowNoteModal(false);};
@@ -209,34 +209,60 @@ function ServiceRequestDetails({ id, incident, organization }) {
     };
     fetchServiceRequestData();
 
-    const fetchExistingSRData = async () => {
-      // Fetch all owners data.
-      await axios.get('/hotline/api/servicerequests/?light=true&incident=' + incident + '&organization=' + organization, {
-        cancelToken: source.token,
-      })
-      .then(existingSRResponse => {
-        if (!unmounted) {
-          let options = [];
-          existingSRResponse.data.filter(request => request.id_for_incident !== Number(id)).forEach(request => {
-            options.push({id: request.id, id_for_incident: request.id_for_incident, label: 'SR#' + request.id_for_incident + ': ' + request.full_address})
-          })
-          setExistingSRs({data:existingSRResponse.data, options:options, fetching:false});
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShowSystemError(true);
-        }
-      });
-    }
-    fetchExistingSRData();
-
     // Cleanup.
     return () => {
       unmounted = true;
       source.cancel();
     };
   }, [id]);
+
+  // Hook for initializing data.
+  useEffect(() => {
+    let unmounted = false;
+    let source = axios.CancelToken.source();
+    
+
+    const fetchExistingSRData = async () => {
+      setIsLoading(true);
+      // Fetch all owners data.
+      let service_requests = [];
+      if (!unmounted) {
+        let options = [];
+        let nextUrl = '/hotline/api/servicerequests/?light=true&incident=' + incident + '&organization=' + organization;
+        do {
+          const response = await axios.get(nextUrl, {
+            cancelToken: source.token,
+          })
+          .catch(error => {
+            setShowSystemError(true);
+            setIsLoading(false);
+          });
+
+          response.data.results.filter(request => request.status !== 'canceled' && request.id_for_incident !== Number(id)).forEach(request => {
+            options.push({id: request.id, id_for_incident: request.id_for_incident, label: 'SR#' + request.id_for_incident + ': ' + request.full_address})
+          })
+
+          service_requests.push(...response.data.results);
+          nextUrl = response.data.next;
+          if (nextUrl) {
+            nextUrl = '/hotline/' + response.data.next.split('/hotline/')[1];
+          }
+        } while(nextUrl != null)
+
+        setExistingSRs({data:service_requests, options:options, fetching:false});
+        setIsLoading(false);
+      }
+    }
+    if (showTransfer) {
+      fetchExistingSRData();
+    }
+
+    // Cleanup.
+    return () => {
+      unmounted = true;
+      source.cancel();
+    };
+  }, [showTransfer]);
 
   return (
     <>
@@ -611,7 +637,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
               </Card.Title>
               <hr/>
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", marginLeft:"-15px"}}>
-                {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
+                {/* {data.assigned_requests.filter(assigned_request => !assigned_request.dispatch_assignment.end_time).map(assigned_request => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Active Dispatch Assignment:</b>
                     &nbsp;<Link href={"/" + organization + "/" + incident + "/dispatch/summary/" + assigned_request.dispatch_assignment.id_for_incident} className="text-link" style={{textDecoration:"none", color:"white"}}><Moment format="LL">{assigned_request.dispatch_assignment.dispatch_date}</Moment></Link>&nbsp;|&nbsp;
@@ -639,7 +665,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                       <Link href={"/" + organization + "/" + incident + "/dispatch/resolution/" + assigned_request.dispatch_assignment.id_for_incident}><FontAwesomeIcon icon={faClipboardCheck} className="ml-1" inverse /></Link>
                     </OverlayTrigger>
                   </ListGroup.Item>
-                ))}
+                ))} */}
                 {data.assigned_requests.filter(assigned_request => assigned_request.visit_note && assigned_request.visit_note.date_completed).map((assigned_request) => (
                   <ListGroup.Item key={assigned_request.id}>
                     <b>Dispatch Assignment:</b>
@@ -690,7 +716,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
                     : ""}
                   </ListGroup.Item>
                 ))}
-                {data.assigned_requests.length < 1 ? <div className="mt-2 mb-1 ml-3">Service Request has not been visited yet.</div> : ""}
+                {data.assigned_requests.filter(assigned_request => assigned_request.visit_note && assigned_request.visit_note.date_completed).length < 1 ? <div className="mt-2 mb-1 ml-3">Service Request has not been visited yet.</div> : ""}
               </ListGroup>
             </Card.Body>
           </Card>

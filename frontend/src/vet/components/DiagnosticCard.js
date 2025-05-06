@@ -100,7 +100,7 @@ function DiagnosticCard(props) {
               }
               <Col className="hover-div pl-0 pr-0">
                 <div className="border treatment-hover-div" style={{paddingTop:"5px", paddingBottom:"7px", paddingLeft:"5px", marginLeft:"-1px", marginTop: "-1px", fontSize:"18px", width:"100%", backgroundColor:"rgb(158 153 153)"}}>
-                  <span style={{marginLeft:"5px"}}>{props.diagnostic.other_name ? props.diagnostic.other_name : props.diagnostic.name}</span>
+                  <span style={{marginLeft:"9px"}}>{props.diagnostic.other_name ? props.diagnostic.other_name : props.diagnostic.name}</span>
                   <span className="float-right">
                   {props.diagnostic.result ?
                     <OverlayTrigger
@@ -129,7 +129,7 @@ function DiagnosticCard(props) {
                     }
                   </span>
                 </div>
-                {props.animal_object ? <Row style={{marginTop:"6px", paddingLeft:"10px"}}>
+                {props.animal_object ? <Row className="mt-1 pl-0 pr-0 ml-0 mr-0">
                   <Col xs={3}>
                     <b>Patient: </b>A#{props.animal_object.id_for_incident}
                   </Col>
@@ -140,7 +140,7 @@ function DiagnosticCard(props) {
                     <b>Name: </b>{props.animal_object.name || "Unknown"}
                   </Col>
                 </Row> : ""}
-                <Row style={{marginTop:props.animal_object ? "" : "6px", paddingLeft:"10px"}}>
+                <Row className="pl-0 pr-0 ml-0 mr-0">
                   {props.diagnostic.complete ?
                   <Col xs={3}>
                     <b>Completed: </b><Moment format="MMM DD, HH:mm">{props.diagnostic.complete}</Moment>
@@ -154,7 +154,7 @@ function DiagnosticCard(props) {
                     <b>Result: </b>{props.diagnostic.result || 'Pending'}
                   </Col>
                 </Row>
-                <Row style={{paddingLeft:"10px"}}>
+                <Row className="pl-0 pr-0 ml-0 mr-0">
                   <Col>
                     <b>Notes: </b>{props.diagnostic.notes || "N/A"}
                   </Col>

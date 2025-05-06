@@ -255,7 +255,7 @@ function AnimalStatus(props) {
             props.formikProps.setFieldValue(`sr_updates.${props.index}.animals.${props.inception}.presenting_complaints`, instance === null ? [] : values);
           }}
         />
-        {props.formikProps.errors['sr_updates'] && props.formikProps.errors['sr_updates'][props.index] && props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints}</div> : ""}
+        {props.formikProps.errors['sr_updates'] && props.formikProps.errors['sr_updates'][props.index] && props.formikProps.errors['sr_updates'][props.index].animals[props.inception] && props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints ? <div style={{ color: "#e74c3c", marginTop: ".5rem", fontSize: "80%" }}>{props.formikProps.errors['sr_updates'][props.index].animals[props.inception].presenting_complaints}</div> : ""}
       </Col>
     </BootstrapForm.Row>: ""}
     {props.presentingComplaintChoices.length && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints && props.formikProps.values.sr_updates[props.index].animals[props.inception].presenting_complaints.includes(props.presentingComplaintChoices.filter(option => option.label === 'Other')[0].value) ?
@@ -319,11 +319,13 @@ function ShelterIntake({ id, incident, organization }) {
     let source = axios.CancelToken.source();
 
     const fetchShelter = async () => {
-      // Fetch current ServiceRequest data.
+      // Fetch current shelter data.
       await axios.get('/shelter/api/shelter/' + id + '/?incident=' + incident, {
         cancelToken: source.token,
       })
-      .then(currentResponse => {
+      .then(async (currentResponse) => {
+        let dispatch_assignments = [];
+        let da_options = [];
         if (!unmounted) {
           let room_options = {};
           let shelter_options = [{value: currentResponse.data.id, label: currentResponse.data.name}];
@@ -335,46 +337,49 @@ function ShelterIntake({ id, incident, organization }) {
             });
           });
           // Fetch active DA data.
-          axios.get('/evac/api/evacassignment/?incident=' + incident, {
-            params: {
-              status: 'active',
-              map: true,
-              organization
-            },
-            cancelToken: source.token,
-          })
-          .then(response => {
-            if (!unmounted) {
-              let da_options = [];
-              response.data.forEach((da, index) => {
-                da_options.push({value: da.id, label: "DA#" + da.id_for_incident + " | " + da.team_name + ": " + da.team_member_names});
-                response.data[index]["sr_updates"] = [];
-                da.assigned_requests.forEach((assigned_request, inception) => {
-                  response.data[index].sr_updates.push({
-                    id: assigned_request.service_request_object.id,
-                    animals: Object.keys(assigned_request.animals).map(animal_id => {return {
-                      ...assigned_request.animals[animal_id],
-                      id:animal_id,
-                      id_for_incident:assigned_request.animals[animal_id].id_for_incident,
-                      request:assigned_request.service_request_object.id,
-                      shelter:assigned_request.animals[animal_id].shelter || null,
-                      room:assigned_request.animals[animal_id].room || null,
-                      priority:'green',
-                      presenting_complaints:[],
-                    }}),
-                  });
-                });
-              });
-              setData(prevState => ({ ...prevState, shelter_name: currentResponse.data.name, dispatch_assignments: response.data, sr_updates: [], isFetching: false}));
-              setOptions({shelter_options:shelter_options, room_options: room_options, da_options:da_options, fetching:false});
-            }
-          })
-          .catch(error => {
-            if (!unmounted) {
+          let nextUrl = '/evac/api/evacassignment/?page=1&page_size=100';
+          do {
+            const response = await axios.get(nextUrl, {
+              params: {
+                status: 'active',
+                map: true,
+                organization
+              },
+              cancelToken: source.token,
+            })
+            .catch(error => {
               setData(prevState => ({ ...prevState, shelter_name: '', dispatch_assignments: [], sr_updates: [], isFetching: false}));
               setShowSystemError(true);
+            });
+
+            response.data.results.forEach((da, index) => {
+              da_options.push({value: da.id, label: "DA#" + da.id_for_incident + " | " + da.team_name + ": " + da.team_member_names});
+              response.data.results[index]["sr_updates"] = [];
+              da.assigned_requests.forEach((assigned_request, inception) => {
+                response.data.results[index].sr_updates.push({
+                  id: assigned_request.service_request_object.id,
+                  animals: Object.keys(assigned_request.animals).map(animal_id => {return {
+                    ...assigned_request.animals[animal_id],
+                    id:animal_id,
+                    id_for_incident:assigned_request.animals[animal_id].id_for_incident,
+                    request:assigned_request.service_request_object.id,
+                    shelter:assigned_request.animals[animal_id].shelter || null,
+                    room:assigned_request.animals[animal_id].room || null,
+                    priority:'green',
+                    presenting_complaints:[],
+                  }}),
+                });
+              });
+            });
+            dispatch_assignments.push(...response.data.results);
+            nextUrl = response.data.next;
+            if (nextUrl) {
+              nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
             }
-          });
+          } while(nextUrl != null)
+
+          setData(prevState => ({ ...prevState, shelter_name: currentResponse.data.name, dispatch_assignments: dispatch_assignments, sr_updates: [], isFetching: false}));
+          setOptions({shelter_options:shelter_options, room_options: room_options, da_options:da_options, fetching:false});
         }
       })
     };

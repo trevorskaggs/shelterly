@@ -19,8 +19,29 @@ from hotline.models import ServiceRequest, ServiceRequestImage, ServiceRequestNo
 from incident.models import Incident
 from evac.models import AssignedRequest
 
-from rest_framework import filters, permissions, serializers, viewsets
+from rest_framework import filters, permissions, response, serializers, viewsets
 from rest_framework.decorators import action as drf_action
+from rest_framework.pagination import PageNumberPagination
+
+class ListModelMixin(object):
+    """
+    List a queryset.
+    """
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 25
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = ServiceRequest.objects.all()
@@ -32,6 +53,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     light_serializer_class = BarebonesServiceRequestSerializer
     detail_serializer_class = ServiceRequestSerializer
     map_serializer_class = MapServiceRequestSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -61,7 +83,8 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
 
             # Notify maps that there is new data.
             channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
+            if channel_layer:
+                async_to_sync(channel_layer.group_send)("map", {"type":"new_data"})
 
     def perform_update(self, serializer):
         from evac.models import AssignedRequest
@@ -126,6 +149,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             .select_related('reporter')
             .prefetch_related('assignedrequest_set')
             .prefetch_related(Prefetch('evacuation_assignments', EvacAssignment.objects.select_related('team').prefetch_related('team__team_members')))
+            .order_by('-timestamp')
         )
 
         # Status filter.
@@ -142,6 +166,12 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             queryset = queryset.exclude(Q(latitude=None) | Q(longitude=None)).exclude(status='canceled')
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
+        if self.request.GET.get('priority'):
+            queryset = queryset.filter(priority=self.request.GET.get('priority'))
+        if self.request.GET.get('open_start'):
+            queryset = queryset.filter(timestamp__gte=self.request.GET.get('open_start'))
+        if self.request.GET.get('open_end'):
+            queryset = queryset.filter(timestamp__lte=self.request.GET.get('open_end'))
         return queryset
 
     @drf_action(detail=True, methods=['GET'], name='Download GeoJSON')

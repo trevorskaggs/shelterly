@@ -94,49 +94,53 @@ function ServiceRequestDispatchAssignment({ id, incident, organization }) {
       await axios.get('/hotline/api/incident/' + (state ? state.incident.id : 'undefined')  + '/servicerequests/' + id + '/', {
         cancelToken: source.token,
       })
-      .then(currentResponse => {
+      .then(async (currentResponse) => {
+        let dispatch_assignments = [];
         if (!unmounted) {
           // Fetch open DA data.
-          axios.get('/evac/api/evacassignment/?incident=' + incident, {
-            params: {
-              status: 'open',
-              map: true,
-              organization
-            },
-            cancelToken: source.token,
-          })
-          .then(response => {
-            if (!unmounted) {
-              const active_assignment = currentResponse.data.assigned_requests.find(assigned_request => !assigned_request.dispatch_assignment.end_time)
-              const active_dispatch = active_assignment ? active_assignment.dispatch_assignment : null;
-              const map_dict = {};
-              const bounds = [];
-              const random_colors = randomColor({count:response.data.length});
-              response.data.forEach((dispatch_assignment, index) => {
-                let sr_dict = {}
-                for (const assigned_request of dispatch_assignment.assigned_requests) {
-                  const matches = countDictMatches(assigned_request.animals);
-                  sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
-                  bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
-                }
-                map_dict[dispatch_assignment.id] = {checked:(active_dispatch !== null) && (active_dispatch.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
-
-              });
-              const current_matches = countMatches(currentResponse.data.animals)[0];
-              currentResponse.data['matches'] = current_matches;
-              setCurrentRequest(currentResponse.data);
-              setActiveDispatch(active_dispatch);
-              bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
-              setMapState(map_dict);
-              setData({dispatch_assignments: response.data, isFetching: false, bounds:L.latLngBounds(bounds)});
-            }
-          })
-          .catch(error => {
-            if (!unmounted) {
+          const map_dict = {};
+          const bounds = [];
+          const active_assignment = currentResponse.data.assigned_requests.find(assigned_request => !assigned_request.dispatch_assignment.end_time)
+          const active_dispatch = active_assignment ? active_assignment.dispatch_assignment : null;
+          let nextUrl = '/evac/api/evacassignment/?page=1&page_size=100?incident=' + incident;
+          do {
+            const response = await axios.get(nextUrl, {
+              params: {
+                status: 'open',
+                map: true,
+                organization
+              },
+              cancelToken: source.token,
+            })
+            .catch(error => {
               setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
               setShowSystemError(true);
+            });
+
+            const random_colors = randomColor({count:response.data.length});
+            response.data.results.forEach((dispatch_assignment, index) => {
+              let sr_dict = {}
+              for (const assigned_request of dispatch_assignment.assigned_requests) {
+                const matches = countDictMatches(assigned_request.animals);
+                sr_dict[assigned_request.service_request_object.id] = {id:assigned_request.service_request_object.id, matches:matches, latitude:assigned_request.service_request_object.latitude, longitude:assigned_request.service_request_object.longitude, full_address:assigned_request.service_request_object.full_address};
+                bounds.push([assigned_request.service_request_object.latitude, assigned_request.service_request_object.longitude]);
+              }
+              map_dict[dispatch_assignment.id] = {checked:(active_dispatch !== null) && (active_dispatch.id === dispatch_assignment.id), hidden: false, color:random_colors[index], service_requests:sr_dict}
+            });
+            dispatch_assignments.push(...response.data.results);
+            nextUrl = response.data.next;
+            if (nextUrl) {
+              nextUrl = '/evac/' + response.data.next.split('/evac/')[1];
             }
-          });
+          } while(nextUrl != null)
+
+          const current_matches = countMatches(currentResponse.data.animals)[0];
+          currentResponse.data['matches'] = current_matches;
+          setCurrentRequest(currentResponse.data);
+          setActiveDispatch(active_dispatch);
+          bounds.push([currentResponse.data.latitude, currentResponse.data.longitude]);
+          setMapState(map_dict);
+          setData({dispatch_assignments: dispatch_assignments, isFetching: false, bounds:L.latLngBounds(bounds)});
         }
       })
     };

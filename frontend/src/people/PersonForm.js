@@ -5,7 +5,7 @@ import { Formik, useFormikContext } from 'formik';
 import { Form as BootstrapForm, Button, ButtonGroup, Card, Modal } from "react-bootstrap";
 import * as Yup from 'yup';
 import { Typeahead } from 'react-bootstrap-typeahead';
-import { AddressSearch, TextInput } from '../components/Form';
+import { AddressSearch, Checkbox, TextInput } from '../components/Form';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowAltCircleLeft } from '@fortawesome/free-solid-svg-icons';
 import ButtonSpinner from '../components/ButtonSpinner';
@@ -68,6 +68,8 @@ const PersonForm = (props) => {
 
   // Track whether or not to add another owner.
   const [addAnother, setAddAnother] = useState(false);
+
+  const [editMode, setEditMode] = useState(false);
 
   const initialData = {
     id: null,
@@ -141,23 +143,31 @@ const PersonForm = (props) => {
     }
     const fetchExistingOwnerData = async () => {
       // Fetch all owners data.
-      await axios.get('/people/api/person/?light=true&incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training, {
-        cancelToken: source.token,
-      })
-      .then(existingOwnersResponse => {
-        if (!unmounted) {
-          let options = [];
-          existingOwnersResponse.data.forEach(owner => {
+      let owners = [];
+      if (!unmounted) {
+        let options = [];
+        let nextUrl = '/people/api/person/?page=1&page_size=100&light=true&incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training;
+        do {
+          const response = await axios.get(nextUrl, {
+            cancelToken: source.token,
+          })
+          .catch(error => {
+            setShowSystemError(true);
+          });
+
+          response.data.results.forEach(owner => {
             options.push({id: owner.id, label: owner.first_name + ' ' + owner.last_name + ' ' + owner.display_phone})
           })
-          setExistingOwners({data:existingOwnersResponse.data, options:options, fetching:false});
-        }
-      })
-      .catch(error => {
-        if (!unmounted) {
-          setShowSystemError(true);
-        }
-      });
+
+          owners.push(...response.data.results);
+          nextUrl = response.data.next;
+          if (nextUrl) {
+            nextUrl = '/people/' + response.data.next.split('/people/')[1];
+          }
+        } while(nextUrl != null)
+
+        setExistingOwners({data:owners, options:options, fetching:false});
+      }
     }
     fetchExistingOwnerData();
 
@@ -222,6 +232,7 @@ const PersonForm = (props) => {
               if (props.state.steps.owners[props.state.ownerIndex + 1] && Object.keys(props.state.steps.owners[props.state.ownerIndex + 1]).length) {
                 setExistingOwner(props.state.steps.owners[props.state.ownerIndex + 1] && props.state.steps.owners[props.state.ownerIndex + 1].id ? true : false);
                 resetForm({values:props.state.steps.owners[props.state.ownerIndex + 1]});
+                setEditMode(false);
                 setRedirectCheck(true);
                 // setIsButtonSubmitting(false);
               }
@@ -230,6 +241,7 @@ const PersonForm = (props) => {
                 setExistingOwner(false);
                 resetForm({values:initialData});
                 setRedirectCheck(true);
+                setEditMode(false);
                 // setIsButtonSubmitting(false);
               }
               existingOwnerRef.current.clear();
@@ -247,6 +259,7 @@ const PersonForm = (props) => {
                 setIsOwner(true);
                 setShowAgency(false);
                 setExistingOwner(props.state.steps.owners[props.state.ownerIndex] && props.state.steps.owners[props.state.ownerIndex].id ? true : false);
+                setEditMode(false);
                 existingOwnerRef.current.clear();
                 if (props.state.steps.owners[props.state.ownerIndex] && props.state.steps.owners[props.state.ownerIndex].first_name) {
                   resetForm({values:props.state.steps.owners[props.state.ownerIndex]});
@@ -304,6 +317,7 @@ const PersonForm = (props) => {
               :
               <Card.Header as="h5" className="pl-3">
                 <span style={{cursor:'pointer'}} onClick={() => {
+                  setEditMode(false);
                   if (isOwner && props.state.ownerIndex > 0) {
                     formikProps.resetForm({values:props.state.steps.owners[props.state.ownerIndex -1]});
                     setExistingOwner(props.state.steps.owners.length && props.state.steps.owners[props.state.ownerIndex -1].id ? true : false);
@@ -319,7 +333,21 @@ const PersonForm = (props) => {
                     setShowStartOverModal(true);
                   }
                 }} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
-          {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
+            {isOwner ? "Owner" : "Reporter"}{is_workflow ? " Information" : ""}
+            {is_workflow && existingOwner ? <Checkbox
+              id={'edit-mode'}
+              name={'edit-mode'}
+              front_label={"Edit Mode"}
+              className={"float-right"}
+              checked={editMode}
+              style={{
+                transform: "scale(1.25)",
+                marginRight: "-5px",
+                marginTop: "-5px",
+                marginBottom: "-5px"
+              }}
+              onChange={() => setEditMode(!editMode)}
+            /> : ""}
           </Card.Header>}
           <Card.Body>
           <BootstrapForm noValidate>
@@ -362,12 +390,14 @@ const PersonForm = (props) => {
                 type="text"
                 label="First Name*"
                 name="first_name"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
               <TextInput
                 xs="6"
                 type="text"
                 label="Last Name*"
                 name="last_name"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row>
@@ -376,12 +406,14 @@ const PersonForm = (props) => {
                 type="text"
                 label="Phone*"
                 name="phone"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
               <TextInput
                 xs={isOwner ? "2" : "3"}
                 type="text"
                 label="Alternate Phone"
                 name="alt_phone"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
               <TextInput hidden={!isOwner}
                 xs="2"
@@ -389,12 +421,14 @@ const PersonForm = (props) => {
                 label="Drivers License"
                 name="drivers_license"
                 id="drivers_license"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
               <TextInput
                 xs="6"
                 type="text"
                 label="Email"
                 name="email"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={(is_first_responder && !isOwner) || (data.agency && id)}>
@@ -403,6 +437,7 @@ const PersonForm = (props) => {
                 as="textarea"
                 label="Comments / Alternate Contact"
                 name="comments"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
             </BootstrapForm.Row>
             <BootstrapForm.Row hidden={!showAgency && (!data.agency || !id)}>
@@ -411,15 +446,17 @@ const PersonForm = (props) => {
                 as="textarea"
                 label="Agency*"
                 name="agency"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
             </BootstrapForm.Row>
-            <AddressSearch formikProps={formikProps} stepIndex={props.state.ownerIndex} label={"Search for " + (isOwner ? "Owner" : "Reporter") + " Address"} incident={props.incident} show_apt={true} show_same={(is_intake || animal_id || servicerequest_id) ? false : true} hidden={id || !isOwner} initialData={props.state.steps.initial} error="Contact Address was not selected." existingOwner={isOwner ? existingOwner : existingReporter} matchingAddress={data.address === props.state.steps.initial.address && data.apartment === props.state.steps.initial.apartment} initial_coordinates={initial_coordinates} animal_id={animal_id} servicerequest_id={servicerequest_id} isOwner={isOwner} />
+            <AddressSearch formikProps={formikProps} stepIndex={props.state.ownerIndex} label={"Search for " + (isOwner ? "Owner" : "Reporter") + " Address"} incident={props.incident} show_apt={true} show_same={(is_intake || animal_id || servicerequest_id) ? false : true} hidden={id || !isOwner} initialData={props.state.steps.initial} disabled={(existingOwner || existingReporter) && !editMode} error="Contact Address was not selected." existingOwner={isOwner ? existingOwner : existingReporter} matchingAddress={data.address === props.state.steps.initial.address && data.apartment === props.state.steps.initial.apartment} initial_coordinates={initial_coordinates} animal_id={animal_id} servicerequest_id={servicerequest_id} isOwner={isOwner} />
             <BootstrapForm.Row hidden={!id || !isOwner}>
               <TextInput
                 xs="12"
                 type="text"
                 label="Change Reason"
                 name="change_reason"
+                disabled={(existingOwner || existingReporter) && !editMode}
               />
             </BootstrapForm.Row>
           </BootstrapForm>

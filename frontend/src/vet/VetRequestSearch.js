@@ -11,6 +11,7 @@ import {
   faChevronCircleDown,
   faChevronCircleRight,
   faStethoscope,
+  faInfoCircle,
   faVial,
   faSyringe,
   faSoap,
@@ -89,6 +90,13 @@ function VetRequestSearch({ incident, organization }) {
     { value: 'Completed', label: 'Completed' },
   ];
 
+  const tooltipDict = {
+    'vet_requests': 'id, animal id, animal name, concern, and complaint name',
+    'treatments': 'id, treatment name, animal name, assignee first name, and assignee last name',
+    'diagnostics': 'id, diagnostic name, and animal name',
+    'procedures': 'id, procedure name, animal name, performer first name, and performer last name'
+  }
+
   const [data, setData] = useState({vet_requests:[], treatments:[], diagnostics:[], procedures:[], isFetching:false});
   const [shelters, setShelters] = useState({options:[], isFetching:false});
   const [speciesChoices, setSpeciesChoices] = useState([]);
@@ -135,15 +143,16 @@ function VetRequestSearch({ incident, organization }) {
   const [treatments, setTreatments] = useState([]);
   const [diagnostics, setDiagnostics] = useState([]);
   const [procedures, setProcedures] = useState([]);
-  const [options, setOptions] = useState({species: '', status:'Open', priority:null, open:null, assignee:null, shelter: ''});
-  const [treatmentOptions, setTreatmentOptions] = useState({species: '', status:'Pending', treatment:'', scheduled:null, administered:null, assignee:null, shelter: '', not_administered:null});
-  const [diagnosticOptions, setDiagnosticOptions] = useState({species: '', status:'Pending', diagnostic:'', ordered:null, complete:null, shelter: ''});
-  const [procedureOptions, setProcedureOptions] = useState({species: '', status:'Pending', procedure:'', ordered:null, complete:null, performer:null, shelter: ''});
+  const [options, setOptions] = useState({species: '', status:null, priority:null, open:null, assignee:null, shelter: ''});
+  const [treatmentOptions, setTreatmentOptions] = useState({species: '', status:null, treatment:'', scheduled:null, administered:null, assignee:null, shelter: '', not_administered:null});
+  const [diagnosticOptions, setDiagnosticOptions] = useState({species: '', status:null, diagnostic:'', ordered:null, complete:null, shelter: ''});
+  const [procedureOptions, setProcedureOptions] = useState({species: '', status:null, procedure:'', ordered:null, complete:null, performer:null, shelter: ''});
   const [page, setPage] = useState(1);
   const [numPages, setNumPages] = useState(1);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(moment().format('YYYY-MM-DD'));
   const { markInstances } = useMark();
+  const [tooltip, setTooltip] = useState(tooltipDict['vet_requests']);
 
   // Update searchTerm when field input changes.
   const handleChange = event => {
@@ -228,6 +237,10 @@ function VetRequestSearch({ incident, organization }) {
       setNumPages(Math.ceil(filtered_procedures.length / ITEMS_PER_PAGE));
     }
   };
+
+   function updateTooltip(search_tab) {
+    setTooltip(tooltipDict[search_tab]);
+  }
 
   const handleClear = () => {
     if (vetObject === 'vet_requests') {
@@ -588,7 +601,19 @@ function VetRequestSearch({ incident, organization }) {
             }}
           />
           <InputGroup.Append>
-            <Button variant="outline-light" type="submit" style={{height:"36px", borderRadius:"0 5px 5px 0"}}>Search</Button>
+            <Button variant="outline-light" type="submit" style={{height:"36px", borderRadius:"0 5px 5px 0", color:"white"}}>Search
+              <OverlayTrigger
+                key={"search-information"}
+                placement="top"
+                overlay={
+                  <Tooltip id={`tooltip-search-information`}>
+                    Searchable fields: {tooltip}.
+                  </Tooltip>
+                }
+              >
+                <FontAwesomeIcon icon={faInfoCircle} className="ml-1 fa-move-up" size="sm" inverse />
+              </OverlayTrigger>
+            </Button>
           </InputGroup.Append>
           <Col className="pl-2 pr-1" style={{maxWidth:"200px"}}>
           <Select
@@ -599,12 +624,13 @@ function VetRequestSearch({ incident, organization }) {
             styles={customStyles}
             isClearable={false}
             onChange={(instance) => {
-              setVetObject(instance.value)
+              setVetObject(instance.value);
+              updateTooltip(instance.value);
             }}
             defaultValue={{value:tab, label:labelLookup[tab]}}
           />
           </Col>
-          <Button variant="outline-light" className="ml-1" onClick={handleShowFilters} style={{height:"36px"}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} size="sm" />}</Button>
+          <Button variant="outline-light" className="ml-1" onClick={handleShowFilters} style={{height:"36px", color:"white"}}>Advanced {showFilters ? <FontAwesomeIcon icon={faChevronDoubleUp} className="fa-move-up" size="sm" /> : <FontAwesomeIcon icon={faChevronDoubleDown} className="fa-move-up" size="sm" />}</Button>
         </InputGroup>
         {vetObject === 'vet_requests' ? <Collapse in={showFilters} className="mb-3">
           <div>
@@ -638,7 +664,7 @@ function VetRequestSearch({ incident, organization }) {
                     onChange={(instance) => {
                       setOptions({...options, priority: instance ? instance.value : null});
                     }}
-                    value={options.priority ? {value:options.priority, label:options.priority} : null}
+                    value={options.priority ? {value:options.priority, label:priorityText[options.priority]} : null}
                   />
                   <Select
                     id="assigneeDropdown"
@@ -958,7 +984,7 @@ function VetRequestSearch({ incident, organization }) {
                         if (dateRange) {
                           parseDateRange(dateRange);
                         }
-                        setDiagnosticOptions({...diagnosticOptions, open: dateRange ? true : null});
+                        setDiagnosticOptions({...diagnosticOptions, ordered: dateRange ? true : null});
                       }}
                     />
                   </Col>
@@ -1080,7 +1106,7 @@ function VetRequestSearch({ incident, organization }) {
                         if (dateRange) {
                           parseDateRange(dateRange);
                         }
-                        setProcedureOptions({...procedureOptions, open: dateRange ? true : null});
+                        setProcedureOptions({...procedureOptions, ordered: dateRange ? true : null});
                       }}
                     />
                   </Col>
@@ -1197,7 +1223,7 @@ function VetRequestSearch({ incident, organization }) {
       {vetObject === 'procedures' && procedures.map((procedure, index) => (
         <ProcedureCard key={procedure.id} incident={incident} organization={organization} procedure={procedure} animal_object={procedure.animal_object} />
       ))}
-      <p>{data.isFetching ? <span>{'Fetching ' + (vetObject === 'vet_requests' ? 'veterinary requests' : vetObject === 'treatments' ? 'treatments' : vetObject === 'diagnostics' ? 'diagnostics' : 'procedures') + '...'}</span> : ""}</p>
+      {data.isFetching ? <p>{'Fetching ' + (vetObject === 'vet_requests' ? 'veterinary requests' : vetObject === 'treatments' ? 'treatments' : vetObject === 'diagnostics' ? 'diagnostics' : 'procedures') + '...'}</p> : ""}
       {!data.isFetching && vetObject === 'vet_requests' && vetRequests.length === 0 ? <p>No veterinary requests found.</p> : ""}
       {!data.isFetching && vetObject === 'treatments' && treatments.length === 0 ? <p>No treatments found.</p> : ""}
       {!data.isFetching && vetObject === 'diagnostics' && diagnostics.length === 0 ? <p>No diagnostics found.</p> : ""}

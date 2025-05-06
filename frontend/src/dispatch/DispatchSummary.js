@@ -350,7 +350,7 @@ function DispatchSummary({ id, incident, organization }) {
               <ListGroup variant="flush" style={{marginTop:"-13px", marginBottom:"-13px", textTransform:"capitalize"}}>
                 <ListGroup.Item>
                   <Row>
-                    <Col><b>Created: </b>{<Moment format="MMM Do YYYY, HH:mm">{data.start_time}</Moment>}</Col>
+                    <Col><b>Opened: </b>{<Moment format="MMM Do YYYY, HH:mm">{data.start_time}</Moment>}</Col>
                     <Col><b>Closed: </b>{data.end_time ? <Moment format="MMM Do YYYY, HH:mm">{data.end_time}</Moment> : "N/A"}</Col>
                   </Row>
                 </ListGroup.Item>
@@ -370,9 +370,9 @@ function DispatchSummary({ id, incident, organization }) {
                         <FontAwesomeIcon icon={faPencilAlt} className="ml-1 fa-move-up" size="sm" onClick={() => {setShowTeamName(true)}} style={{cursor:'pointer'}} inverse />
                       </OverlayTrigger>
                     </Col>
-                    <Col>
-                      <b>Dispatch Date: </b>{<Moment format="MMM Do YYYY">{data.dispatch_date || new Date()}</Moment>}
-                    </Col>
+                    {/* <Col>
+                      <b>Scheduled: </b>{<Moment format="MMM Do YYYY">{data.dispatch_date || new Date()}</Moment>}
+                    </Col> */}
                   </Row>
                 </ListGroup.Item>
                 {data.team_member_objects && data.team_member_objects.length > 0 && data.team_member_objects.map(team_member => (

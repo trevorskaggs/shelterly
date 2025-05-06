@@ -79,7 +79,7 @@ const useStyles = makeStyles({
 const DateRangePicker = React.forwardRef((props, ref) => {
   let options = {};
   if (props["data-enable-time"] === false) {
-    options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y" : "m-d-Y", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0}
+    options = {enableTime: false, allowInput: true, dateFormat: props.mode === "single" ? "M d, Y" : "m-d-Y", mode: props.mode === "single" ? "single" : "range"}
   }
   else {
     options = {allowInput: true, dateFormat: props.mode === "single" ? "M d, Y H:i" : "m-d-Y H:i", mode: props.mode === "single" ? "single" : "range", defaultHour:props.hour === 0 ? 0 : props.hour||12, defaultMinute:props.minute||0, altFormat: "F j, Y H:i"}
@@ -232,6 +232,7 @@ const Checkbox = (props) => {
       inputProps={{ 'aria-label': 'decorative checkbox' }}
       {...props}
     />
+    {props.front_label ? <span className={"float-right"}>{props.front_label}</span> : ""}
     {/* {meta.touched && meta.error ? (
       <div className="error">{meta.error}</div>
     ) : null} */}
@@ -250,7 +251,7 @@ const Radio = (props) => {
       type="checkbox"
       className={classes.radio}
       disableRipple
-      color="white"
+      color="default"
       inputProps={{ 'aria-label': 'decorative radio' }}
       {...props}
     />
@@ -671,7 +672,6 @@ const AddressSearch = (props) => {
   const markerRef = useRef(null);
   const mapRef = useRef(null);
   const { setFieldValue } = useFormikContext();
-  console.log(props)
   const [initialLatLon, setInitialLatLon] = useState(props.initial_coordinates);
 
   const [fadeIn, setFadeIn] = useState(!(props.initialData && props.initialData.address === props.formikProps.values.address) ? false : true);
@@ -743,7 +743,7 @@ const AddressSearch = (props) => {
     {props.show_same && props.isOwner ?
       <span className="form-row" hidden={props.hidden} style={{marginBottom:props.lookup_hidden ? "-10px" : "10px"}}>
         <Form.Label style={{marginLeft:"5px"}}>Owner Address Same as Service Request: </Form.Label>
-        <input id="same_address" type="checkbox" className="ml-2" checked={!fadeIn && props.initialData && props.initialData.address === props.formikProps.values.address} onChange={handleChange} style={{marginTop:"-7px"}} />
+        <input id="same_address" type="checkbox" className="ml-2" disabled={props.disabled} checked={!fadeIn && props.initialData && props.initialData.address === props.formikProps.values.address} onChange={handleChange} style={{marginTop:"-7px"}} />
       </span>
     : ""}
     {props.address_form || fadeIn || !(props.initialData && props.initialData.address === props.formikProps.values.address) ?

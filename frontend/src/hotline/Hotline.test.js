@@ -11,6 +11,7 @@ import { SystemErrorProvider } from '../components/SystemError';
 import { initialState } from "../accounts/AccountsReducer"
 
 const MOCK_INCIDENT_ID = 1;
+const MOCK_ORGANIZATION_ID = 1;
 
 // Nock API chain
 nock('http://localhost')
@@ -26,24 +27,24 @@ nock('http://localhost')
 ;
 
 describe("Render hotline", () => {
-  it("Render hotline", () => {
-    render(<SystemErrorProvider><Hotline incident={MOCK_INCIDENT_ID} /></SystemErrorProvider>);
-    expect(screen.getAllByText(/OWNER CALLING/)).toBeTruthy();
-    expect(screen.getByText(/NON-OWNER CALLING/)).toBeTruthy();
-    expect(screen.getByText(/FIRST RESPONDER CALLING/)).toBeTruthy();
+  it("Render hotline", async () => {
+    render(<SystemErrorProvider><Hotline incident={MOCK_INCIDENT_ID} organization={MOCK_ORGANIZATION_ID} /></SystemErrorProvider>);
+    expect(await screen.getAllByText(/OWNER CALLING/)).toBeTruthy();
+    expect(await screen.getByText(/NON-OWNER CALLING/)).toBeTruthy();
+    expect(await screen.getByText(/FIRST RESPONDER CALLING/)).toBeTruthy();
   });
 });
 
 describe("Render ServiceRequestDetails", () => {
   it("Service request details loads", async () => {
-    render(<SystemErrorProvider><ServiceRequestDetails id={1} incident={MOCK_INCIDENT_ID} state={initialState}/></SystemErrorProvider>);
+    render(<SystemErrorProvider><ServiceRequestDetails id={1} incident={MOCK_INCIDENT_ID} organization={MOCK_ORGANIZATION_ID} state={initialState}/></SystemErrorProvider>);
     expect(screen.getAllByText(/Service Request/)).toBeTruthy();
   });
 });
 
 describe("Render ServiceRequestSearch", () => {
   it("Empty table loads", async () => {
-    render(<SystemErrorProvider><ServiceRequestSearch incident={MOCK_INCIDENT_ID}/></SystemErrorProvider>);
+    render(<SystemErrorProvider><ServiceRequestSearch incident={MOCK_INCIDENT_ID} organization={MOCK_ORGANIZATION_ID} /></SystemErrorProvider>);
     expect(await screen.getByText("Fetching service requests...")).toBeTruthy();
   });
 });

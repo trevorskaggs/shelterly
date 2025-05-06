@@ -3,11 +3,13 @@ from django.shortcuts import render
 from django.db import transaction
 from django.db.models import Q
 import operator
+import math
+from decimal import Decimal
 from functools import reduce
 from django.shortcuts import get_object_or_404
 from copy import deepcopy
 from datetime import datetime
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, permissions, response, viewsets
 from actstream import action
 
 from animals.models import Animal, AnimalImage, Species
@@ -16,6 +18,34 @@ from incident.models import Incident
 from shelter.models import IntakeSummary
 from people.serializers import SimplePersonSerializer
 from vet.models import MedicalRecord, VetRequest
+from rest_framework.pagination import PageNumberPagination
+
+def distance(lat1, lon1, lat2, lon2):
+    # Radius of the Earth in miles
+    R = 3958.8
+
+    # Convert degrees to radians
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+
+    # Haversine formula
+    dlon = lon2_rad - lon1_rad
+    dlat = lat2_rad - lat1_rad
+    a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    return R * c
+
+def is_within_radius(lat1, lon1, lat2, lon2, radius_miles=1):
+    return distance(lat1, lon1, lat2, lon2) <= radius_miles
+
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 25
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class MultipleFieldLookupMixin(object):
     def get_object(self):
@@ -28,6 +58,17 @@ class MultipleFieldLookupMixin(object):
         obj = get_object_or_404(queryset, **filter)
         return obj
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return response.Response(serializer.data)
+
 class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     queryset = Animal.objects.with_images().exclude(status="CANCELED")
     lookup_fields = ['pk', 'incident', 'id_for_incident']
@@ -36,6 +77,7 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = ModestAnimalSerializer
     detail_serializer_class = AnimalSerializer
+    pagination_class = StandardResultsSetPagination
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -278,6 +320,28 @@ class AnimalViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
         )
         if self.request.GET.get('incident'):
             queryset = queryset.filter(incident__slug=self.request.GET.get('incident'), incident__organization__slug=self.request.GET.get('organization'))
+        if self.request.GET.get('species'):
+            queryset = queryset.filter(species__name=self.request.GET.get('species'))
+        if self.request.GET.get('status'):
+            queryset = queryset.filter(status=self.request.GET.get('status'))
+        if self.request.GET.get('sex'):
+            queryset = queryset.filter(sex=self.request.GET.get('sex'))
+        if self.request.GET.get('owned', '') == 'no':
+            queryset = queryset.filter(owners=None)
+        if self.request.GET.get('pcolor'):
+            queryset = queryset.filter(pcolor=self.request.GET.get('pcolor'))
+        if self.request.GET.get('scolor'):
+            queryset = queryset.filter(scolor=self.request.GET.get('scolor'))
+        if self.request.GET.get('shelter'):
+            queryset = queryset.filter(shelter=self.request.GET.get('shelter'))
+        if self.request.GET.get('latlng'):
+            animals_inside_radius = []
+            for animal in queryset:
+                if animal.latitude and animal.longitude:
+                    lat, lon = self.request.GET.get('latlng').replace('(','').replace(')','').replace(' ','').replace('LatLng','').split(',')
+                    if is_within_radius(Decimal(lat), Decimal(lon), animal.latitude, animal.longitude, radius_miles=int(self.request.GET.get('radius', 1))):
+                        animals_inside_radius.append(animal.id)
+            queryset = queryset.filter(id__in=animals_inside_radius)
         return queryset
 
 class SpeciesViewSet(viewsets.ModelViewSet):
