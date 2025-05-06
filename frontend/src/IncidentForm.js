@@ -246,15 +246,12 @@ const IncidentForm = ({ id, organization }) => {
               <BootstrapForm.Row>
                 <TextInput
                   type="text"
-                  label="Name*"
+                  label={`Name* (URL: /${organization}/${newSlug ? newSlug : data.slug}/)`}
                   name="name"
                   id="name"
                   xs="12"
                 />
               </BootstrapForm.Row>
-              Slug: { newSlug ? newSlug : data.slug }
-              <br/>
-              <br/>
               <BootstrapForm.Row>
                 <TextInput
                   type="text"
