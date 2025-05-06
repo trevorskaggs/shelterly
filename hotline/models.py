@@ -130,8 +130,8 @@ class ServiceRequest(Location):
                     species_count = species_counts[status_key][species]
                     sp = Species.objects.get(name=species)
                     sp_name = sp.name if species_count <= 1 else sp.plural_name
-                    species_string += '%s %s' % (species_count, sp_name)
-                status_description += '%s: %s, ' % (status, species_string)
+                    species_string += '%s %s, ' % (species_count, sp_name)
+                status_description += '%s: %s, ' % (status, species_string[:-2])
         description += status_description[:-2]
         description += ")"
         description += "\nLast Updated: %s" % datetime.now().strftime("%Y-%m-%d %H:%M:%S")
