@@ -71,7 +71,7 @@ function Dispatch({ incident, organization }) {
       if (!unmounted) {
         const map_dict = {};
         const bounds = [];
-        let nextUrl = '/evac/api/evacassignment/?page=1&page_size=100';
+        let nextUrl = '/evac/api/evacassignment/?page=1&page_size=25';
         do {
           const response = await axios.get(nextUrl, {
             params: {

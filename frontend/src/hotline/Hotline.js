@@ -68,7 +68,7 @@ function Hotline({ incident, organization }) {
       if (!unmounted) {
         const map_dict = {};
         const bounds = [];
-        let nextUrl = '/hotline/api/servicerequests/?page=1&page_size=100&incident=' + incident + '&organization=' + organization;
+        let nextUrl = '/hotline/api/servicerequests/?page=1&page_size=50&incident=' + incident + '&organization=' + organization;
         do {
           const response = await axios.get(nextUrl, {
             params: {
