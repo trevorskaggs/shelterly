@@ -305,7 +305,9 @@ function Deploy({ incident, organization }) {
               cancelToken: source.token,
             })
             .catch(error => {
-              setShowSystemError(true);
+              if (error.response) {
+                setShowSystemError(true);
+              }
             });
 
             response.data.results.forEach(function(da) {
@@ -342,7 +344,9 @@ function Deploy({ incident, organization }) {
             cancelToken: source.token,})
           .catch(error => {
             setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-            setShowSystemError(true);
+            if (error.response) {
+              setShowSystemError(true);
+            }
           });
           const current_ids = Object.keys(mapState);
           for (const service_request of response.data.results) {

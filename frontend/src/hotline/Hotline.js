@@ -78,7 +78,9 @@ function Hotline({ incident, organization }) {
           })
           .catch(error => {
             setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-            setShowSystemError(true);
+            if (error.response) {
+              setShowSystemError(true);
+            }
           });
 
           if (response) {

@@ -152,7 +152,9 @@ const PersonForm = (props) => {
             cancelToken: source.token,
           })
           .catch(error => {
-            setShowSystemError(true);
+            if (error.response) {
+              setShowSystemError(true);
+            }
           });
 
           response.data.results.forEach(owner => {

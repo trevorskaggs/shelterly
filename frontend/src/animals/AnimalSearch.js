@@ -182,7 +182,9 @@ function AnimalSearch({ incident, organization }) {
         },
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (error.response) {
+          setShowSystemError(true);
+        }
       });
 
       animals.push(...response.data.results);

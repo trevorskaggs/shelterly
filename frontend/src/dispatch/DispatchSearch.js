@@ -100,7 +100,9 @@ function DispatchAssignmentSearch({ incident, organization }) {
         },
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (error.response) {
+          setShowSystemError(true);
+        }
       });
 
       dispatch_assignments.push(...response.data.results);

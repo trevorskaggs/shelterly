@@ -116,7 +116,9 @@ function ServiceRequestSearch({ incident, organization }) {
         },
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (error.response) {
+          setShowSystemError(true);
+        }
       });
 
       service_requests.push(...response.data.results);
@@ -164,7 +166,9 @@ function ServiceRequestSearch({ incident, organization }) {
         },
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (error.response) {
+          setShowSystemError(true);
+        }
       });
 
       service_requests.push(...response.data.results);

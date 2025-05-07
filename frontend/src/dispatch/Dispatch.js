@@ -84,7 +84,9 @@ function Dispatch({ incident, organization }) {
           })
           .catch(error => {
             setData({dispatch_assignments: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
-            setShowSystemError(true);
+            if (error.response) {
+              setShowSystemError(true);
+            }
           });
 
           if (response) {

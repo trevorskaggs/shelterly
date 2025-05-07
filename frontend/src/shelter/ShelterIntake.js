@@ -349,7 +349,9 @@ function ShelterIntake({ id, incident, organization }) {
             })
             .catch(error => {
               setData(prevState => ({ ...prevState, shelter_name: '', dispatch_assignments: [], sr_updates: [], isFetching: false}));
-              setShowSystemError(true);
+              if (error.response) {
+                setShowSystemError(true);
+              }
             });
 
             response.data.results.forEach((da, index) => {
