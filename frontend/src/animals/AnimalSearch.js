@@ -341,7 +341,7 @@ function AnimalSearch({ incident, organization }) {
 
           let bounds_array = [];
           if (options.latlng) {
-            bounds_array.push([options.latlng['Lat'], options.latlng['Lng']]);
+            bounds_array.push([options.latlng['lat'], options.latlng['lng']]);
           }
           for (const animal of response.data.results) {
             if (!options.latlng && animal.latitude && animal.longitude) {

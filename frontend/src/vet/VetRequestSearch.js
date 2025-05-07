@@ -626,6 +626,7 @@ function VetRequestSearch({ incident, organization }) {
             onChange={(instance) => {
               setVetObject(instance.value);
               updateTooltip(instance.value);
+              handleClear();
             }}
             defaultValue={{value:tab, label:labelLookup[tab]}}
           />
