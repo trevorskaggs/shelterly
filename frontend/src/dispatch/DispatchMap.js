@@ -46,7 +46,7 @@ function Deploy({ incident, organization }) {
   const [bounds, setBounds] = useState([]);
   const [totalSelectedState, setTotalSelectedState] = useState({'ANIMALLESS':{}, 'REPORTED':{}, 'REPORTED (EVAC REQUESTED)':{}, 'REPORTED (SIP REQUESTED)':{}, 'SHELTERED IN PLACE':{}, 'UNABLE TO LOCATE':{}});
   const [selectedCount, setSelectedCount] = useState({count:0, disabled:true});
-  const [statusOptions, setStatusOptions] = useState({aco_required:false, hide_pending: true});
+  const [statusOptions, setStatusOptions] = useState({aco_required:false});
   const [triggerRefresh, setTriggerRefresh] = useState(false);
   const [teamData, setTeamData] = useState({teams: [], members:[], options: [], isFetching: false});
   const [selected, setSelected] = useState([]);
@@ -78,9 +78,9 @@ function Deploy({ incident, organization }) {
   }
 
   // Handle hide_pending toggle.
-  const handlePendingOnly = async event => {
-    setStatusOptions(prevState => ({ ...prevState, hide_pending:!statusOptions.hide_pending }));
-  }
+  // const handlePendingOnly = async event => {
+  //   setStatusOptions(prevState => ({ ...prevState, hide_pending:!statusOptions.hide_pending }));
+  // }
 
   // Handle radius circle toggles.
   const handleRadius = (id) => {
@@ -337,7 +337,6 @@ function Deploy({ incident, organization }) {
           const response = await axios.get(nextUrl, {
             params: {
             status: 'open',
-            when: 'today',
             landingmap: true
           },
             cancelToken: source.token,})
@@ -685,7 +684,7 @@ function Deploy({ incident, organization }) {
               ))}
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
-              .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
+              // .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
               .filter(service_request => filterData.species.length ? filterData.species.some(species => new Set(service_request.animals.filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'UNABLE TO LOCATE' , 'SHELTERED IN PLACE'].includes(animal.status)).map(animal => animal.species_string)).has(species)) : true)
               .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
@@ -846,7 +845,7 @@ function Deploy({ incident, organization }) {
             <Scrollbar no_shadow="true" style={{height:"275px", marginLeft:"-10px", marginRight:"-10px"}} renderThumbHorizontal={props => <div {...props} style={{...props.style, display: 'none'}} />}>
               {data.service_requests
               .filter(service_request => statusOptions.aco_required ? service_request.aco_required === statusOptions.aco_required : true)
-              .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
+              // .filter(service_request => statusOptions.hide_pending ? service_request.pending !== statusOptions.hide_pending : true)
               .filter(service_request => filterData.priority.length ? filterData.priority.includes(service_request.priority) : true)
               .filter(service_request => filterData.species.length ? filterData.species.some(species => new Set(service_request.animals.filter(animal => ['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)', 'UNABLE TO LOCATE' , 'SHELTERED IN PLACE'].includes(animal.status)).map(animal => animal.species_string)).has(species)) : true)
               .filter(service_request => filterData.followup_date_start ? moment(service_request.followup_date).format('YYYY-MM-DD') >= filterData.followup_date_start : true)
