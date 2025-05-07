@@ -559,6 +559,7 @@ const AnimalForm = (props) => {
               });
             }
             else {
+              setEditMode(false);
               props.onSubmit('animals', formData, 'request');
             }
           }
@@ -607,7 +608,7 @@ const AnimalForm = (props) => {
               <span>{props.state.animalIndex > 0 ? <span style={{cursor:'pointer'}} onClick={() => {setAddAnother(false); setEditMode(false); populateBack(props.state.steps.animals[props.state.animalIndex-1]); props.handleBack('animals', 'animals')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>
               :
               <span style={{cursor:'pointer'}} onClick={() => {props.handleBack('animals', props.state.stepIndex > 1 ? 'owners' : 'reporter')}} className="mr-3"><FontAwesomeIcon icon={faArrowAltCircleLeft} size="lg" inverse /></span>}</span>}{!id ? "Animal Information" : "Update Animal"}
-              {is_workflow && props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id ? <Checkbox
+              {is_workflow && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id'))) ? <Checkbox
                 id={'edit-mode'}
                 name={'edit-mode'}
                 front_label={"Edit Mode"}
@@ -631,7 +632,7 @@ const AnimalForm = (props) => {
                     type="text"
                     label="Animal Name"
                     xs="4"
-                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                    disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                   />
                   <Col xs="4" style={{textTransform:'capitalize'}}>
                     <DropDown
@@ -653,7 +654,7 @@ const AnimalForm = (props) => {
                         formikProps.setFieldValue("species", instance ? instance.value : '');
                         formikProps.setFieldValue("species_string", instance ? instance.label : '');
                       }}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                   <Col xs="4">
@@ -668,7 +669,7 @@ const AnimalForm = (props) => {
                       options={Object.keys(sizeChoices).includes(formikProps.values.species_string) ? sizeChoices[formikProps.values.species_string] : sizeChoices['other']}
                       value={formikProps.values.size||''}
                       placeholder={placeholder}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                 </BootstrapForm.Row>
@@ -685,7 +686,7 @@ const AnimalForm = (props) => {
                       options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
                       value={formikProps.values.pcolor||''}
                       placeholder={placeholder}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                     <DropDown
                       label="Secondary Color"
@@ -698,7 +699,7 @@ const AnimalForm = (props) => {
                       options={Object.keys(colorChoices).includes(formikProps.values.species_string) ? colorChoices[formikProps.values.species_string] : colorChoices['other']}
                       value={formikProps.values.scolor||''}
                       placeholder={placeholder}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                   <TextInput
@@ -708,7 +709,7 @@ const AnimalForm = (props) => {
                     rows={5}
                     label="Breed / Description"
                     xs="8"
-                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                    disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mb-3">
@@ -720,7 +721,7 @@ const AnimalForm = (props) => {
                         type="text"
                         key={`my_unique_requested_service_select_key__${formikProps.values.status}`}
                         options={['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) ? reportedStatusChoices : statusChoicesNFA}
-                        disabled={(props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode) || (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) && !data.active_dispatch ? false : true)}
+                        disabled={(((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id'))) && !editMode) || (['REPORTED', 'REPORTED (EVAC REQUESTED)', 'REPORTED (SIP REQUESTED)'].includes(data.status) && !data.active_dispatch ? false : true)}
                         value={formikProps.values.status||''}
                         isClearable={false}
                     />
@@ -735,7 +736,7 @@ const AnimalForm = (props) => {
                       ref={sexRef}
                       options={sexChoices}
                       value={formikProps.values.sex||''}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                   <Col xs="3">
@@ -748,7 +749,7 @@ const AnimalForm = (props) => {
                       handleValueChange={(value) => formikProps.setFieldValue('age', value)}
                       optionsKey={formikProps.values.species_string || ''}
                       formValidationName="age"
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                   <Col xs="3">
@@ -760,7 +761,7 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.fixed||'unknown'}
                       isClearable={false}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                 </BootstrapForm.Row>
@@ -778,7 +779,7 @@ const AnimalForm = (props) => {
                         formikProps.setFieldValue("aggressive", instance === null ? '' : instance.value);
                         formikProps.setFieldValue("aco_required", instance && instance.value === 'yes' ? 'yes' : formikProps.values.aco_required);
                       }}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                   <Col xs="3">
@@ -790,7 +791,7 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.aco_required||'unknown'}
                       isClearable={false}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                   <Col xs="3" hidden={is_intake}>
@@ -802,7 +803,7 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.confined||'unknown'}
                       isClearable={false}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                   <Col xs="3">
@@ -814,7 +815,7 @@ const AnimalForm = (props) => {
                       options={unknownChoices}
                       value={formikProps.values.injured||'unknown'}
                       isClearable={false}
-                      disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                      disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
                   </Col>
                 </BootstrapForm.Row>
@@ -826,7 +827,7 @@ const AnimalForm = (props) => {
                     as="textarea"
                     rows={5}
                     xs="12"
-                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                    disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
@@ -837,7 +838,7 @@ const AnimalForm = (props) => {
                     as="textarea"
                     rows={5}
                     xs="12"
-                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                    disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                   />
                 </BootstrapForm.Row>
                 {is_intake ? <BootstrapForm.Row>
@@ -921,7 +922,7 @@ const AnimalForm = (props) => {
                     }}
                     value={formikProps.values.last_seen||null}
                     hidden={is_intake}
-                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                    disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row className="mt-3">
@@ -931,7 +932,7 @@ const AnimalForm = (props) => {
                     type="text"
                     label="Microchip Number"
                     xs="6"
-                    disabled={props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode}
+                    disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                   />
                 </BootstrapForm.Row>
                 <BootstrapForm.Row>
@@ -941,7 +942,7 @@ const AnimalForm = (props) => {
                     type="text"
                     xs="2"
                     label="No. of Animals"
-                    disabled={(props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id && !editMode) || (data instanceof FormData ? data.get('medical_record') : data.medical_record ? true : false)}
+                    disabled={(((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id'))) && !editMode) || (data instanceof FormData ? data.get('medical_record') : data.medical_record ? true : false)}
                   />
                 </BootstrapForm.Row>
                 {/* Only show Shelter selection on intake and update. */}
