@@ -275,7 +275,7 @@ function ServiceRequestForm(props) {
                   <b>Service Request Address: </b>{formikProps.values.address}{formikProps.values.apartment ? <span> Apt #{formikProps.values.apartment}</span> : ""}, {formikProps.values.city}, {formikProps.values.state}
                   <br />
                   <BootstrapForm.Label className="mt-2">Refine Exact Lat/Lon Point</BootstrapForm.Label>
-                  <Map zoom={15} ref={mapRef} center={[initialLatLon[0] || formikProps.values.latitude || 0, initialLatLon[1] || formikProps.values.longitude || 0]} className="animal-search-leaflet-container border rounded" >
+                  <Map zoom={15} ref={mapRef} center={[formikProps.values.latitude || initialLatLon[0] || 0, formikProps.values.longitude || initialLatLon[1] || 0]} className="animal-search-leaflet-container border rounded" >
                     <Legend position="bottomleft" metric={false} />
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
