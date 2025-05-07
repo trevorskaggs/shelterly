@@ -234,7 +234,9 @@ function ServiceRequestDetails({ id, incident, organization }) {
             cancelToken: source.token,
           })
           .catch(error => {
-            setShowSystemError(true);
+            if (error.response) {
+              setShowSystemError(true);
+            }
             setIsLoading(false);
           });
 

@@ -6,7 +6,7 @@ from django.db import transaction
 from django.db.models import Case, Count, Exists, OuterRef, Prefetch, Q, Sum, When, Value, BooleanField
 from django.http import HttpResponse, JsonResponse
 from actstream import action
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from .serializers import BarebonesServiceRequestSerializer, ServiceRequestSerializer, ServiceRequestNoteSerializer, MapServiceRequestSerializer, SimpleServiceRequestSerializer, VisitNoteSerializer
 from .ordering import MyCustomOrdering
 from wsgiref.util import FileWrapper
@@ -236,7 +236,7 @@ class ServiceRequestViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
     def remove_active(self, request, pk=None):
         from rest_framework import response
         sr = ServiceRequest.objects.get(id=pk)
-        sr.followup_date=datetime.today()
+        sr.followup_date=date.today()
         sr.save()
         for assigned_request in AssignedRequest.objects.filter(service_request=sr, dispatch_assignment__end_time=None):
             assigned_request.delete()

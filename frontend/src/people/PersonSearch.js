@@ -84,7 +84,9 @@ function PersonSearch({ incident, organization }) {
       const response = await axios.get(nextUrl, {
       })
       .catch(error => {
-        setShowSystemError(true);
+        if (error.response) {
+          setShowSystemError(true);
+        }
       });
 
       owners.push(...response.data.results);

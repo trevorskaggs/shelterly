@@ -49,7 +49,9 @@ const AddressForm = (props) => {
           const response = await axios.get(nextUrl, {
             cancelToken: source.token,})
           .catch(error => {
-            setShowSystemError(true);
+            if (error.response) {
+              setShowSystemError(true);
+            }
           });
 
           service_requests.push(...response.data.results);
@@ -74,7 +76,9 @@ const AddressForm = (props) => {
             cancelToken: source.token,
           })
           .catch(error => {
-            setShowSystemError(true);
+            if (error.response) {
+              setShowSystemError(true);
+            }
           });
 
           owners.push(...response.data.results);

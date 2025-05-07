@@ -64,6 +64,7 @@ function ServiceRequestForm(props) {
   const [data, setData] = useState({
     owners: [],
     reporter: null,
+    id: props.state.steps.request.id || null,
     directions: props.state.steps.request.directions || '',
     priority: props.state.steps.request.priority || 2,
     followup_date: props.state.steps.request.followup_date || new Date().toJSON().slice(0, 10),
