@@ -105,6 +105,9 @@ function Hotline({ incident, organization }) {
           setData({service_requests: service_requests, isFetching: false, bounds:bounds});
           setInitialBounds(bounds);
         }
+        else {
+          setData({service_requests: [], isFetching: false, bounds:L.latLngBounds([[0,0]])});
+        }
       }
     };
 

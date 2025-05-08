@@ -343,6 +343,7 @@ function ShelterIntake({ id, incident, organization }) {
               params: {
                 status: 'active',
                 map: true,
+                incident,
                 organization
               },
               cancelToken: source.token,
