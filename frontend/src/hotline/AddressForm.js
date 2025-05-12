@@ -70,7 +70,7 @@ const AddressForm = (props) => {
       // Fetch all owners data.
       let owners = [];
       if (!unmounted) {
-        let nextUrl = '/people/api/person/?page=1&page_size=100&light=true&incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training;
+        let nextUrl = '/people/api/person/?page=1&page_size=100&light=true&incident=' + props.incident + '&organization=' + props.organization +'&training=' + state.incident.training + '&only_inactive=true';
         do {
           const response = await axios.get(nextUrl, {
             cancelToken: source.token,
