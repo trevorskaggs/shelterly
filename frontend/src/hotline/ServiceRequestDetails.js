@@ -91,7 +91,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   });
 
   const [existingSRs, setExistingSRs] = useState({data:{}, options:[], fetching:true});
-  const [noteData, setNoteData] = useState({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});
+  const [noteData, setNoteData] = useState({'open':null, 'urgent': true, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});
 
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -100,7 +100,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
   const handleCloseTransfer = () => {setShowTransfer(false);setIsLoading(false);};
   const [transferData, setTransferData] = useState({'new_request_id':null, 'new_request_id_for_incident': null, 'animal_ids':[]});
   const [showNoteModal, setShowNoteModal] = useState(false);
-  const handleCloseNoteModal = () => {setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});setShowNoteModal(false);};
+  const handleCloseNoteModal = () => {setNoteData({'open':null, 'urgent': true, 'notes':'', 'author':state ? state.user.id : 'undefined', 'service_request':data.id});setShowNoteModal(false);};
   const [showRemoveModal, setShowRemoveModal] = useState(false);
   const handleCloseRemoveModal = () => setShowRemoveModal(false);
   const [showCloseModal, setShowCloseModal] = useState(false);
@@ -872,7 +872,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
             });
             setData(prevState => ({ ...prevState, notes:updated_notes}));
             resetForm();
-            setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
+            setNoteData({'open':null, 'urgent': true, 'notes':'', 'author':state.user.id, 'service_request':data.id});
             setShowNoteModal(false);
           })
           .catch(error => {
@@ -886,7 +886,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
             updated_notes.unshift(response.data);
             setData(prevState => ({ ...prevState, notes:updated_notes}));
             resetForm();
-            setNoteData({'open':null, 'urgent': false, 'notes':'', 'author':state.user.id, 'service_request':data.id});
+            setNoteData({'open':null, 'urgent': true, 'notes':'', 'author':state.user.id, 'service_request':data.id});
             setShowNoteModal(false);
           })
           .catch(error => {
@@ -911,7 +911,7 @@ function ServiceRequestDetails({ id, incident, organization }) {
             xs="12"
           />
         </BootstrapForm.Row>
-        <BootstrapForm.Label htmlFor="urgent">Urgent</BootstrapForm.Label>
+        <BootstrapForm.Label htmlFor="urgent">Share to Field Team</BootstrapForm.Label>
         <Field component={Switch} name="urgent" type="checkbox" color="primary" />
       </Modal.Body>
       <Modal.Footer>
