@@ -1,7 +1,7 @@
 version: '3'
 services:
   db:
-    image: mdillon/postgis
+    image: postgis/postgis:13-3.3
     container_name: db
   shelterly:
     image: trevorskaggs/shelterly:dev

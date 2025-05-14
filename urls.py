@@ -3,8 +3,8 @@ import settings
 from rest_framework import permissions
 from django.contrib import admin
 from django.views.static import serve
+from django.urls import include
 from django.urls import path, re_path
-from django.conf.urls import include, url
 from django.contrib.staticfiles.urls import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
@@ -26,8 +26,8 @@ urlpatterns = [
     path('shelter/', include('shelter.urls')),
     path('vet/', include('vet.urls')),
     path('activity/', include('actstream.urls')),
-    url(r'login/', LoginView.as_view(), name='knox_login'),
-    url(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
+    re_path(r'login/', LoginView.as_view(), name='knox_login'),
+    re_path(r'logout/', knox_views.LogoutView.as_view(), name='knox_logout'),
 ]
 if settings.USE_S3:
     urlpatterns.append(re_path(u'static/(?P<path>.*)$', views.static_url))
@@ -36,4 +36,4 @@ elif not settings.USE_S3 and settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-urlpatterns.append(url(r'^(?:.*)/?$', views.home))
+urlpatterns.append(re_path(r'^(?:.*)/?$', views.home))
