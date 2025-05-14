@@ -3,7 +3,7 @@ awscli
 boto3
 channels
 channels_postgres
-Django==3.2.25
+Django==4.2
 django-activity-stream
 django-cors-headers
 django-filter
@@ -16,5 +16,5 @@ django-rest-passwordreset
 ipython
 sartopo-python==2.0.0
 pillow
-psycopg2-binary
+psycopg2-binary==2.9.10
 pytz==2018.9
