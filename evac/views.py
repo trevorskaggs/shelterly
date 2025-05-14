@@ -189,15 +189,17 @@ class EvacAssignmentViewSet(MultipleFieldLookupMixin, viewsets.ModelViewSet):
             timestamp = None
             if ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').exists():
                 raise serializers.ValidationError(['Duplicate assigned service request error.', list(ServiceRequest.objects.filter(pk__in=self.request.data['service_requests'], status='assigned').values_list('id', flat=True))])
-            if self.request.data.get('team_members'):
-                name = 'Team '
-                i = 1
-                team_names = EvacAssignment.objects.filter(end_time__isnull=True).values_list('team__name', flat=True)
-                while name + str(i) in list(team_names):
-                    i+=1
-                name = name + str(i)
-            else:
-                name = 'Preplanned'
+            # Commenting out for potential future use.
+            # if self.request.data.get('team_members'):
+            #     name = 'Team '
+            #     i = 1
+            #     team_names = EvacAssignment.objects.filter(end_time__isnull=True).values_list('team__name', flat=True)
+            #     while name + str(i) in list(team_names):
+            #         i+=1
+            #     name = name + str(i)
+            # else:
+            #     name = 'Preplanned'
+            name = ''
             team = DispatchTeam.objects.create(name=name, incident=Incident.objects.get(pk=self.request.data.get('incident')))
 
             timestamp = None

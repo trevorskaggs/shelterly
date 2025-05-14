@@ -458,21 +458,23 @@ function Deploy({ incident, organization }) {
             else {
               axios.post('/evac/api/evacassignment/', values)
               .then(response => {
+                navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id_for_incident);
+                // Historical Active vs Preplan Logic.
                 // Stay on map and remove selected SRs if in Preplanning mode.
-                if (values.team_members.length === 0 && selectedCount.count > 0) {
-                  setSelectedCount({count:0, disabled:true});
-                  const newState = {...mapState};
-                  values.service_requests.forEach(sr => {
-                    delete newState[sr];
-                  })
-                  setMapState(newState);
-                  resetForm();
-                  setTriggerRefresh(!triggerRefresh);
-                }
-                // Otherwise navigate to the DA Summary page.
-                else {
-                  navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id_for_incident);
-                }
+                // if (values.team_members.length === 0 && selectedCount.count > 0) {
+                //   setSelectedCount({count:0, disabled:true});
+                //   const newState = {...mapState};
+                //   values.service_requests.forEach(sr => {
+                //     delete newState[sr];
+                //   })
+                //   setMapState(newState);
+                //   resetForm();
+                //   setTriggerRefresh(!triggerRefresh);
+                // }
+                // // Otherwise navigate to the DA Summary page.
+                // else {
+                //   navigate('/' + organization + "/" + incident + '/dispatch/summary/' + response.data.id_for_incident);
+                // }
               })
               .catch(error => {
                 if (error.response.data && error.response.data[0].includes('Duplicate assigned service request error')) {

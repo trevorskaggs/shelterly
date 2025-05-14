@@ -486,7 +486,7 @@ const ExamForm = (props) => {
                       name="fixed"
                       type="text"
                       key={`my_unique_fixed_select_key__${formikProps.values.fixed}`}
-                      options={[{value:'yes', label:'Yes'},{value:'no', label:'No'}]}
+                      options={[{value:'yes', label:'Yes'},{value:'no', label:'No'}, {value:'unknown', label:'Unknown'}]}
                       isClearable={false}
                       disabled={formikProps.values.confirm_sex_age}
                       value={formikProps.values.fixed||data.animal_object.age}

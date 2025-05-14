@@ -118,7 +118,7 @@ const AnimalForm = (props) => {
     caution: false,
     last_seen: null,
     microchip: '',
-    animal_count: 1,
+    animal_count: 0,
     room: null,
     shelter: props.state.shelter || null,
     medical_record: null,
@@ -653,6 +653,7 @@ const AnimalForm = (props) => {
                         scolorRef.current.select.clearValue();
                         formikProps.setFieldValue("species", instance ? instance.value : '');
                         formikProps.setFieldValue("species_string", instance ? instance.label : '');
+                        formikProps.setFieldValue("animal_count", instance ? 1 : 0);
                       }}
                       disabled={!editMode && ((props.state.steps.animals[props.state.animalIndex] && props.state.steps.animals[props.state.animalIndex].id) || (props.state.steps.animals[props.state.animalIndex] instanceof FormData && props.state.steps.animals[props.state.animalIndex].get('id')))}
                     />
@@ -1081,7 +1082,7 @@ const AnimalForm = (props) => {
                   }
                   
                 }}>
-                  Next Step
+                  {props.state.steps.animals.length -1 > props.state.animalIndex ? "Skip Animals" : "Next Step"}
                 </ButtonSpinner> : ""}
             {is_workflow && is_intake ?
                 <ButtonSpinner isSubmitting={formikProps.isSubmitting && !addAnother} isSubmittingText="Saving..." type="button" className="btn btn-primary mr-1 border" onClick={() => {
